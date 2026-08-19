@@ -292,36 +292,39 @@
             <h2 class="karthika-section-head-title">Popular this week</h2>
             <a href="#" class="karthika-section-head-link">See all</a>
           </div>
-
           <div class="karthika-two-col-grid">
-            <!-- Card 1 (Exact match to reference) -->
+            <!-- Card 1 -->
             <div class="karthika-compact-card">
               <div class="karthika-compact-media">
-                <div class="karthika-card-badge">30% off</div>
+                <div class="karthika-card-badge">30% OFF</div>
                 <a href="#"><img src="https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80" alt="Fresh! Capsicum" class="karthika-compact-img"></a>
               </div>
               <div class="karthika-compact-info">
-                <div class="karthika-compact-title-block">
-                  <a href="#" class="karthika-compact-title">Fresh! Capsicum</a>
-                  <div class="karthika-compact-pack">red (loose), 1 kg</div>
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">red (loose), 1 kg</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
                 </div>
-                <div class="karthika-compact-bottom-action-row">
-                  <div class="karthika-compact-price-wrap">
-                    <span class="karthika-compact-price">$2.90</span>
+                <a href="#" class="karthika-compact-title">Fresh! Capsicum</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$2.90</span>
+                    <span class="karthika-price-original">$4.10</span>
+                    <span class="karthika-price-discount-tag">-30%</span>
                   </div>
-                  <div class="karthika-compact-add-wrap">
-                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                      </svg>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
-                    <div class="karthika-compact-stepper">
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
-                      <span class="karthika-compact-stepper-val">1</span>
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
-                    </div>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -330,31 +333,35 @@
             <!-- Card 2 -->
             <div class="karthika-compact-card">
               <div class="karthika-compact-media" style="background: #E8F5E9;">
-                <div class="karthika-card-badge">20% off</div>
+                <div class="karthika-card-badge">20% OFF</div>
                 <a href="#"><img src="https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=360&q=80" alt="Broccoli Fresh" class="karthika-compact-img"></a>
               </div>
               <div class="karthika-compact-info">
-                <div class="karthika-compact-title-block">
-                  <a href="#" class="karthika-compact-title">Fresh Broccoli</a>
-                  <div class="karthika-compact-pack">organic, 500g</div>
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">organic, 500g</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
                 </div>
-                <div class="karthika-compact-bottom-action-row">
-                  <div class="karthika-compact-price-wrap">
-                    <span class="karthika-compact-price">$3.80</span>
+                <a href="#" class="karthika-compact-title">Fresh Broccoli</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$3.80</span>
+                    <span class="karthika-price-original">$4.80</span>
+                    <span class="karthika-price-discount-tag">-20%</span>
                   </div>
-                  <div class="karthika-compact-add-wrap">
-                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                      </svg>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
-                    <div class="karthika-compact-stepper">
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
-                      <span class="karthika-compact-stepper-val">1</span>
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
-                    </div>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -375,32 +382,35 @@
           <div class="karthika-two-col-grid">
             <div class="karthika-compact-card">
               <div class="karthika-compact-media" style="background: #FEE2E2;">
-                <div class="karthika-card-badge">22% off</div>
+                <div class="karthika-card-badge">22% OFF</div>
                 <a href="#"><img src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=360&q=80" alt="Fresh Farm Red Tomato" class="karthika-compact-img"></a>
               </div>
               <div class="karthika-compact-info">
-                <div class="karthika-compact-title-block">
-                  <a href="#" class="karthika-compact-title">Red Tomatoes</a>
-                  <div class="karthika-compact-pack">farm fresh, 1 kg</div>
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">farm fresh, 1 kg</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
                 </div>
-                <div class="karthika-compact-bottom-action-row">
-                  <div class="karthika-compact-price-wrap">
-                    <span class="karthika-compact-price">$3.50</span>
-                    <span class="karthika-compact-compare-price">$4.50</span>
+                <a href="#" class="karthika-compact-title">Red Tomatoes</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$3.50</span>
+                    <span class="karthika-price-original">$4.50</span>
+                    <span class="karthika-price-discount-tag">-22%</span>
                   </div>
-                  <div class="karthika-compact-add-wrap">
-                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                      </svg>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
-                    <div class="karthika-compact-stepper">
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
-                      <span class="karthika-compact-stepper-val">1</span>
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
-                    </div>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -408,32 +418,35 @@
 
             <div class="karthika-compact-card">
               <div class="karthika-compact-media" style="background: #FEF3C7;">
-                <div class="karthika-card-badge">24% off</div>
+                <div class="karthika-card-badge">24% OFF</div>
                 <a href="#"><img src="https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=360&q=80" alt="Organic Red Onion" class="karthika-compact-img"></a>
               </div>
               <div class="karthika-compact-info">
-                <div class="karthika-compact-title-block">
-                  <a href="#" class="karthika-compact-title">Organic Red Onion</a>
-                  <div class="karthika-compact-pack">medium, 1 kg</div>
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">medium, 1 kg</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
                 </div>
-                <div class="karthika-compact-bottom-action-row">
-                  <div class="karthika-compact-price-wrap">
-                    <span class="karthika-compact-price">$2.90</span>
-                    <span class="karthika-compact-compare-price">$3.80</span>
+                <a href="#" class="karthika-compact-title">Organic Red Onion</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$2.90</span>
+                    <span class="karthika-price-original">$3.80</span>
+                    <span class="karthika-price-discount-tag">-24%</span>
                   </div>
-                  <div class="karthika-compact-add-wrap">
-                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                      </svg>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
-                    <div class="karthika-compact-stepper">
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
-                      <span class="karthika-compact-stepper-val">1</span>
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
-                    </div>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -458,27 +471,29 @@
                 <a href="#"><img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=360&q=80" alt="Kerala Banana Chips" class="karthika-compact-img"></a>
               </div>
               <div class="karthika-compact-info">
-                <div class="karthika-compact-title-block">
-                  <a href="#" class="karthika-compact-title">Kerala Banana Chips</a>
-                  <div class="karthika-compact-pack">crispy coconut oil, 250g</div>
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">crispy coconut oil, 250g</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
                 </div>
-                <div class="karthika-compact-bottom-action-row">
-                  <div class="karthika-compact-price-wrap">
-                    <span class="karthika-compact-price">$4.50</span>
+                <a href="#" class="karthika-compact-title">Kerala Banana Chips</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$4.50</span>
                   </div>
-                  <div class="karthika-compact-add-wrap">
-                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                      </svg>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
-                    <div class="karthika-compact-stepper">
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
-                      <span class="karthika-compact-stepper-val">1</span>
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
-                    </div>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -490,27 +505,29 @@
                 <a href="#"><img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=360&q=80" alt="Pure Coconut Oil" class="karthika-compact-img"></a>
               </div>
               <div class="karthika-compact-info">
-                <div class="karthika-compact-title-block">
-                  <a href="#" class="karthika-compact-title">Pure Coconut Oil</a>
-                  <div class="karthika-compact-pack">cold pressed, 1 Litre</div>
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">cold pressed, 1 Litre</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
                 </div>
-                <div class="karthika-compact-bottom-action-row">
-                  <div class="karthika-compact-price-wrap">
-                    <span class="karthika-compact-price">$8.20</span>
+                <a href="#" class="karthika-compact-title">Pure Coconut Oil</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$8.20</span>
                   </div>
-                  <div class="karthika-compact-add-wrap">
-                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                      </svg>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
-                    <div class="karthika-compact-stepper">
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
-                      <span class="karthika-compact-stepper-val">1</span>
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
-                    </div>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -595,31 +612,33 @@
           <div class="karthika-two-col-grid">
             <div class="karthika-compact-card">
               <div class="karthika-compact-media" style="background: #FEF9C3;">
-                <div class="karthika-card-badge" style="background: var(--karthika-red); color: #fff;">NEW</div>
+                <div class="karthika-card-badge karthika-card-badge--new">NEW</div>
                 <a href="#"><img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=360&q=80" alt="Kerala Jackfruit Chips" class="karthika-compact-img"></a>
               </div>
               <div class="karthika-compact-info">
-                <div class="karthika-compact-title-block">
-                  <a href="#" class="karthika-compact-title">Kerala Jackfruit Chips</a>
-                  <div class="karthika-compact-pack">hot & crispy, 200g</div>
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">hot & crispy, 200g</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
                 </div>
-                <div class="karthika-compact-bottom-action-row">
-                  <div class="karthika-compact-price-wrap">
-                    <span class="karthika-compact-price">$5.20</span>
+                <a href="#" class="karthika-compact-title">Kerala Jackfruit Chips</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$5.20</span>
                   </div>
-                  <div class="karthika-compact-add-wrap">
-                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                      </svg>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
-                    <div class="karthika-compact-stepper">
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
-                      <span class="karthika-compact-stepper-val">1</span>
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
-                    </div>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -627,31 +646,33 @@
 
             <div class="karthika-compact-card">
               <div class="karthika-compact-media" style="background: #E8F5E9;">
-                <div class="karthika-card-badge" style="background: var(--karthika-red); color: #fff;">NEW</div>
+                <div class="karthika-card-badge karthika-card-badge--new">NEW</div>
                 <a href="#"><img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=360&q=80" alt="Fresh Tender Green Jackfruit" class="karthika-compact-img"></a>
               </div>
               <div class="karthika-compact-info">
-                <div class="karthika-compact-title-block">
-                  <a href="#" class="karthika-compact-title">Green Jackfruit Curry Cut</a>
-                  <div class="karthika-compact-pack">fresh farm, 500g</div>
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">fresh farm, 500g</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
                 </div>
-                <div class="karthika-compact-bottom-action-row">
-                  <div class="karthika-compact-price-wrap">
-                    <span class="karthika-compact-price">$4.80</span>
+                <a href="#" class="karthika-compact-title">Green Jackfruit Curry Cut</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$4.80</span>
                   </div>
-                  <div class="karthika-compact-add-wrap">
-                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                      </svg>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
-                    <div class="karthika-compact-stepper">
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
-                      <span class="karthika-compact-stepper-val">1</span>
-                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
-                    </div>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -703,14 +724,17 @@
     }
 
     function toggleStepper(btn) {
-      const wrap = btn.closest('.karthika-compact-add-wrap');
-      wrap.classList.add('is-added');
-      updateCartCount(1);
+      const wrap = btn.closest('.karthika-stepper') || btn.closest('.karthika-card-action-bar') || btn.closest('.karthika-compact-add-wrap');
+      if (wrap) {
+        wrap.classList.add('is-added');
+        updateCartCount(1);
+      }
     }
 
     function changeQty(btn, delta) {
-      const wrap = btn.closest('.karthika-compact-add-wrap');
-      const valEl = wrap.querySelector('.karthika-compact-stepper-val');
+      const wrap = btn.closest('.karthika-stepper') || btn.closest('.karthika-card-action-bar') || btn.closest('.karthika-compact-add-wrap');
+      if (!wrap) return;
+      const valEl = wrap.querySelector('.karthika-compact-stepper-val') || wrap.querySelector('.karthika-stepper-qty');
       let val = parseInt(valEl.textContent, 10) + delta;
       if (val <= 0) {
         wrap.classList.remove('is-added');

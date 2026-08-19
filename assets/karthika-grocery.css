@@ -656,38 +656,39 @@ body {
   }
 }
 
-/* Card Outer Shell - Generous 28px radius, pure white, soft border & shadow */
+/* Card Outer Shell - Modern 20px radius, crisp border & subtle elevation */
 .karthika-compact-card {
   display: flex;
   flex-direction: column;
   position: relative;
   background: #FFFFFF;
-  border-radius: 28px;
-  padding: 12px 12px 14px 12px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
-  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border-radius: 20px;
+  padding: 10px 10px 12px 10px;
+  border: 1px solid #ECECE8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
   box-sizing: border-box;
   height: 100%;
 }
 
 .karthika-compact-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  border-color: #DFDFD8;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
 /* Image Container - Generous soft rounded background */
 .karthika-compact-media {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 0.95;
-  background: #FDE8E0;
-  border-radius: 20px;
+  aspect-ratio: 1 / 0.96;
+  background: #F4F5EF;
+  border-radius: 14px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .karthika-compact-media a {
@@ -704,205 +705,296 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .karthika-compact-card:hover .karthika-compact-img {
-  transform: scale(1.08) translateY(-2px);
+  transform: scale(1.06);
 }
 
-/* Top-Left Rounded Floating Discount Pill ("30% off") */
+/* Top-Left Rounded Floating Discount Pill ("30% OFF") */
 .karthika-card-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 8px;
+  left: 8px;
   background: #FFFFFF;
   color: #171717;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
   border-radius: 9999px;
   z-index: 3;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  letter-spacing: -0.2px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
   line-height: 1.2;
 }
 
-/* Product Info Container - Clean Content Hierarchy */
+.karthika-card-badge--new {
+  background: var(--karthika-yellow, #FFD200);
+  color: #111111;
+}
+
+/* Product Info Container - Modern Left-Aligned Content Hierarchy */
 .karthika-compact-info {
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding: 0 4px 6px 4px;
-  text-align: center;
+  padding: 0 2px 2px 2px;
+  text-align: left;
 }
 
-.karthika-compact-title-block {
-  margin-bottom: 8px;
-  min-height: 48px;
+/* Meta row with Pack Size & In Stock indicator */
+.karthika-card-meta-row {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.karthika-compact-title {
-  font-size: 14.5px;
-  font-weight: 800;
-  color: #111111;
-  text-decoration: none;
-  line-height: 1.25;
-  letter-spacing: -0.3px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
 }
 
 .karthika-compact-pack {
-  font-size: 12px;
+  font-size: 11.5px;
   color: #6E6E6E;
   font-weight: 500;
-  line-height: 1.3;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Bottom Action Row: Stacked & Spaced Price + Action Row */
-.karthika-compact-bottom-action-row {
-  position: relative;
+.karthika-stock-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #15803D;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.karthika-stock-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #22C55E;
+  display: inline-block;
+}
+
+/* Product Title - Clean 2-line clamp */
+.karthika-compact-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #141414;
+  text-decoration: none;
+  line-height: 1.28;
+  letter-spacing: -0.2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 8px;
+  min-height: 34px;
+  transition: color 0.15s ease;
+}
+
+.karthika-compact-title:hover {
+  color: var(--karthika-red, #B40000);
+}
+
+/* Modern 2026 Grocery Price Area */
+.karthika-price-container,
+.karthika-compact-price-row,
+.karthika-compact-bottom-action-row .karthika-compact-price-wrap {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
+  gap: 2px;
   margin-top: auto;
-  padding-top: 4px;
+  margin-bottom: 8px;
   width: 100%;
 }
 
-.karthika-compact-price-wrap {
+.karthika-price-main-row {
   display: flex;
   align-items: baseline;
-  justify-content: center;
   gap: 6px;
-  width: 100%;
+  flex-wrap: wrap;
 }
 
+.karthika-price-current,
 .karthika-compact-price {
   font-size: 18px;
   font-weight: 800;
   color: #111111;
   letter-spacing: -0.4px;
-  line-height: 1.2;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
+.karthika-price-original,
 .karthika-compact-compare-price {
   font-size: 12.5px;
-  color: #949494;
+  color: #8E8E93;
   text-decoration: line-through;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Action / Stepper Container - Flow below price with no absolute overlap */
+.karthika-price-discount-tag {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--karthika-red, #B40000);
+  background: rgba(180, 0, 0, 0.08);
+  padding: 2px 6px;
+  border-radius: 6px;
+  letter-spacing: -0.2px;
+  line-height: 1.1;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Integrated Mobile Action Bar - Generous Full-Width Touch Zone */
+.karthika-card-action-bar,
 .karthika-compact-add-wrap {
-  position: static;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
   width: 100%;
-  min-height: 32px;
+  height: 38px;
+  border-radius: 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin-top: auto;
 }
 
-/* Circular Outline Plus Button (+) */
-.karthika-compact-icon-add-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #F4F4F2;
-  border: none;
+/* Full-Width High-Affordance "+ ADD" Button */
+.karthika-card-action-bar .karthika-stepper-add-btn,
+.karthika-compact-add-wrap .karthika-stepper-add-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #111111;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: #FFFFFF;
+  border: 1.5px solid var(--karthika-red, #B40000);
+  color: var(--karthika-red, #B40000);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(180, 0, 0, 0.06);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
   padding: 0;
-  transition: all 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.karthika-compact-icon-add-btn:hover {
-  transform: scale(1.08);
-  background: #EAEAE6;
-  color: var(--karthika-red);
+.karthika-card-action-bar .karthika-stepper-add-btn:hover,
+.karthika-compact-add-wrap .karthika-stepper-add-btn:hover {
+  background: var(--karthika-red, #B40000);
+  color: #FFFFFF;
+  box-shadow: 0 3px 8px rgba(180, 0, 0, 0.2);
 }
 
-.karthika-compact-icon-add-btn svg {
-  width: 20px;
-  height: 20px;
+.karthika-card-action-bar .karthika-stepper-add-btn:active,
+.karthika-compact-add-wrap .karthika-stepper-add-btn:active {
+  transform: scale(0.97);
+  background: var(--karthika-red-hover, #960000);
+  color: #FFFFFF;
 }
 
-/* Quantity Stepper State for Compact Card - Fully visible, centered, and rounded */
-.karthika-compact-stepper {
+.karthika-add-btn-icon {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.karthika-add-btn-text {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Quantity Stepper State - Integrated, High Contrast, Wide Touch Targets */
+.karthika-card-action-bar .karthika-compact-stepper,
+.karthika-compact-add-wrap .karthika-compact-stepper {
   display: none;
-  height: 32px;
   width: 100%;
-  max-width: 110px;
-  border-radius: 9999px;
+  height: 100%;
+  border-radius: 12px;
   background-color: var(--karthika-red, #B40000);
   color: #FFFFFF;
   align-items: center;
   justify-content: space-between;
-  padding: 0 6px;
   box-sizing: border-box;
-  box-shadow: 0 3px 10px rgba(180, 0, 0, 0.28);
-  animation: karthikaStepperPop 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(180, 0, 0, 0.25);
+  animation: karthikaStepperPop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
 }
 
 @keyframes karthikaStepperPop {
-  0% { transform: scale(0.9); opacity: 0; }
+  0% { transform: scale(0.95); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
 
-.karthika-compact-add-wrap.is-added .karthika-compact-icon-add-btn {
+.karthika-card-action-bar.is-added .karthika-stepper-add-btn,
+.karthika-compact-add-wrap.is-added .karthika-stepper-add-btn {
   display: none;
 }
 
+.karthika-card-action-bar.is-added .karthika-compact-stepper,
 .karthika-compact-add-wrap.is-added .karthika-compact-stepper {
   display: flex;
 }
 
-.karthika-stepper-act-btn {
+/* Generous Minus & Plus Tap Targets (44px wide touch target) */
+.karthika-card-action-bar .karthika-stepper-act-btn,
+.karthika-compact-add-wrap .karthika-stepper-act-btn {
   background: transparent;
   border: none;
   color: #FFFFFF;
-  font-size: 16px;
-  font-weight: 700;
-  width: 24px;
-  height: 24px;
+  width: 44px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 50%;
-  transition: background 0.15s;
-  line-height: 1;
+  transition: background 0.15s, transform 0.1s;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
 }
 
-.karthika-stepper-act-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+.karthika-card-action-bar .karthika-stepper-act-btn:hover,
+.karthika-compact-add-wrap .karthika-stepper-act-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
 }
 
-.karthika-stepper-act-btn:active {
-  background: rgba(255, 255, 255, 0.35);
+.karthika-card-action-bar .karthika-stepper-act-btn:active,
+.karthika-compact-add-wrap .karthika-stepper-act-btn:active {
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(0.92);
 }
 
-.karthika-compact-stepper-val {
-  font-size: 13.5px;
-  font-weight: 700;
+.karthika-card-action-bar .karthika-stepper-act-btn svg,
+.karthika-compact-add-wrap .karthika-stepper-act-btn svg {
+  display: block;
+}
+
+/* Visually Prominent Quantity Count in Center */
+.karthika-card-action-bar .karthika-compact-stepper-val,
+.karthika-compact-add-wrap .karthika-compact-stepper-val {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 800;
   color: #FFFFFF;
-  padding: 0 6px;
+  text-align: center;
+  letter-spacing: -0.2px;
+  line-height: 1;
+  padding: 0 4px;
 }
 
 /* ==========================================================================
