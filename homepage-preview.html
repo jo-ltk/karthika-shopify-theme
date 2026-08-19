@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karthika Supermarket - Premium Mobile Grocery Experience</title>
+  <link rel="stylesheet" href="assets/karthika-grocery.css">
+  <style>
+    /* Interactive Preview Shell & Viewport Switcher */
+    .preview-viewport-controls {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #171717;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 999px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      z-index: 9999;
+      font-size: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .preview-btn {
+      background: #2A2A2A;
+      color: #D1D1CB;
+      border: 1px solid #3A3A3A;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .preview-btn.active {
+      background: var(--karthika-red);
+      color: #FFFFFF;
+      border-color: var(--karthika-red);
+      font-weight: 700;
+    }
+    .preview-stage {
+      display: flex;
+      justify-content: center;
+      padding-top: 56px;
+      padding-bottom: 40px;
+      min-height: 100vh;
+      background: #E5E5E0;
+    }
+    .device-shell {
+      width: 390px;
+      background: var(--karthika-bg-body);
+      min-height: 844px;
+      border-radius: 44px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      position: relative;
+      border: 10px solid #1C1C1E;
+      display: flex;
+      flex-direction: column;
+    }
+    .device-shell.mode-375 { width: 375px; min-height: 812px; border-radius: 40px; }
+    .device-shell.mode-390 { width: 390px; min-height: 844px; }
+    .device-shell.mode-430 { width: 430px; min-height: 932px; border-radius: 48px; }
+    .device-shell.mode-desktop {
+      width: 100%;
+      max-width: 1240px;
+      border-radius: 20px;
+      border: none;
+      min-height: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Viewport Switcher -->
+  <div class="preview-viewport-controls">
+    <span style="font-weight: 600; color: var(--karthika-yellow);">Viewport:</span>
+    <button class="preview-btn" onclick="setMode('375')">375 × 812</button>
+    <button class="preview-btn active" onclick="setMode('390')">390 × 844 (Target)</button>
+    <button class="preview-btn" onclick="setMode('430')">430 × 932 (Pro Max)</button>
+    <button class="preview-btn" onclick="setMode('desktop')">1240px Desktop</button>
+  </div>
+
+  <div class="preview-stage">
+    <div id="deviceShell" class="device-shell mode-390">
+      
+      <div class="karthika-app-container">
+        
+        <!-- 1. Header & Location Row + Search Bar -->
+        <header class="karthika-mobile-header" role="banner">
+          <div class="karthika-header-top-row">
+            <div class="karthika-header-location-box karthika-change-location-btn" role="button" tabindex="0">
+              <div class="karthika-header-location-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </div>
+              <div class="karthika-header-location-text">
+                <div class="karthika-location-badge-row">
+                  <span class="karthika-location-sub">Express delivery</span>
+                </div>
+                <span class="karthika-location-main karthika-delivery-address">Tampines Central, Singapore 529538</span>
+              </div>
+            </div>
+
+            <div class="karthika-header-actions">
+              <button type="button" class="karthika-header-action-btn karthika-search-bar-trigger" aria-label="Search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+              <button type="button" class="karthika-header-action-btn" aria-label="Notifications">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span class="karthika-notification-dot"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Integrated Search Bar -->
+          <div class="karthika-header-search-bar karthika-search-bar-trigger" role="button" tabindex="0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span class="karthika-header-search-placeholder">Search groceries, spices, snacks...</span>
+          </div>
+        </header>
+
+        <!-- 2. Segmented Switcher [ Items ] [ Shop ] -->
+        <div class="karthika-segmented-wrapper">
+          <div class="karthika-segmented-control" role="tablist">
+            <button type="button" class="karthika-segmented-btn is-active">Items</button>
+            <button type="button" class="karthika-segmented-btn">Shop</button>
+          </div>
+        </div>
+
+        <!-- 3. Modern Hero Promotional Mobile Carousel -->
+        <div class="karthika-promo-banner-wrap">
+          <div class="karthika-carousel-container" id="karthikaHeroCarousel">
+            <div class="karthika-carousel-track" id="karthikaHeroTrack">
+              <!-- Slide 1 -->
+              <a href="#" class="karthika-carousel-slide">
+                <img
+                  src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80"
+                  alt="Fresh Kerala favourites"
+                  class="karthika-promo-bg-img"
+                  loading="eager"
+                >
+                <div class="karthika-promo-overlay"></div>
+                <div class="karthika-promo-content">
+                  <span class="karthika-promo-badge">20% OFF FIRST ORDER</span>
+                  <h2 class="karthika-promo-title">Fresh Kerala favourites</h2>
+                  <p class="karthika-promo-sub">Delivered across Singapore</p>
+                </div>
+              </a>
+
+              <!-- Slide 2 -->
+              <a href="#" class="karthika-carousel-slide">
+                <img
+                  src="https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=900&q=80"
+                  alt="Farm Fresh Veggies"
+                  class="karthika-promo-bg-img"
+                  loading="lazy"
+                >
+                <div class="karthika-promo-overlay"></div>
+                <div class="karthika-promo-content">
+                  <span class="karthika-promo-badge badge-green">DAILY HARVEST</span>
+                  <h2 class="karthika-promo-title">Organic & Fresh Veggies</h2>
+                  <p class="karthika-promo-sub">Directly sourced daily</p>
+                </div>
+              </a>
+
+              <!-- Slide 3 -->
+              <a href="#" class="karthika-carousel-slide">
+                <img
+                  src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=900&q=80"
+                  alt="Aromatic Kerala Spices"
+                  class="karthika-promo-bg-img"
+                  loading="lazy"
+                >
+                <div class="karthika-promo-overlay"></div>
+                <div class="karthika-promo-content">
+                  <span class="karthika-promo-badge badge-orange">AUTHENTIC TASTE</span>
+                  <h2 class="karthika-promo-title">Handpicked Spices & Herbs</h2>
+                  <p class="karthika-promo-sub">Pure aroma of Wayanad & Idukki</p>
+                </div>
+              </a>
+
+              <!-- Slide 4 -->
+              <a href="#" class="karthika-carousel-slide">
+                <img
+                  src="https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=900&q=80"
+                  alt="Traditional Kerala Snacks"
+                  class="karthika-promo-bg-img"
+                  loading="lazy"
+                >
+                <div class="karthika-promo-overlay"></div>
+                <div class="karthika-promo-content">
+                  <span class="karthika-promo-badge badge-red">CRUNCHY DELIGHTS</span>
+                  <h2 class="karthika-promo-title">Hot Banana Chips & Mix</h2>
+                  <p class="karthika-promo-sub">Fried in pure coconut oil</p>
+                </div>
+              </a>
+            </div>
+          </div>
+          <!-- Pagination Dots -->
+          <div class="karthika-carousel-pagination" id="karthikaHeroDots" role="tablist" aria-label="Hero Carousel Dots">
+            <button type="button" class="karthika-carousel-dot is-active" aria-label="Slide 1" data-index="0"></button>
+            <button type="button" class="karthika-carousel-dot" aria-label="Slide 2" data-index="1"></button>
+            <button type="button" class="karthika-carousel-dot" aria-label="Slide 3" data-index="2"></button>
+            <button type="button" class="karthika-carousel-dot" aria-label="Slide 4" data-index="3"></button>
+          </div>
+        </div>
+
+        <!-- 4. Category Discovery (Horizontal Photo Cards) -->
+        <div class="karthika-category-section">
+          <div class="karthika-section-head" style="margin-top: 4px;">
+            <h2 class="karthika-section-head-title">Shop by category</h2>
+            <a href="#" class="karthika-section-head-link">See all</a>
+          </div>
+
+          <div class="karthika-category-scroll-wrap karthika-hide-scrollbar">
+            <a href="#" class="karthika-category-card">
+              <div class="karthika-category-card-img-box">
+                <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=140&q=80" alt="Rice & Grains" class="karthika-category-card-img">
+              </div>
+              <span class="karthika-category-card-name">Rice & Grains</span>
+            </a>
+
+            <a href="#" class="karthika-category-card">
+              <div class="karthika-category-card-img-box">
+                <img src="https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=140&q=80" alt="Kerala Favourites" class="karthika-category-card-img">
+              </div>
+              <span class="karthika-category-card-name">Kerala Favourites</span>
+            </a>
+
+            <a href="#" class="karthika-category-card">
+              <div class="karthika-category-card-img-box">
+                <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=140&q=80" alt="Spices" class="karthika-category-card-img">
+              </div>
+              <span class="karthika-category-card-name">Spices</span>
+            </a>
+
+            <a href="#" class="karthika-category-card">
+              <div class="karthika-category-card-img-box">
+                <img src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=140&q=80" alt="Fresh Produce" class="karthika-category-card-img">
+              </div>
+              <span class="karthika-category-card-name">Fresh Produce</span>
+            </a>
+
+            <a href="#" class="karthika-category-card">
+              <div class="karthika-category-card-img-box">
+                <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=140&q=80" alt="Snacks" class="karthika-category-card-img">
+              </div>
+              <span class="karthika-category-card-name">Snacks</span>
+            </a>
+
+            <a href="#" class="karthika-category-card">
+              <div class="karthika-category-card-img-box">
+                <img src="https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=140&q=80" alt="Dairy" class="karthika-category-card-img">
+              </div>
+              <span class="karthika-category-card-name">Dairy</span>
+            </a>
+
+            <a href="#" class="karthika-category-card">
+              <div class="karthika-category-card-img-box">
+                <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=140&q=80" alt="Beverages" class="karthika-category-card-img">
+              </div>
+              <span class="karthika-category-card-name">Beverages</span>
+            </a>
+
+            <a href="#" class="karthika-category-card">
+              <div class="karthika-category-card-img-box">
+                <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=140&q=80" alt="Pickles & Oils" class="karthika-category-card-img">
+              </div>
+              <span class="karthika-category-card-name">Pickles & Oils</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 5. Popular this week -->
+        <div class="karthika-grid-section">
+          <div class="karthika-section-head">
+            <h2 class="karthika-section-head-title">Popular this week</h2>
+            <a href="#" class="karthika-section-head-link">See all</a>
+          </div>
+
+          <div class="karthika-two-col-grid">
+            <!-- Card 1 (Exact match to reference) -->
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media">
+                <div class="karthika-card-badge">30% off</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80" alt="Fresh! Capsicum" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-compact-title-block">
+                  <a href="#" class="karthika-compact-title">Fresh! Capsicum</a>
+                  <div class="karthika-compact-pack">red (loose), 1 kg</div>
+                </div>
+                <div class="karthika-compact-bottom-action-row">
+                  <div class="karthika-compact-price-wrap">
+                    <span class="karthika-compact-price">$2.90</span>
+                  </div>
+                  <div class="karthika-compact-add-wrap">
+                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="karthika-compact-stepper">
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
+                      <span class="karthika-compact-stepper-val">1</span>
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #E8F5E9;">
+                <div class="karthika-card-badge">20% off</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=360&q=80" alt="Broccoli Fresh" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-compact-title-block">
+                  <a href="#" class="karthika-compact-title">Fresh Broccoli</a>
+                  <div class="karthika-compact-pack">organic, 500g</div>
+                </div>
+                <div class="karthika-compact-bottom-action-row">
+                  <div class="karthika-compact-price-wrap">
+                    <span class="karthika-compact-price">$3.80</span>
+                  </div>
+                  <div class="karthika-compact-add-wrap">
+                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="karthika-compact-stepper">
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
+                      <span class="karthika-compact-stepper-val">1</span>
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Today's Deals -->
+        <div class="karthika-grid-section">
+          <div class="karthika-section-head">
+            <div class="karthika-section-head-title-wrap">
+              <h2 class="karthika-section-head-title">Today's deals</h2>
+              <span class="karthika-section-head-sub">Fresh savings for your kitchen</span>
+            </div>
+            <a href="#" class="karthika-section-head-link">See all</a>
+          </div>
+
+          <div class="karthika-two-col-grid">
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #FEE2E2;">
+                <div class="karthika-card-badge">22% off</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=360&q=80" alt="Fresh Farm Red Tomato" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-compact-title-block">
+                  <a href="#" class="karthika-compact-title">Red Tomatoes</a>
+                  <div class="karthika-compact-pack">farm fresh, 1 kg</div>
+                </div>
+                <div class="karthika-compact-bottom-action-row">
+                  <div class="karthika-compact-price-wrap">
+                    <span class="karthika-compact-price">$3.50</span>
+                    <span class="karthika-compact-compare-price">$4.50</span>
+                  </div>
+                  <div class="karthika-compact-add-wrap">
+                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="karthika-compact-stepper">
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
+                      <span class="karthika-compact-stepper-val">1</span>
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #FEF3C7;">
+                <div class="karthika-card-badge">24% off</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=360&q=80" alt="Organic Red Onion" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-compact-title-block">
+                  <a href="#" class="karthika-compact-title">Organic Red Onion</a>
+                  <div class="karthika-compact-pack">medium, 1 kg</div>
+                </div>
+                <div class="karthika-compact-bottom-action-row">
+                  <div class="karthika-compact-price-wrap">
+                    <span class="karthika-compact-price">$2.90</span>
+                    <span class="karthika-compact-compare-price">$3.80</span>
+                  </div>
+                  <div class="karthika-compact-add-wrap">
+                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="karthika-compact-stepper">
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
+                      <span class="karthika-compact-stepper-val">1</span>
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Kerala Favourites -->
+        <div class="karthika-grid-section">
+          <div class="karthika-section-head">
+            <div class="karthika-section-head-title-wrap">
+              <h2 class="karthika-section-head-title">Kerala favourites</h2>
+              <span class="karthika-section-head-sub">Authentic flavours from home</span>
+            </div>
+            <a href="#" class="karthika-section-head-link">See all</a>
+          </div>
+
+          <div class="karthika-two-col-grid">
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #FEF9C3;">
+                <div class="karthika-card-badge">Popular</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=360&q=80" alt="Kerala Banana Chips" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-compact-title-block">
+                  <a href="#" class="karthika-compact-title">Kerala Banana Chips</a>
+                  <div class="karthika-compact-pack">crispy coconut oil, 250g</div>
+                </div>
+                <div class="karthika-compact-bottom-action-row">
+                  <div class="karthika-compact-price-wrap">
+                    <span class="karthika-compact-price">$4.50</span>
+                  </div>
+                  <div class="karthika-compact-add-wrap">
+                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="karthika-compact-stepper">
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
+                      <span class="karthika-compact-stepper-val">1</span>
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #F1F5F9;">
+                <div class="karthika-card-badge">Essential</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=360&q=80" alt="Pure Coconut Oil" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-compact-title-block">
+                  <a href="#" class="karthika-compact-title">Pure Coconut Oil</a>
+                  <div class="karthika-compact-pack">cold pressed, 1 Litre</div>
+                </div>
+                <div class="karthika-compact-bottom-action-row">
+                  <div class="karthika-compact-price-wrap">
+                    <span class="karthika-compact-price">$8.20</span>
+                  </div>
+                  <div class="karthika-compact-add-wrap">
+                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="karthika-compact-stepper">
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
+                      <span class="karthika-compact-stepper-val">1</span>
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. Smart Bundles -->
+        <div class="karthika-bundle-card">
+          <div class="karthika-bundle-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </svg>
+            <span>SMART BUNDLE</span>
+          </div>
+          <h3 class="karthika-bundle-title">Kerala Breakfast Combo</h3>
+          <p class="karthika-bundle-items-text">Puttu Podi + Kadala (500g) + Grated Coconut + Nendran Banana</p>
+          <div class="karthika-bundle-bottom-row">
+            <div class="karthika-bundle-price-wrap">
+              <span class="karthika-bundle-price">$12.80</span>
+              <span class="karthika-bundle-compare">$15.80</span>
+              <span class="karthika-bundle-save-tag">Save $3.00</span>
+            </div>
+            <button type="button" class="karthika-bundle-add-btn" onclick="updateCartCount(4)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Add bundle</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 10. AI Shopping Assistant -->
+        <div class="karthika-ai-assistant-card">
+          <div class="karthika-ai-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <span>Karthika AI Assistant</span>
+          </div>
+          <h3 class="karthika-ai-title">Not sure what to cook?</h3>
+          <p class="karthika-ai-desc">Tell Karthika what you're making and we'll find the fresh ingredients.</p>
+          
+          <div class="karthika-ai-chips-wrap karthika-hide-scrollbar">
+            <button type="button" class="karthika-ai-chip is-active" onclick="switchRecipe('biryani', this)">🍗 Chicken Biryani</button>
+            <button type="button" class="karthika-ai-chip" onclick="switchRecipe('kerala_breakfast', this)">🥞 Kerala Breakfast</button>
+            <button type="button" class="karthika-ai-chip" onclick="switchRecipe('sambar', this)">🍛 Sambar & Rasam</button>
+            <button type="button" class="karthika-ai-chip" onclick="switchRecipe('tea_snacks', this)">☕ Tea Time Snacks</button>
+          </div>
+
+          <div class="karthika-ai-basket-box">
+            <div class="karthika-ai-basket-head">
+              <span id="previewRecipeTitle" class="karthika-ai-basket-dish">Malabar Chicken Biryani Kit</span>
+              <span id="previewRecipePrice" class="karthika-ai-basket-price">$24.50</span>
+            </div>
+            <div id="previewRecipeIngredients" class="karthika-ai-ingredients-list">
+              <div>✓ Kaima Jeerakasala Biryani Rice (1kg) &mdash; $4.80</div>
+              <div>✓ Fresh Farm Chicken Curry Cut (1kg) &mdash; $9.50</div>
+              <div>✓ Eastern Biryani Masala & Pure Ghee &mdash; $4.40</div>
+              <div>✓ Fresh Mint Leaves, Coriander & Onions &mdash; $5.80</div>
+            </div>
+            <button type="button" class="karthika-ai-build-btn" onclick="updateCartCount(4)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              <span>Build my basket</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 11. New Arrivals -->
+        <div class="karthika-grid-section">
+          <div class="karthika-section-head">
+            <div class="karthika-section-head-title-wrap">
+              <h2 class="karthika-section-head-title">New arrivals</h2>
+              <span class="karthika-section-head-sub">Freshly stocked groceries & specialities</span>
+            </div>
+            <a href="#" class="karthika-section-head-link">See all</a>
+          </div>
+
+          <div class="karthika-two-col-grid">
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #FEF9C3;">
+                <div class="karthika-card-badge" style="background: var(--karthika-red); color: #fff;">NEW</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=360&q=80" alt="Kerala Jackfruit Chips" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-compact-title-block">
+                  <a href="#" class="karthika-compact-title">Kerala Jackfruit Chips</a>
+                  <div class="karthika-compact-pack">hot & crispy, 200g</div>
+                </div>
+                <div class="karthika-compact-bottom-action-row">
+                  <div class="karthika-compact-price-wrap">
+                    <span class="karthika-compact-price">$5.20</span>
+                  </div>
+                  <div class="karthika-compact-add-wrap">
+                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="karthika-compact-stepper">
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
+                      <span class="karthika-compact-stepper-val">1</span>
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #E8F5E9;">
+                <div class="karthika-card-badge" style="background: var(--karthika-red); color: #fff;">NEW</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=360&q=80" alt="Fresh Tender Green Jackfruit" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-compact-title-block">
+                  <a href="#" class="karthika-compact-title">Green Jackfruit Curry Cut</a>
+                  <div class="karthika-compact-pack">fresh farm, 500g</div>
+                </div>
+                <div class="karthika-compact-bottom-action-row">
+                  <div class="karthika-compact-price-wrap">
+                    <span class="karthika-compact-price">$4.80</span>
+                  </div>
+                  <div class="karthika-compact-add-wrap">
+                    <button type="button" class="karthika-compact-icon-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="karthika-compact-stepper">
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)">&minus;</button>
+                      <span class="karthika-compact-stepper-val">1</span>
+                      <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">&plus;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 10. Polished 5-Tab Mobile Bottom Navigation -->
+      <nav class="karthika-bottom-nav" aria-label="Mobile Navigation">
+        <a href="#" class="karthika-nav-item is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"></path></svg>
+          <span>Home</span>
+        </a>
+        <a href="#" class="karthika-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="3" width="7" height="7" rx="2"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="2"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="2"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="2"></rect>
+          </svg>
+          <span>Categories</span>
+        </a>
+        <a href="#" class="karthika-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Search</span>
+        </a>
+        <a href="#" class="karthika-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M2 3h3l2.5 13h12l3-9H6"></path></svg>
+          <span>Cart</span>
+          <span class="karthika-nav-badge" id="previewCartBadge">2</span>
+        </a>
+        <a href="#" class="karthika-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>Account</span>
+        </a>
+      </nav>
+
+    </div>
+  </div>
+
+  <script>
+    function setMode(mode) {
+      document.querySelectorAll('.preview-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      const shell = document.getElementById('deviceShell');
+      shell.className = 'device-shell mode-' + mode;
+    }
+
+    function toggleStepper(btn) {
+      const wrap = btn.closest('.karthika-compact-add-wrap');
+      wrap.classList.add('is-added');
+      updateCartCount(1);
+    }
+
+    function changeQty(btn, delta) {
+      const wrap = btn.closest('.karthika-compact-add-wrap');
+      const valEl = wrap.querySelector('.karthika-compact-stepper-val');
+      let val = parseInt(valEl.textContent, 10) + delta;
+      if (val <= 0) {
+        wrap.classList.remove('is-added');
+        valEl.textContent = '1';
+        updateCartCount(-1);
+      } else {
+        valEl.textContent = val;
+        updateCartCount(delta);
+      }
+    }
+
+    let cartTotal = 2;
+    function updateCartCount(delta) {
+      cartTotal = Math.max(0, cartTotal + delta);
+      const badge = document.getElementById('previewCartBadge');
+      if (badge) {
+        badge.textContent = cartTotal;
+        badge.style.display = cartTotal > 0 ? 'flex' : 'none';
+      }
+    }
+
+    const previewRecipes = {
+      biryani: {
+        title: "Malabar Chicken Biryani Kit",
+        price: "$24.50",
+        ingredients: [
+          "✓ Kaima Jeerakasala Biryani Rice (1kg) &mdash; $4.80",
+          "✓ Fresh Farm Chicken Curry Cut (1kg) &mdash; $9.50",
+          "✓ Eastern Biryani Masala & Pure Ghee &mdash; $4.40",
+          "✓ Fresh Mint Leaves, Coriander & Onions &mdash; $5.80"
+        ]
+      },
+      kerala_breakfast: {
+        title: "Kerala Appam & Stew Kit",
+        price: "$14.20",
+        ingredients: [
+          "✓ Brahmins Easy Appam Mix (1kg) &mdash; $3.60",
+          "✓ Pure Coconut Milk Can (400ml) &mdash; $2.80",
+          "✓ Fresh Stew Veggies (Potato, Carrot, Beans) &mdash; $4.80",
+          "✓ Whole Kerala Spices & Ginger Pack &mdash; $3.00"
+        ]
+      },
+      sambar: {
+        title: "Authentic Sambar & Rasam Kit",
+        price: "$11.80",
+        ingredients: [
+          "✓ Karthika Premium Toor Dal (1kg) &mdash; $3.50",
+          "✓ MTR Traditional Sambar Powder &mdash; $2.40",
+          "✓ Sambar Veggies (Drumstick, Shallots, Tomato) &mdash; $4.10",
+          "✓ Natural Tamarind Block (200g) &mdash; $1.80"
+        ]
+      },
+      tea_snacks: {
+        title: "Kerala Evening Chai & Snacks Combo",
+        price: "$13.90",
+        ingredients: [
+          "✓ Crispy Kerala Banana Chips (250g) &mdash; $4.50",
+          "✓ Spicy Mixture & Ribbon Pakoda &mdash; $3.80",
+          "✓ AVT Premium Kerala Dust Tea (500g) &mdash; $5.60"
+        ]
+      }
+    };
+
+    function switchRecipe(key, btn) {
+      document.querySelectorAll('.karthika-ai-chip').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      const data = previewRecipes[key];
+      if (data) {
+        document.getElementById('previewRecipeTitle').textContent = data.title;
+        document.getElementById('previewRecipePrice').textContent = data.price;
+        document.getElementById('previewRecipeIngredients').innerHTML = data.ingredients.map(i => `<div>${i}</div>`).join('');
+      }
+    }
+
+    // Hero Banner Mobile Carousel Controller
+    (function initHeroCarousel() {
+      const carousel = document.getElementById('karthikaHeroCarousel');
+      const track = document.getElementById('karthikaHeroTrack');
+      const dots = document.querySelectorAll('#karthikaHeroDots .karthika-carousel-dot');
+      if (!carousel || !track || !dots.length) return;
+
+      const slides = track.querySelectorAll('.karthika-carousel-slide');
+      const totalSlides = slides.length;
+      let currentIndex = 0;
+      let autoPlayTimer = null;
+      let startX = 0;
+      let currentTranslate = 0;
+      let prevTranslate = 0;
+      let isDragging = false;
+
+      function goToSlide(index) {
+        if (index < 0) {
+          currentIndex = totalSlides - 1;
+        } else if (index >= totalSlides) {
+          currentIndex = 0;
+        } else {
+          currentIndex = index;
+        }
+
+        track.style.transition = 'transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)';
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('is-active', idx === currentIndex);
+          dot.setAttribute('aria-selected', idx === currentIndex ? 'true' : 'false');
+        });
+      }
+
+      function startAutoPlay() {
+        stopAutoPlay();
+        autoPlayTimer = setInterval(() => {
+          goToSlide(currentIndex + 1);
+        }, 4000);
+      }
+
+      function stopAutoPlay() {
+        if (autoPlayTimer) {
+          clearInterval(autoPlayTimer);
+          autoPlayTimer = null;
+        }
+      }
+
+      // Dot click handling
+      dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const targetIndex = parseInt(dot.getAttribute('data-index'), 10);
+          goToSlide(targetIndex);
+          startAutoPlay();
+        });
+      });
+
+      // Swipe / Touch Events
+      carousel.addEventListener('touchstart', (e) => {
+        stopAutoPlay();
+        startX = e.touches[0].clientX;
+        isDragging = true;
+      }, { passive: true });
+
+      carousel.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const currentX = e.touches[0].clientX;
+        const diff = currentX - startX;
+        // subtle resistance
+        const offsetPercent = (diff / carousel.offsetWidth) * 100;
+        track.style.transition = 'none';
+        track.style.transform = `translateX(calc(-${currentIndex * 100}% + ${diff}px))`;
+      }, { passive: true });
+
+      carousel.addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        const endX = e.changedTouches[0].clientX;
+        const diff = endX - startX;
+
+        // Threshold for slide trigger: 40px
+        if (diff < -40) {
+          goToSlide(currentIndex + 1);
+        } else if (diff > 40) {
+          goToSlide(currentIndex - 1);
+        } else {
+          goToSlide(currentIndex);
+        }
+        startAutoPlay();
+      });
+
+      // Mouse drag support for preview on desktop
+      carousel.addEventListener('mousedown', (e) => {
+        stopAutoPlay();
+        startX = e.clientX;
+        isDragging = true;
+        carousel.style.cursor = 'grabbing';
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const diff = e.clientX - startX;
+        track.style.transition = 'none';
+        track.style.transform = `translateX(calc(-${currentIndex * 100}% + ${diff}px))`;
+      });
+
+      window.addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        carousel.style.cursor = 'grab';
+        const diff = e.clientX - startX;
+        if (diff < -40) {
+          goToSlide(currentIndex + 1);
+        } else if (diff > 40) {
+          goToSlide(currentIndex - 1);
+        } else {
+          goToSlide(currentIndex);
+        }
+        startAutoPlay();
+      });
+
+      // Pause on hover
+      carousel.addEventListener('mouseenter', stopAutoPlay);
+      carousel.addEventListener('mouseleave', startAutoPlay);
+
+      // Start automatic sliding
+      startAutoPlay();
+    })();
+  </script>
+</body>
+</html>

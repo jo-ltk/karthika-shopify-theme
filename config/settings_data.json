@@ -1,0 +1,204 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "current": "Crave",
+  "presets": {
+    "Crave": {
+      "logo_width": 140,
+      "color_schemes": {
+        "scheme-1": {
+          "settings": {
+            "background": "#ffffff",
+            "background_gradient": "",
+            "text": "#171717",
+            "button": "#b40000",
+            "button_label": "#ffffff",
+            "secondary_button_label": "#b40000",
+            "shadow": "#171717"
+          }
+        },
+        "scheme-2": {
+          "settings": {
+            "background": "#f7f7f5",
+            "background_gradient": "",
+            "text": "#171717",
+            "button": "#b40000",
+            "button_label": "#ffffff",
+            "secondary_button_label": "#b40000",
+            "shadow": "#171717"
+          }
+        },
+        "scheme-3": {
+          "settings": {
+            "background": "#ffd200",
+            "background_gradient": "",
+            "text": "#171717",
+            "button": "#b40000",
+            "button_label": "#ffffff",
+            "secondary_button_label": "#171717",
+            "shadow": "#171717"
+          }
+        },
+        "scheme-4": {
+          "settings": {
+            "background": "#b40000",
+            "background_gradient": "",
+            "text": "#ffffff",
+            "button": "#ffd200",
+            "button_label": "#171717",
+            "secondary_button_label": "#ffffff",
+            "shadow": "#171717"
+          }
+        },
+        "scheme-5": {
+          "settings": {
+            "background": "#171717",
+            "background_gradient": "",
+            "text": "#f7f7f5",
+            "button": "#ffd200",
+            "button_label": "#171717",
+            "secondary_button_label": "#ffd200",
+            "shadow": "#000000"
+          }
+        }
+      },
+      "type_header_font": "archivo_n7",
+      "heading_scale": 100,
+      "type_body_font": "archivo_n4",
+      "body_scale": 100,
+      "page_width": 1200,
+      "spacing_sections": 40,
+      "spacing_grid_horizontal": 12,
+      "spacing_grid_vertical": 12,
+      "animations_reveal_on_scroll": true,
+      "animations_hover_elements": "none",
+      "buttons_border_thickness": 0,
+      "buttons_border_opacity": 0,
+      "buttons_radius": 24,
+      "buttons_shadow_opacity": 0,
+      "buttons_shadow_horizontal_offset": 0,
+      "buttons_shadow_vertical_offset": 0,
+      "buttons_shadow_blur": 0,
+      "variant_pills_border_thickness": 1,
+      "variant_pills_border_opacity": 20,
+      "variant_pills_radius": 20,
+      "variant_pills_shadow_opacity": 0,
+      "variant_pills_shadow_horizontal_offset": 0,
+      "variant_pills_shadow_vertical_offset": 0,
+      "variant_pills_shadow_blur": 0,
+      "inputs_border_thickness": 1,
+      "inputs_border_opacity": 20,
+      "inputs_radius": 16,
+      "inputs_shadow_opacity": 0,
+      "inputs_shadow_horizontal_offset": 0,
+      "inputs_shadow_vertical_offset": 0,
+      "inputs_shadow_blur": 0,
+      "card_style": "card",
+      "card_image_padding": 8,
+      "card_text_alignment": "left",
+      "card_color_scheme": "scheme-1",
+      "card_border_thickness": 1,
+      "card_border_opacity": 15,
+      "card_corner_radius": 16,
+      "card_shadow_opacity": 10,
+      "card_shadow_horizontal_offset": 0,
+      "card_shadow_vertical_offset": 2,
+      "card_shadow_blur": 10,
+      "collection_card_style": "card",
+      "collection_card_image_padding": 8,
+      "collection_card_text_alignment": "center",
+      "collection_card_color_scheme": "scheme-2",
+      "collection_card_border_thickness": 1,
+      "collection_card_border_opacity": 15,
+      "collection_card_corner_radius": 16,
+      "collection_card_shadow_opacity": 0,
+      "collection_card_shadow_horizontal_offset": 0,
+      "collection_card_shadow_vertical_offset": 0,
+      "collection_card_shadow_blur": 0,
+      "blog_card_style": "card",
+      "blog_card_image_padding": 0,
+      "blog_card_text_alignment": "left",
+      "blog_card_color_scheme": "scheme-1",
+      "blog_card_border_thickness": 1,
+      "blog_card_border_opacity": 15,
+      "blog_card_corner_radius": 16,
+      "blog_card_shadow_opacity": 10,
+      "blog_card_shadow_horizontal_offset": 0,
+      "blog_card_shadow_vertical_offset": 2,
+      "blog_card_shadow_blur": 10,
+      "text_boxes_border_thickness": 1,
+      "text_boxes_border_opacity": 15,
+      "text_boxes_radius": 16,
+      "text_boxes_shadow_opacity": 0,
+      "text_boxes_shadow_horizontal_offset": 0,
+      "text_boxes_shadow_vertical_offset": 0,
+      "text_boxes_shadow_blur": 0,
+      "media_border_thickness": 1,
+      "media_border_opacity": 15,
+      "media_radius": 16,
+      "media_shadow_opacity": 0,
+      "media_shadow_horizontal_offset": 0,
+      "media_shadow_vertical_offset": 0,
+      "media_shadow_blur": 0,
+      "popup_border_thickness": 1,
+      "popup_border_opacity": 15,
+      "popup_corner_radius": 16,
+      "popup_shadow_opacity": 20,
+      "popup_shadow_horizontal_offset": 0,
+      "popup_shadow_vertical_offset": 4,
+      "popup_shadow_blur": 15,
+      "drawer_border_thickness": 1,
+      "drawer_border_opacity": 15,
+      "drawer_shadow_opacity": 20,
+      "drawer_shadow_horizontal_offset": 0,
+      "drawer_shadow_vertical_offset": 0,
+      "drawer_shadow_blur": 25,
+      "badge_position": "top left",
+      "badge_corner_radius": 8,
+      "sale_badge_color_scheme": "scheme-4",
+      "brand_headline": "Karthika Supermarket",
+      "brand_description": "<p>Authentic Indian & Kerala Groceries delivered across Singapore since 1991.</p>",
+      "brand_image_width": 140,
+      "sold_out_badge_color_scheme": "scheme-5",
+      "social_twitter_link": "",
+      "social_facebook_link": "https://facebook.com/karthikasupermarket",
+      "social_pinterest_link": "",
+      "social_instagram_link": "https://instagram.com/karthikasupermarket",
+      "social_tiktok_link": "",
+      "social_tumblr_link": "",
+      "social_snapchat_link": "",
+      "social_youtube_link": "",
+      "social_vimeo_link": "",
+      "predictive_search_enabled": true,
+      "predictive_search_show_vendor": false,
+      "predictive_search_show_price": true,
+      "currency_code_enabled": true,
+      "cart_type": "drawer",
+      "show_vendor": false,
+      "show_cart_note": true,
+      "cart_drawer_collection": "",
+      "cart_color_scheme": "scheme-1",
+      "sections": {
+        "main-password-header": {
+          "type": "main-password-header",
+          "settings": {
+            "color_scheme": "scheme-1"
+          }
+        },
+        "main-password-footer": {
+          "type": "main-password-footer",
+          "settings": {
+            "color_scheme": "scheme-1"
+          }
+        }
+      }
+    }
+  }
+}

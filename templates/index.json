@@ -1,0 +1,106 @@
+{
+  "sections": {
+    "switcher": {
+      "type": "karthika-segmented-switcher",
+      "settings": {}
+    },
+    "promo_banner": {
+      "type": "karthika-promo-banner",
+      "settings": {
+        "badge": "20% OFF FIRST ORDER",
+        "title": "Fresh Kerala favourites",
+        "subtitle": "Delivered across Singapore"
+      }
+    },
+    "category_discovery": {
+      "type": "karthika-category-scroll",
+      "blocks": {
+        "cat_1": { "type": "category_item", "settings": { "title": "Rice & Grains", "demo_image_url": "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=140&q=80" } },
+        "cat_2": { "type": "category_item", "settings": { "title": "Kerala Favourites", "demo_image_url": "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=140&q=80" } },
+        "cat_3": { "type": "category_item", "settings": { "title": "Spices", "demo_image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=140&q=80" } },
+        "cat_4": { "type": "category_item", "settings": { "title": "Fresh Produce", "demo_image_url": "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=140&q=80" } },
+        "cat_5": { "type": "category_item", "settings": { "title": "Snacks", "demo_image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=140&q=80" } },
+        "cat_6": { "type": "category_item", "settings": { "title": "Dairy", "demo_image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=140&q=80" } },
+        "cat_7": { "type": "category_item", "settings": { "title": "Beverages", "demo_image_url": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=140&q=80" } },
+        "cat_8": { "type": "category_item", "settings": { "title": "Pickles & Oils", "demo_image_url": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=140&q=80" } }
+      },
+      "block_order": ["cat_1", "cat_2", "cat_3", "cat_4", "cat_5", "cat_6", "cat_7", "cat_8"],
+      "settings": {
+        "title": "Shop by category",
+        "link_text": "See all"
+      }
+    },
+    "popular_this_week": {
+      "type": "karthika-product-carousel",
+      "settings": {
+        "title": "Popular this week",
+        "link_text": "See all",
+        "collection": "all",
+        "preset_type": "popular",
+        "products_to_show": 4
+      }
+    },
+    "todays_deals": {
+      "type": "karthika-product-carousel",
+      "settings": {
+        "title": "Today's deals",
+        "subtitle": "Daily fresh savings & discounts",
+        "link_text": "See all",
+        "collection": "all",
+        "preset_type": "deals",
+        "products_to_show": 4
+      }
+    },
+    "kerala_favourites": {
+      "type": "karthika-product-carousel",
+      "settings": {
+        "title": "Kerala favourites",
+        "subtitle": "Authentic flavours from home",
+        "link_text": "See all",
+        "collection": "all",
+        "preset_type": "kerala",
+        "products_to_show": 4
+      }
+    },
+    "smart_bundles": {
+      "type": "karthika-smart-bundles",
+      "settings": {
+        "badge": "SMART BUNDLE",
+        "title": "Kerala Breakfast Combo",
+        "items_text": "Puttu Podi + Kadala (500g) + Grated Coconut + Nendran Banana",
+        "price": "$12.80",
+        "compare_price": "$15.80",
+        "save_text": "Save $3.00"
+      }
+    },
+    "karthika_ai": {
+      "type": "karthika-ai-assistant",
+      "settings": {
+        "heading": "Not sure what to cook?",
+        "subheading": "Tell Karthika what you're making and we'll find the ingredients."
+      }
+    },
+    "new_arrivals": {
+      "type": "karthika-product-carousel",
+      "settings": {
+        "title": "New arrivals",
+        "subtitle": "Freshly stocked groceries & specialities",
+        "link_text": "See all",
+        "collection": "all",
+        "preset_type": "new_arrivals",
+        "products_to_show": 4
+      }
+    }
+  },
+  "order": [
+    "switcher",
+    "promo_banner",
+    "category_discovery",
+    "popular_this_week",
+    "todays_deals",
+    "kerala_favourites",
+    "smart_bundles",
+    "karthika_ai",
+    "new_arrivals"
+  ]
+}

@@ -1,0 +1,173 @@
+{% doc %}
+  Renders the compact mobile-app style product card.
+  
+  Features:
+  - Soft neutral #F3F4EE background container for product image
+  - Circular floating favourite heart button (top right, turns #B40000 on active)
+  - Product title & Brand / Pack size
+  - Rating badge (★ 4.3)
+  - Price & Compare at price ($10.00)
+  - Modern Add to cart CTA: [+ Add] changing smoothly to [− 1 +] stepper
+  - Supports both real Shopify product objects and realistic grocery fallbacks
+{% enddoc %}
+
+{%- if card_product and card_product != empty -%}
+  {%- liquid
+    assign current_variant = card_product.selected_or_first_available_variant
+    assign on_sale = false
+    if card_product.compare_at_price > card_product.price
+      assign on_sale = true
+      assign save_percent = card_product.compare_at_price | minus: card_product.price | times: 100.0 | divided_by: card_product.compare_at_price | round
+    endif
+
+    assign rating_val = "4.3"
+    if card_product.metafields.reviews.rating.value != blank
+      assign rating_val = card_product.metafields.reviews.rating.value
+    endif
+
+    assign pack_size = card_product.vendor | default: "Karthika"
+    if current_variant.title != 'Default Title'
+      assign pack_size = pack_size | append: " • " | append: current_variant.title
+    elsif card_product.variants.first.weight > 0
+      assign pack_size = pack_size | append: " • " | append: card_product.variants.first.weight | weight_with_unit
+    endif
+  -%}
+
+  <div class="karthika-compact-card" data-product-id="{{ card_product.id }}">
+    <!-- Image Media Box with Pastel Background & Top-Left Rounded Discount Pill -->
+    <div class="karthika-compact-media">
+      {%- if on_sale -%}
+        <div class="karthika-card-badge">{{ save_percent }}% off</div>
+      {%- elsif card_product.tags contains 'new' or card_product.tags contains 'New' -%}
+        <div class="karthika-card-badge">New</div>
+      {%- endif -%}
+
+      <a href="{{ card_product.url }}" aria-label="{{ card_product.title | escape }}">
+        {%- if card_product.featured_media -%}
+          <img
+            src="{{ card_product.featured_media | image_url: width: 360 }}"
+            alt="{{ card_product.featured_media.alt | default: card_product.title | escape }}"
+            loading="lazy"
+            width="200"
+            height="200"
+            class="karthika-compact-img"
+          >
+        {%- else -%}
+          <img
+            src="{{ demo_img | default: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80' }}"
+            alt="{{ card_product.title | escape }}"
+            loading="lazy"
+            width="200"
+            height="200"
+            class="karthika-compact-img"
+          >
+        {%- endif -%}
+      </a>
+    </div>
+
+    <!-- Product Info -->
+    <div class="karthika-compact-info">
+      <div class="karthika-compact-title-block">
+        <a href="{{ card_product.url }}" class="karthika-compact-title" title="{{ card_product.title | escape }}">
+          {{ card_product.title | escape }}
+        </a>
+        <div class="karthika-compact-pack">{{ pack_size }}</div>
+      </div>
+
+      <!-- Bottom Row: Price Centered + Circular Plus Action Button at Right -->
+      <div class="karthika-compact-bottom-action-row">
+        <div class="karthika-compact-price-wrap">
+          <span class="karthika-compact-price">{{ card_product.price | money }}</span>
+          {%- if on_sale -%}
+            <span class="karthika-compact-compare-price">{{ card_product.compare_at_price | money }}</span>
+          {%- endif -%}
+        </div>
+
+        <div class="karthika-compact-add-wrap karthika-stepper" data-variant-id="{{ current_variant.id }}">
+          <button type="button" class="karthika-compact-icon-add-btn karthika-stepper-add-btn" aria-label="Add to cart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </button>
+
+          <div class="karthika-compact-stepper">
+            <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--minus" aria-label="Decrease quantity">&minus;</button>
+            <span class="karthika-compact-stepper-val karthika-stepper-qty">1</span>
+            <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--plus" aria-label="Increase quantity">&plus;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{%- else -%}
+  <!-- Realistic Demo Grocery Card (Exact reference mockup fallback) -->
+  {%- liquid
+    assign d_title = demo_title | default: "Broccoli Fresh"
+    assign d_brand = demo_brand | default: "Fresh Farm"
+    assign d_pack = demo_pack | default: "500gm"
+    assign d_price = demo_price | default: "$10.00"
+    assign d_compare = demo_compare | default: ""
+    assign d_badge = demo_badge | default: ""
+    assign d_rating = demo_rating | default: "4.3"
+    assign d_img = demo_img | default: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=360&q=80"
+  -%}
+
+  <div class="karthika-compact-card" data-demo="true">
+    <!-- Image Media Box with Pastel Background & Top-Left Rounded Discount Pill -->
+    <div class="karthika-compact-media">
+      {%- if d_badge != blank -%}
+        <div class="karthika-card-badge">{{ d_badge }}</div>
+      {%- endif -%}
+
+      <a href="/products/preview" aria-label="{{ d_title | escape }}">
+        <img
+          src="{{ d_img }}"
+          alt="{{ d_title | escape }}"
+          loading="lazy"
+          width="200"
+          height="200"
+          class="karthika-compact-img"
+        >
+      </a>
+    </div>
+
+    <!-- Product Info -->
+    <div class="karthika-compact-info">
+      <div class="karthika-compact-title-block">
+        <a href="/products/preview" class="karthika-compact-title" title="{{ d_title | escape }}">
+          {{ d_title }}
+        </a>
+        <div class="karthika-compact-pack">{{ d_brand }}{% if d_pack != blank %}, {{ d_pack }}{% endif %}</div>
+      </div>
+
+      <!-- Bottom Row: Price Centered + Circular Plus Action Button at Right -->
+      <div class="karthika-compact-bottom-action-row">
+        <div class="karthika-compact-price-wrap">
+          <span class="karthika-compact-price">{{ d_price }}</span>
+          {%- if d_compare != blank -%}
+            <span class="karthika-compact-compare-price">{{ d_compare }}</span>
+          {%- endif -%}
+        </div>
+
+        <div class="karthika-compact-add-wrap karthika-stepper" data-demo="true">
+          <button type="button" class="karthika-compact-icon-add-btn karthika-stepper-add-btn" aria-label="Add to cart" onclick="const p = this.closest('.karthika-compact-add-wrap'); p.classList.add('is-added'); if(window.Karthika && window.Karthika.Cart) window.Karthika.Cart.updateBadges();">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </button>
+
+          <div class="karthika-compact-stepper">
+            <button type="button" class="karthika-stepper-act-btn" onclick="const p = this.closest('.karthika-compact-add-wrap'); const v = p.querySelector('.karthika-compact-stepper-val'); let count = parseInt(v.textContent, 10) - 1; if(count <= 0) { p.classList.remove('is-added'); v.textContent = '1'; } else { v.textContent = count; }">&minus;</button>
+            <span class="karthika-compact-stepper-val">1</span>
+            <button type="button" class="karthika-stepper-act-btn" onclick="const v = this.closest('.karthika-compact-add-wrap').querySelector('.karthika-compact-stepper-val'); v.textContent = parseInt(v.textContent, 10) + 1;">&plus;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endif -%}

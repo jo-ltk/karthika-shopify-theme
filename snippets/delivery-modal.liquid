@@ -1,0 +1,71 @@
+{% doc %}
+  Renders the delivery location modal for selecting Singapore addresses and postal codes.
+{% enddoc %}
+
+<div id="KarthikaDeliveryModal" class="karthika-delivery-modal" role="dialog" aria-modal="true" aria-labelledby="DeliveryModalTitle">
+  <div class="karthika-delivery-modal-box">
+    <div class="karthika-delivery-modal-head">
+      <h3 id="DeliveryModalTitle" class="karthika-delivery-modal-title">Select Delivery Location</h3>
+      <button type="button" class="karthika-delivery-modal-close" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--karthika-text-muted);">&times;</button>
+    </div>
+
+    <p style="font-size: 13px; color: var(--karthika-text-muted); margin-bottom: 16px;">
+      Express 30-min Indian grocery delivery across Singapore. Select your address:
+    </p>
+
+    <div class="karthika-location-item is-selected" data-address="34 Buffalo Road, Little India (219796)">
+      <div>
+        <div style="font-weight: 700; font-size: 14px; color: var(--karthika-text-dark);">Karthika Main Store (Little India)</div>
+        <div style="font-size: 12px; color: var(--karthika-text-muted);">34 Buffalo Road, Singapore 219796</div>
+      </div>
+      <span style="font-size: 11px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 2px 8px; border-radius: 999px;">30 min</span>
+    </div>
+
+    <div class="karthika-location-item" data-address="Tampines Central, Singapore 529538">
+      <div>
+        <div style="font-weight: 700; font-size: 14px; color: var(--karthika-text-dark);">Tampines & East Area</div>
+        <div style="font-size: 12px; color: var(--karthika-text-muted);">Tampines Central, Singapore 529538</div>
+      </div>
+      <span style="font-size: 11px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 2px 8px; border-radius: 999px;">Express</span>
+    </div>
+
+    <div class="karthika-location-item" data-address="Jurong East Ave 1, Singapore 609788">
+      <div>
+        <div style="font-weight: 700; font-size: 14px; color: var(--karthika-text-dark);">Jurong & West Region</div>
+        <div style="font-size: 12px; color: var(--karthika-text-muted);">Jurong East Ave 1, Singapore 609788</div>
+      </div>
+      <span style="font-size: 11px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 2px 8px; border-radius: 999px;">Express</span>
+    </div>
+
+    <div class="karthika-location-item" data-address="Woodlands Square, Singapore 737737">
+      <div>
+        <div style="font-weight: 700; font-size: 14px; color: var(--karthika-text-dark);">Woodlands & North Region</div>
+        <div style="font-size: 12px; color: var(--karthika-text-muted);">Woodlands Square, Singapore 737737</div>
+      </div>
+      <span style="font-size: 11px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 2px 8px; border-radius: 999px;">Same Day</span>
+    </div>
+
+    <div style="margin-top: 16px; border-top: 1px solid var(--karthika-border); padding-top: 14px;">
+      <label style="font-size: 12px; font-weight: 700; color: var(--karthika-text-dark); display: block; margin-bottom: 6px;">
+        Or enter Singapore 6-digit postal code:
+      </label>
+      <div style="display: flex; gap: 8px;">
+        <input
+          type="text"
+          id="KarthikaPostalInput"
+          placeholder="e.g. 219796"
+          maxlength="6"
+          style="flex: 1; padding: 8px 12px; border-radius: var(--karthika-radius-md); border: 1px solid var(--karthika-border); font-size: 14px; outline: none;"
+        >
+        <button
+          type="button"
+          id="KarthikaPostalSubmit"
+          style="background: var(--karthika-red); color: #fff; border: none; padding: 8px 16px; border-radius: var(--karthika-radius-pill); font-weight: 700; font-size: 13px; cursor: pointer;"
+          onclick="const val = document.getElementById('KarthikaPostalInput').value; if(val){ window.Karthika.Location.setLocation('Singapore ' + val); }"
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

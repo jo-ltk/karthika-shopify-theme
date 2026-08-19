@@ -1,0 +1,119 @@
+{% doc %}
+  Karthika Supermarket Hero Banner Section
+  Features promotional slides with Karthika Yellow/Red branding and delivery assurance badges.
+{% enddoc %}
+
+<div class="karthika-hero-section">
+  <div class="karthika-container">
+    {%- for block in section.blocks -%}
+      {%- if forloop.first -%}
+        <div class="karthika-hero-card" {{ block.shopify_attributes }}>
+          <div class="karthika-hero-content">
+            <div class="karthika-hero-tag">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span>{{ block.settings.badge_text | default: '30-Min Singapore Delivery' }}</span>
+            </div>
+
+            <h1 class="karthika-hero-title">
+              {{ block.settings.heading | default: 'Your Everyday Indian Grocery Store' }}
+            </h1>
+
+            <p class="karthika-hero-subtitle">
+              {{ block.settings.subheading | default: 'Authentic Indian groceries, Kerala staples & fresh produce delivered right to your doorstep across Singapore.' }}
+            </p>
+
+            <a href="{{ block.settings.button_link | default: routes.all_products_collection_url }}" class="karthika-hero-btn">
+              <span>{{ block.settings.button_label | default: 'Shop Now' }}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
+
+          <div class="karthika-hero-image-wrap">
+            {%- if block.settings.image != blank -%}
+              <img
+                src="{{ block.settings.image | image_url: width: 600 }}"
+                alt="{{ block.settings.heading | escape }}"
+                loading="eager"
+                width="360"
+                height="220"
+                class="karthika-hero-image"
+              >
+            {%- else -%}
+              <div style="background: rgba(255,255,255,0.7); border-radius: var(--karthika-radius-md); padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; border: 1px dashed #D4AF37;">
+                <span style="font-size: 38px;">🛍️🌾🥥</span>
+                <span style="font-size: 13px; font-weight: 700; color: var(--karthika-text-dark);">Fresh • Authentic • Fast</span>
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Karthika Hero Banner",
+  "tag": "section",
+  "class": "section",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Hero Slide",
+      "settings": [
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Badge Text",
+          "default": "30-Min Singapore Delivery"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Your Everyday Indian Grocery Store"
+        },
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Authentic Indian groceries, Kerala staples & fresh produce delivered right to your doorstep across Singapore."
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button Label",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Hero Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Karthika Hero Banner",
+      "blocks": [
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

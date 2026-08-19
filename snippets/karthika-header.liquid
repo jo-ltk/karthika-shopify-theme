@@ -1,0 +1,56 @@
+{% doc %}
+  Renders the mobile grocery app header matching the exact reference.
+  Features:
+  - Top row: Express delivery location selector + outline search & notification icons
+  - Large compact 48px search input ("Search groceries, spices, snacks...")
+{% enddoc %}
+
+<header class="karthika-mobile-header" role="banner">
+  <!-- Top Location & Action Row -->
+  <div class="karthika-header-top-row">
+    <!-- Location Selector (Left) -->
+    <div class="karthika-header-location-box karthika-change-location-btn" role="button" tabindex="0" aria-label="Select delivery location">
+      <div class="karthika-header-location-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+      </div>
+      <div class="karthika-header-location-text">
+        <div class="karthika-location-badge-row">
+          <span class="karthika-location-sub">Express delivery</span>
+        </div>
+        <span class="karthika-location-main karthika-delivery-address">Tampines Central, Singapore 529538</span>
+      </div>
+    </div>
+
+    <!-- Search & Notification Icons (Right) -->
+    <div class="karthika-header-actions">
+      <!-- Search Button Icon -->
+      <button type="button" class="karthika-header-action-btn karthika-search-bar-trigger" aria-label="Search groceries">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+
+      <!-- Notification Button Icon -->
+      <a href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" class="karthika-header-action-btn" aria-label="Notifications and account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span class="karthika-notification-dot"></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Integrated Prominent Search Bar -->
+  <div class="karthika-header-search-bar karthika-search-bar-trigger" role="button" tabindex="0" aria-label="Search groceries">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <span class="karthika-header-search-placeholder">Search groceries, spices, snacks...</span>
+  </div>
+</header>

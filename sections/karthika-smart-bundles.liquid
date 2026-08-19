@@ -1,0 +1,88 @@
+{% doc %}
+  Karthika Supermarket - Smart Grocery Bundles
+  Compact bundle cards (e.g. Kerala Breakfast, Dosa Kit, etc.)
+{% enddoc %}
+
+<div class="karthika-bundle-card">
+  <div class="karthika-bundle-badge">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+      <line x1="7" y1="7" x2="7.01" y2="7"></line>
+    </svg>
+    <span>{{ section.settings.badge | default: 'SMART BUNDLE' }}</span>
+  </div>
+
+  <h3 class="karthika-bundle-title">{{ section.settings.title | default: "Kerala Breakfast Combo" }}</h3>
+  <p class="karthika-bundle-items-text">{{ section.settings.items_text | default: "Puttu Podi + Kadala (500g) + Grated Coconut + Nendran Banana" }}</p>
+
+  <div class="karthika-bundle-bottom-row">
+    <div class="karthika-bundle-price-wrap">
+      <span class="karthika-bundle-price">{{ section.settings.price | default: "$12.80" }}</span>
+      <span class="karthika-bundle-compare">{{ section.settings.compare_price | default: "$15.80" }}</span>
+      <span class="karthika-bundle-save-tag">{{ section.settings.save_text | default: "Save $3.00" }}</span>
+    </div>
+
+    <button
+      type="button"
+      class="karthika-bundle-add-btn"
+      onclick="if(window.Karthika && window.Karthika.Cart){ window.Karthika.Cart.openCartDrawer(); }"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Add bundle</span>
+    </button>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Karthika Smart Bundles",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "Bundle Badge",
+      "default": "SMART BUNDLE"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Kerala Breakfast Combo"
+    },
+    {
+      "type": "text",
+      "id": "items_text",
+      "label": "Items Description",
+      "default": "Puttu Podi + Kadala (500g) + Grated Coconut + Nendran Banana"
+    },
+    {
+      "type": "text",
+      "id": "price",
+      "label": "Bundle Price",
+      "default": "$12.80"
+    },
+    {
+      "type": "text",
+      "id": "compare_price",
+      "label": "Compare Price",
+      "default": "$15.80"
+    },
+    {
+      "type": "text",
+      "id": "save_text",
+      "label": "Savings Tag",
+      "default": "Save $3.00"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Karthika Smart Bundles"
+    }
+  ]
+}
+{% endschema %}

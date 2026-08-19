@@ -1,0 +1,72 @@
+{% doc %}
+  Renders the app-style predictive search overlay with recent searches, trending grocery tags, and categories.
+{% enddoc %}
+
+<div id="KarthikaSearchModal" class="karthika-search-modal" role="dialog" aria-modal="true" aria-labelledby="SearchModalTitle">
+  <div class="karthika-search-modal-content">
+    <div class="karthika-search-modal-header">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--karthika-text-muted);">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <form action="{{ routes.search_url }}" method="get" role="search" style="flex: 1; display: flex;">
+        <input type="hidden" name="type" value="product">
+        <input
+          id="SearchModalTitle"
+          type="search"
+          name="q"
+          class="karthika-search-modal-input"
+          placeholder="Search groceries, brands, spices, Kerala snacks..."
+          autocomplete="off"
+          autofocus
+        >
+      </form>
+      <button type="button" class="karthika-search-modal-close" aria-label="Close search">&times;</button>
+    </div>
+
+    <div class="karthika-search-modal-body">
+      <!-- Trending Searches -->
+      <div class="karthika-search-group">
+        <div class="karthika-search-group-title">Trending Grocery Searches</div>
+        <div class="karthika-search-tag-chips">
+          <span class="karthika-search-chip" data-query="Basmati Rice">🍚 Basmati Rice</span>
+          <span class="karthika-search-chip" data-query="Aashirvaad Atta">🌾 Aashirvaad Atta</span>
+          <span class="karthika-search-chip" data-query="Kerala Banana Chips">🍌 Kerala Banana Chips</span>
+          <span class="karthika-search-chip" data-query="Narasus Filter Coffee">☕ Filter Coffee</span>
+          <span class="karthika-search-chip" data-query="Coconut Oil">🥥 Pure Coconut Oil</span>
+          <span class="karthika-search-chip" data-query="Biryani Masala">🌶️ Eastern Biryani Masala</span>
+          <span class="karthika-search-chip" data-query="Toor Dal">🥣 Toor Dal</span>
+          <span class="karthika-search-chip" data-query="Pooja Agarbatti">🪔 Pooja Agarbatti</span>
+        </div>
+      </div>
+
+      <!-- Suggested Categories -->
+      <div class="karthika-search-group">
+        <div class="karthika-search-group-title">Shop by Category</div>
+        <div class="karthika-search-tag-chips">
+          <a href="/collections/all?filter=rice" class="karthika-search-chip">Rice & Grains</a>
+          <a href="/collections/all?filter=spices" class="karthika-search-chip">Spices & Masalas</a>
+          <a href="/collections/all?filter=kerala" class="karthika-search-chip">Kerala Essentials</a>
+          <a href="/collections/all?filter=snacks" class="karthika-search-chip">Indian Snacks & Sweets</a>
+          <a href="/collections/all?filter=pooja" class="karthika-search-chip">Pooja Items</a>
+          <a href="/collections/all?filter=frozen" class="karthika-search-chip">Frozen & Ready-to-Eat</a>
+        </div>
+      </div>
+
+      <!-- Natural Language AI Search Prompts -->
+      <div class="karthika-search-group" style="background: var(--karthika-yellow-light); padding: 12px; border-radius: var(--karthika-radius-md); border: 1px solid #FFE082;">
+        <div style="font-size: 11px; font-weight: 800; color: var(--karthika-red); text-transform: uppercase; margin-bottom: 4px;">
+          ✨ AI Smart Search Examples
+        </div>
+        <div style="font-size: 13px; color: var(--karthika-text-dark); margin-bottom: 8px;">
+          Try searching what you are preparing:
+        </div>
+        <div class="karthika-search-tag-chips">
+          <span class="karthika-search-chip" data-query="Chicken Biryani" style="background: #fff;">"What do I need for biryani?"</span>
+          <span class="karthika-search-chip" data-query="Appam Stew" style="background: #fff;">"Kerala breakfast for 4"</span>
+          <span class="karthika-search-chip" data-query="Dosa" style="background: #fff;">"Everything for crispy dosa"</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

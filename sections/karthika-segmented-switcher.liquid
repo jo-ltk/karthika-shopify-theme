@@ -1,0 +1,41 @@
+{% doc %}
+  Renders the segmented switcher: [ Items ] [ Shop ]
+  Height: 48px, Radius: 14px, white active surface with Karthika Red text and subtle shadow.
+{% enddoc %}
+
+<div class="karthika-segmented-wrapper">
+  <div class="karthika-segmented-control" role="tablist" aria-label="Catalog View Mode">
+    <button
+      type="button"
+      class="karthika-segmented-btn is-active"
+      role="tab"
+      aria-selected="true"
+      onclick="document.querySelectorAll('.karthika-segmented-btn').forEach(b => b.classList.remove('is-active')); this.classList.add('is-active');"
+    >
+      Items
+    </button>
+    <a
+      href="{{ routes.collections_url }}"
+      class="karthika-segmented-btn"
+      role="tab"
+      aria-selected="false"
+      onclick="document.querySelectorAll('.karthika-segmented-btn').forEach(b => b.classList.remove('is-active')); this.classList.add('is-active');"
+    >
+      Shop
+    </a>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Items / Shop Switcher",
+  "tag": "section",
+  "class": "section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Items / Shop Switcher"
+    }
+  ]
+}
+{% endschema %}

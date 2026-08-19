@@ -1,0 +1,39 @@
+# Environment & Secrets
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.cert
+*.crt
+*.token
+credentials.json
+client_secrets.json
+
+# Shopify CLI & Local Credentials
+.shopify/
+shopify.theme.yml
+shopify.web.toml
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+*.log
+
+# Local Agent Skills repository
+agent-skills/

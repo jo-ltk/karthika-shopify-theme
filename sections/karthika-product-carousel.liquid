@@ -1,0 +1,111 @@
+{% doc %}
+  Karthika Supermarket - Grocery Product Grid Section
+  Renders responsive 2-column mobile / 4-5 column desktop product grid.
+{% enddoc %}
+
+<div class="karthika-grid-section">
+  <div class="karthika-section-head">
+    <div class="karthika-section-head-title-wrap">
+      <h2 class="karthika-section-head-title">{{ section.settings.title | default: 'Popular this week' }}</h2>
+      {%- if section.settings.subtitle != blank -%}
+        <span class="karthika-section-head-sub">{{ section.settings.subtitle }}</span>
+      {%- endif -%}
+    </div>
+    
+    {%- assign see_all_link = section.settings.collection.url | default: routes.all_products_collection_url -%}
+    <a href="{{ see_all_link }}" class="karthika-section-head-link">
+      {{ section.settings.link_text | default: 'See all' }}
+    </a>
+  </div>
+
+  <div class="karthika-two-col-grid">
+    {%- assign products_to_show = section.settings.products_to_show | default: 4 -%}
+    {%- if section.settings.collection != blank and section.settings.collection.products_count > 0 -%}
+      {%- for product in section.settings.collection.products limit: products_to_show -%}
+        {% render 'karthika-card-product', card_product: product, section_id: section.id %}
+      {%- endfor -%}
+    {%- else -%}
+      <!-- Demo products matching reference image & grocery categories -->
+      {%- if section.settings.preset_type == 'kerala' -%}
+        {% render 'karthika-card-product', demo_title: "Kerala Banana Chips", demo_brand: "Karthika Special", demo_pack: "250gm", demo_price: "$4.50", demo_rating: "4.8", demo_img: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Pure Coconut Oil (Cold Pressed)", demo_brand: "Kera Fresh", demo_pack: "1 Litre", demo_price: "$8.20", demo_rating: "4.9", demo_img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Palakkadan Matta Rice", demo_brand: "Double Horse", demo_pack: "5kg", demo_price: "$12.00", demo_rating: "4.7", demo_img: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Kerala Roasted Puttu Podi", demo_brand: "Brahmins", demo_pack: "1kg", demo_price: "$3.80", demo_rating: "4.8", demo_img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=360&q=80" %}
+      {%- elsif section.settings.preset_type == 'new_arrivals' -%}
+        {% render 'karthika-card-product', demo_title: "Kerala Jackfruit Chips (Hot & Crispy)", demo_brand: "Karthika Special", demo_pack: "200gm", demo_price: "$5.20", demo_rating: "4.9", demo_badge: "NEW", demo_img: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Fresh Tender Green Jackfruit Curry Cut", demo_brand: "Fresh Farm", demo_pack: "500gm", demo_price: "$4.80", demo_rating: "4.7", demo_badge: "NEW", demo_img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Kerala Chemba Puttu Podi (Red Rice)", demo_brand: "Brahmins", demo_pack: "1kg", demo_price: "$3.90", demo_rating: "4.8", demo_badge: "NEW", demo_img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Nadan Mango Pickle (Spicy & Sour)", demo_brand: "Grandma's", demo_pack: "400gm", demo_price: "$3.40", demo_rating: "4.8", demo_badge: "NEW", demo_img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=360&q=80" %}
+      {%- elsif section.settings.preset_type == 'deals' -%}
+        {% render 'karthika-card-product', demo_title: "Fresh Farm Red Tomato", demo_brand: "Local Farm", demo_pack: "1kg", demo_price: "$3.50", demo_compare: "$4.50", demo_badge: "22% OFF", demo_rating: "4.6", demo_img: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Mixed Sweet Bell Peppers", demo_brand: "Fresh Farm", demo_pack: "3 pcs", demo_price: "$4.80", demo_compare: "$6.00", demo_badge: "20% OFF", demo_rating: "4.5", demo_img: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Organic Red Onion", demo_brand: "Fresh Harvest", demo_pack: "1kg", demo_price: "$2.90", demo_compare: "$3.80", demo_badge: "24% OFF", demo_rating: "4.7", demo_img: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Fresh Green Spinach Bunch", demo_brand: "Hydroponic", demo_pack: "300gm", demo_price: "$2.20", demo_compare: "$2.90", demo_badge: "24% OFF", demo_rating: "4.4", demo_img: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=360&q=80" %}
+      {%- else -%}
+        <!-- Popular this week default matching reference image -->
+        {% render 'karthika-card-product', demo_title: "Broccoli Fresh", demo_brand: "Farm Fresh", demo_pack: "500gm", demo_price: "$10.00", demo_rating: "4.3", demo_img: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Avocado Fresh Hass", demo_brand: "Imported", demo_pack: "500gm", demo_price: "$10.00", demo_rating: "4.3", demo_img: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Fresh Red Vine Tomatoes", demo_brand: "Cameron Farm", demo_pack: "500gm", demo_price: "$6.00", demo_rating: "4.5", demo_img: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product', demo_title: "Sweet Crisp Bell Peppers", demo_brand: "Organic Choice", demo_pack: "500gm", demo_price: "$8.00", demo_rating: "4.4", demo_img: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80" %}
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Karthika Product Grid",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Popular this week"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle"
+    },
+    {
+      "type": "text",
+      "id": "link_text",
+      "label": "Link Text",
+      "default": "See all"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "select",
+      "id": "preset_type",
+      "label": "Demo Category Type",
+      "options": [
+        { "value": "popular", "label": "Popular / Fresh Produce" },
+        { "value": "kerala", "label": "Kerala Essentials" },
+        { "value": "deals", "label": "Today's Deals" },
+        { "value": "new_arrivals", "label": "New Arrivals" }
+      ],
+      "default": "popular"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 12,
+      "step": 2,
+      "default": 4,
+      "label": "Products to Show"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Karthika Product Grid"
+    }
+  ]
+}
+{% endschema %}

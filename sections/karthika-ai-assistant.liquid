@@ -1,0 +1,90 @@
+{% doc %}
+  Karthika AI Shopping Assistant & Recipe Meal Builder Section
+  "Not sure what to cook? Tell Karthika what you're making and we'll find the ingredients."
+{% enddoc %}
+
+<div class="karthika-ai-assistant-card">
+  <div class="karthika-ai-badge">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+    </svg>
+    <span>Karthika AI Assistant</span>
+  </div>
+
+  <h3 class="karthika-ai-title">{{ section.settings.heading | default: "Not sure what to cook?" }}</h3>
+  <p class="karthika-ai-desc">{{ section.settings.subheading | default: "Tell Karthika what you're making and we'll find the fresh ingredients." }}</p>
+
+  <!-- Recipe / Dish Selection Chips -->
+  <div class="karthika-ai-chips-wrap karthika-hide-scrollbar">
+    <button type="button" class="karthika-ai-chip is-active karthika-ai-pill-btn" data-recipe="biryani">
+      🍗 Chicken Biryani
+    </button>
+    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-recipe="kerala_breakfast">
+      🥞 Kerala Breakfast
+    </button>
+    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-recipe="sambar">
+      🍛 Sambar & Rasam
+    </button>
+    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-recipe="tea_snacks">
+      ☕ Tea Time Snacks
+    </button>
+  </div>
+
+  <!-- Interactive Basket Preview Box -->
+  <div class="karthika-ai-basket-box">
+    <div class="karthika-ai-basket-head">
+      <span id="KarthikaAIRecipeTitle" class="karthika-ai-basket-dish">
+        Malabar Chicken Biryani Kit
+      </span>
+      <span id="KarthikaAIRecipePrice" class="karthika-ai-basket-price">
+        $24.50
+      </span>
+    </div>
+
+    <div id="KarthikaAIIngredientList" class="karthika-ai-ingredients-list">
+      <div>✓ Kaima Jeerakasala Biryani Rice (1kg) &mdash; $4.80</div>
+      <div>✓ Fresh Farm Chicken Curry Cut (1kg) &mdash; $9.50</div>
+      <div>✓ Eastern Biryani Masala & Pure Ghee &mdash; $4.40</div>
+      <div>✓ Fresh Mint Leaves, Coriander & Onions &mdash; $5.80</div>
+    </div>
+
+    <button
+      type="button"
+      class="karthika-ai-build-btn karthika-ai-add-all-btn"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>
+      <span>Build my basket</span>
+    </button>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Karthika AI Assistant",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Not sure what to cook?"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Tell Karthika what you're making and we'll find the fresh ingredients."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Karthika AI Assistant"
+    }
+  ]
+}
+{% endschema %}

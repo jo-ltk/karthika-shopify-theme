@@ -1,0 +1,57 @@
+{% doc %}
+  Renders the 5-tab mobile bottom navigation bar.
+  Tabs: Home, Categories, Search, Cart, Account.
+  Outline icons, Karthika Red active, #8A8A8A inactive, safe-area padding.
+{% enddoc %}
+
+<nav class="karthika-bottom-nav" aria-label="Mobile Navigation">
+  <!-- 1. Home -->
+  <a href="{{ routes.root_url }}" class="karthika-nav-item {% if template.name == 'index' %}is-active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"></path>
+    </svg>
+    <span>Home</span>
+  </a>
+
+  <!-- 2. Categories -->
+  <a href="{{ routes.collections_url }}" class="karthika-nav-item {% if template.name contains 'collection' or template.name == 'list-collections' %}is-active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <rect x="3" y="3" width="7" height="7" rx="2"></rect>
+      <rect x="14" y="3" width="7" height="7" rx="2"></rect>
+      <rect x="14" y="14" width="7" height="7" rx="2"></rect>
+      <rect x="3" y="14" width="7" height="7" rx="2"></rect>
+    </svg>
+    <span>Categories</span>
+  </a>
+
+  <!-- 3. Search -->
+  <button type="button" class="karthika-nav-item karthika-nav-search-trigger karthika-search-bar-trigger {% if template.name == 'search' %}is-active{% endif %}" style="background: none; border: none; padding: 0; cursor: pointer;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="11" cy="11" r="7"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <span>Search</span>
+  </button>
+
+  <!-- 4. Cart -->
+  <button type="button" class="karthika-nav-item karthika-cart-trigger" aria-label="Open Cart Drawer" style="background: none; border: none; padding: 0; cursor: pointer;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="9" cy="20" r="1.5"></circle>
+      <circle cx="18" cy="20" r="1.5"></circle>
+      <path d="M2 3h3l2.5 13h12l3-9H6"></path>
+    </svg>
+    <span>Cart</span>
+    <span class="karthika-nav-badge" {% if cart.item_count == 0 %}style="display: none;"{% endif %}>
+      {{ cart.item_count }}
+    </span>
+  </button>
+
+  <!-- 5. Account -->
+  <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="karthika-nav-item {% if template.name contains 'customer' %}is-active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+    <span>Account</span>
+  </a>
+</nav>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karthika Supermarket - Onboarding</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #dcd9d2;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .phone-container {
+      position: relative;
+      width: 100%;
+      max-width: 390px;
+      height: 844px;
+      max-height: 94vh;
+      max-height: 94dvh;
+      background-color: #F7F5F0;
+      border-radius: 44px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Top Hero Image Area: 52% of card */
+    .hero-image-wrapper {
+      width: 100%;
+      height: 52%;
+      flex: 0 0 52%;
+      position: relative;
+      overflow: hidden;
+      background-color: #F7F5F0;
+    }
+
+    .hero-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+
+    /* Content Area */
+    .content-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 28px 28px 34px 28px;
+      background-color: #F7F5F0;
+    }
+
+    .text-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .headline {
+      font-size: 30px;
+      line-height: 1.15;
+      font-weight: 800;
+      color: #121212;
+      letter-spacing: -0.5px;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .subheadline {
+      font-size: 14px;
+      line-height: 1.45;
+      color: #717171;
+      font-weight: 400;
+      margin-bottom: 24px;
+      max-width: 95%;
+      text-align: left;
+    }
+
+    /* Slider Indicators */
+    .slider-indicators {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .indicator {
+      height: 5px;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    .indicator.inactive {
+      width: 12px;
+      background-color: #D8D4CC;
+    }
+
+    .indicator.active {
+      width: 18px;
+      background-color: #B40000;
+    }
+
+    /* CTA Button */
+    .cta-wrapper {
+      width: 100%;
+      margin-top: auto;
+    }
+
+    .cta-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 54px;
+      background-color: #B40000;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 14.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(180, 0, 0, 0.25);
+      transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    .cta-btn:hover {
+      background-color: #960000;
+      box-shadow: 0 6px 18px rgba(180, 0, 0, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .cta-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 6px rgba(180, 0, 0, 0.2);
+    }
+
+    /* Mobile viewports */
+    @media (max-width: 480px) {
+      body {
+        padding: 0;
+        background-color: #F7F5F0;
+      }
+
+      .phone-container {
+        max-width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100vh;
+        max-height: 100dvh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .content-wrapper {
+        padding: 22px 24px 30px 24px;
+      }
+
+      .headline {
+        font-size: 28px;
+        margin-bottom: 12px;
+      }
+
+      .subheadline {
+        font-size: 13.5px;
+        margin-bottom: 20px;
+      }
+
+      .cta-btn {
+        height: 52px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone-container">
+    <!-- 1. Top Grocery Bag Image -->
+    <div class="hero-image-wrapper">
+      <img
+        src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=85"
+        alt="Fresh Items with fast delivery grocery"
+      />
+    </div>
+
+    <!-- 2. Text Area & Bottom CTA -->
+    <div class="content-wrapper">
+      <div class="text-content">
+        <h1 class="headline">
+          Fresh items with<br>fast delivery grocery
+        </h1>
+
+        <p class="subheadline">
+          We try our best level to make sure our customer happiness by fresh grocery item
+        </p>
+
+        <!-- 3. Slider Indicators (middle active in Karthika Red) -->
+        <div class="slider-indicators">
+          <span class="indicator inactive"></span>
+          <span class="indicator active"></span>
+          <span class="indicator inactive"></span>
+        </div>
+      </div>
+
+      <!-- 4. Bottom CTA Button -->
+      <div class="cta-wrapper">
+        <a href="/" class="cta-btn" id="getStartedBtn">
+          GET STARTED
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

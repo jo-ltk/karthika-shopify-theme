@@ -1,0 +1,325 @@
+{% doc %}
+  Karthika Supermarket Promotional Mobile Carousel Section
+  Full-width promotional carousel with auto-sliding, swipe gestures, consistent height,
+  and Karthika Red (#B40000) active dot indicators.
+{% enddoc %}
+
+<div class="karthika-promo-banner-wrap" id="KarthikaCarousel-{{ section.id }}">
+  <div class="karthika-carousel-container" id="karthikaHeroCarousel-{{ section.id }}">
+    <div class="karthika-carousel-track" id="karthikaHeroTrack-{{ section.id }}">
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          <a href="{{ block.settings.link | default: routes.all_products_collection_url }}" class="karthika-carousel-slide" {{ block.shopify_attributes }}>
+            {%- if block.settings.image != blank -%}
+              <img
+                src="{{ block.settings.image | image_url: width: 900 }}"
+                alt="{{ block.settings.title | default: 'Karthika Promotion' | escape }}"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                class="karthika-promo-bg-img"
+              >
+            {%- else -%}
+              {%- assign fallback_idx = forloop.index0 | modulo: 4 -%}
+              {%- case fallback_idx -%}
+                {%- when 0 -%}
+                  <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80" alt="Fresh Kerala favourites" class="karthika-promo-bg-img" loading="eager">
+                {%- when 1 -%}
+                  <img src="https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=900&q=80" alt="Farm Fresh Veggies" class="karthika-promo-bg-img" loading="lazy">
+                {%- when 2 -%}
+                  <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=900&q=80" alt="Aromatic Kerala Spices" class="karthika-promo-bg-img" loading="lazy">
+                {%- else -%}
+                  <img src="https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=900&q=80" alt="Traditional Kerala Snacks" class="karthika-promo-bg-img" loading="lazy">
+              {%- endcase -%}
+            {%- endif -%}
+
+            <div class="karthika-promo-overlay"></div>
+            <div class="karthika-promo-content">
+              {%- if block.settings.badge != blank -%}
+                <span class="karthika-promo-badge {% if block.settings.badge_color != blank %}{{ block.settings.badge_color }}{% endif %}">{{ block.settings.badge }}</span>
+              {%- endif -%}
+              {%- if block.settings.title != blank -%}
+                <h2 class="karthika-promo-title">{{ block.settings.title }}</h2>
+              {%- endif -%}
+              {%- if block.settings.subtitle != blank -%}
+                <p class="karthika-promo-sub">{{ block.settings.subtitle }}</p>
+              {%- endif -%}
+            </div>
+          </a>
+        {%- endfor -%}
+      {%- else -%}
+        <!-- Default Fallback Slides -->
+        <a href="{{ routes.all_products_collection_url }}" class="karthika-carousel-slide">
+          <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80" alt="Fresh Kerala favourites" class="karthika-promo-bg-img" loading="eager">
+          <div class="karthika-promo-overlay"></div>
+          <div class="karthika-promo-content">
+            <span class="karthika-promo-badge">20% OFF FIRST ORDER</span>
+            <h2 class="karthika-promo-title">Fresh Kerala favourites</h2>
+            <p class="karthika-promo-sub">Delivered across Singapore</p>
+          </div>
+        </a>
+        <a href="{{ routes.all_products_collection_url }}" class="karthika-carousel-slide">
+          <img src="https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=900&q=80" alt="Organic & Fresh Veggies" class="karthika-promo-bg-img" loading="lazy">
+          <div class="karthika-promo-overlay"></div>
+          <div class="karthika-promo-content">
+            <span class="karthika-promo-badge badge-green">DAILY HARVEST</span>
+            <h2 class="karthika-promo-title">Organic & Fresh Veggies</h2>
+            <p class="karthika-promo-sub">Directly sourced daily</p>
+          </div>
+        </a>
+        <a href="{{ routes.all_products_collection_url }}" class="karthika-carousel-slide">
+          <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=900&q=80" alt="Handpicked Spices & Herbs" class="karthika-promo-bg-img" loading="lazy">
+          <div class="karthika-promo-overlay"></div>
+          <div class="karthika-promo-content">
+            <span class="karthika-promo-badge badge-orange">AUTHENTIC TASTE</span>
+            <h2 class="karthika-promo-title">Handpicked Spices & Herbs</h2>
+            <p class="karthika-promo-sub">Pure aroma of Wayanad & Idukki</p>
+          </div>
+        </a>
+        <a href="{{ routes.all_products_collection_url }}" class="karthika-carousel-slide">
+          <img src="https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=900&q=80" alt="Hot Banana Chips & Mix" class="karthika-promo-bg-img" loading="lazy">
+          <div class="karthika-promo-overlay"></div>
+          <div class="karthika-promo-content">
+            <span class="karthika-promo-badge badge-red">CRUNCHY DELIGHTS</span>
+            <h2 class="karthika-promo-title">Hot Banana Chips & Mix</h2>
+            <p class="karthika-promo-sub">Fried in pure coconut oil</p>
+          </div>
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <!-- Pagination Dots -->
+  <div class="karthika-carousel-pagination" id="karthikaHeroDots-{{ section.id }}" role="tablist" aria-label="Hero Carousel Dots">
+    {%- assign slide_count = section.blocks.size -%}
+    {%- if slide_count == 0 -%}{%- assign slide_count = 4 -%}{%- endif -%}
+    {%- for i in (1..slide_count) -%}
+      {%- assign idx = forloop.index0 -%}
+      <button
+        type="button"
+        class="karthika-carousel-dot {% if forloop.first %}is-active{% endif %}"
+        aria-label="Slide {{ i }}"
+        data-index="{{ idx }}"
+      ></button>
+    {%- endfor -%}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sectionWrap = document.getElementById('KarthikaCarousel-{{ section.id }}');
+    if (!sectionWrap) return;
+    const carousel = sectionWrap.querySelector('.karthika-carousel-container');
+    const track = sectionWrap.querySelector('.karthika-carousel-track');
+    const dots = sectionWrap.querySelectorAll('.karthika-carousel-dot');
+    if (!carousel || !track || !dots.length) return;
+
+    const slides = track.querySelectorAll('.karthika-carousel-slide');
+    const totalSlides = slides.length;
+    let currentIndex = 0;
+    let autoPlayTimer = null;
+    let startX = 0;
+    let isDragging = false;
+
+    function goToSlide(index) {
+      if (index < 0) {
+        currentIndex = totalSlides - 1;
+      } else if (index >= totalSlides) {
+        currentIndex = 0;
+      } else {
+        currentIndex = index;
+      }
+
+      track.style.transition = 'transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)';
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('is-active', idx === currentIndex);
+      });
+    }
+
+    function startAutoPlay() {
+      stopAutoPlay();
+      autoPlayTimer = setInterval(() => {
+        goToSlide(currentIndex + 1);
+      }, {{ section.settings.autoplay_speed | default: 4 | times: 1000 }});
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+      }
+    }
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetIndex = parseInt(dot.getAttribute('data-index'), 10);
+        goToSlide(targetIndex);
+        startAutoPlay();
+      });
+    });
+
+    carousel.addEventListener('touchstart', (e) => {
+      stopAutoPlay();
+      startX = e.touches[0].clientX;
+      isDragging = true;
+    }, { passive: true });
+
+    carousel.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const currentX = e.touches[0].clientX;
+      const diff = currentX - startX;
+      track.style.transition = 'none';
+      track.style.transform = `translateX(calc(-${currentIndex * 100}% + ${diff}px))`;
+    }, { passive: true });
+
+    carousel.addEventListener('touchend', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      const endX = e.changedTouches[0].clientX;
+      const diff = endX - startX;
+
+      if (diff < -40) {
+        goToSlide(currentIndex + 1);
+      } else if (diff > 40) {
+        goToSlide(currentIndex - 1);
+      } else {
+        goToSlide(currentIndex);
+      }
+      startAutoPlay();
+    });
+
+    carousel.addEventListener('mouseenter', stopAutoPlay);
+    carousel.addEventListener('mouseleave', startAutoPlay);
+
+    {% if section.settings.autoplay %}
+      startAutoPlay();
+    {% endif %}
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Karthika Promo Hero",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate slides",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "unit": "s",
+      "label": "Slide duration",
+      "default": 4
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Promo Slide",
+      "settings": [
+        {
+          "type": "text",
+          "id": "badge",
+          "label": "Promotion Badge",
+          "default": "20% OFF FIRST ORDER"
+        },
+        {
+          "type": "select",
+          "id": "badge_color",
+          "label": "Badge Color Style",
+          "options": [
+            { "value": "", "label": "Yellow" },
+            { "value": "badge-green", "label": "Green" },
+            { "value": "badge-orange", "label": "Orange" },
+            { "value": "badge-red", "label": "Red" }
+          ],
+          "default": ""
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Fresh Kerala favourites"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "Delivered across Singapore"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Label",
+          "default": "Shop now"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Banner Background Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Banner Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Karthika Promo Hero",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "badge": "20% OFF FIRST ORDER",
+            "title": "Fresh Kerala favourites",
+            "subtitle": "Delivered across Singapore",
+            "button_text": "Shop now"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "badge": "DAILY HARVEST",
+            "badge_color": "badge-green",
+            "title": "Organic & Fresh Veggies",
+            "subtitle": "Directly sourced daily",
+            "button_text": "Explore Fresh"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "badge": "AUTHENTIC TASTE",
+            "badge_color": "badge-orange",
+            "title": "Handpicked Spices & Herbs",
+            "subtitle": "Pure aroma of Wayanad & Idukki",
+            "button_text": "Shop Spices"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "badge": "CRUNCHY DELIGHTS",
+            "badge_color": "badge-red",
+            "title": "Hot Banana Chips & Mix",
+            "subtitle": "Fried in pure coconut oil",
+            "button_text": "Order Snacks"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
