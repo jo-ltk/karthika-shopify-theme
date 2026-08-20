@@ -33,7 +33,7 @@
         "link_text": "See all",
         "collection": "all",
         "preset_type": "popular",
-        "products_to_show": 6,
+        "products_to_show": 4,
         "carousel": false
       }
     },
@@ -100,9 +100,9 @@
   "order": [
     "promo_banner",
     "category_discovery",
+    "weekend_deals",
     "popular_this_week",
     "todays_deals",
-    "weekend_deals",
     "kerala_favourites",
     "smart_bundles",
     "karthika_ai",

@@ -18,11 +18,15 @@
     </a>
   </div>
 
-  <div class="karthika-two-col-grid">
+  <div class="{% if section.settings.preset_type == 'popular' %}karthika-popular-mini-grid{% elsif section.settings.preset_type == 'deals' %}karthika-deals-three-grid{% else %}karthika-two-col-grid{% endif %}">
     {%- assign products_to_show = section.settings.products_to_show | default: 4 -%}
     {%- if section.settings.collection != blank and section.settings.collection.products_count > 0 -%}
       {%- for product in section.settings.collection.products limit: products_to_show -%}
-        {% render 'karthika-card-product', card_product: product, section_id: section.id %}
+        {%- if section.settings.preset_type == 'popular' -%}
+          {% render 'karthika-card-product-mini', card_product: product %}
+        {%- else -%}
+          {% render 'karthika-card-product', card_product: product, section_id: section.id %}
+        {%- endif -%}
       {%- endfor -%}
     {%- else -%}
       <!-- Demo products matching reference image & grocery categories -->
@@ -43,10 +47,10 @@
         {% render 'karthika-card-product', demo_title: "Fresh Green Spinach Bunch", demo_brand: "Hydroponic", demo_pack: "300gm", demo_price: "$2.20", demo_compare: "$2.90", demo_badge: "24% OFF", demo_rating: "4.4", demo_img: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=360&q=80" %}
       {%- else -%}
         <!-- Popular this week default matching reference image -->
-        {% render 'karthika-card-product', demo_title: "Broccoli Fresh", demo_brand: "Farm Fresh", demo_pack: "500gm", demo_price: "$10.00", demo_rating: "4.3", demo_img: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Avocado Fresh Hass", demo_brand: "Imported", demo_pack: "500gm", demo_price: "$10.00", demo_rating: "4.3", demo_img: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Fresh Red Vine Tomatoes", demo_brand: "Cameron Farm", demo_pack: "500gm", demo_price: "$6.00", demo_rating: "4.5", demo_img: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Sweet Crisp Bell Peppers", demo_brand: "Organic Choice", demo_pack: "500gm", demo_price: "$8.00", demo_rating: "4.4", demo_img: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product-mini', demo_title: "Broccoli Fresh", demo_img: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product-mini', demo_title: "Avocado Fresh Hass", demo_img: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product-mini', demo_title: "Fresh Red Vine Tomatoes", demo_img: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=360&q=80" %}
+        {% render 'karthika-card-product-mini', demo_title: "Sweet Crisp Bell Peppers", demo_img: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80" %}
       {%- endif -%}
     {%- endif -%}
   </div>

@@ -293,13 +293,45 @@ Fresh Veggies</h2>
           </div>
         </div>
 
+        <!-- 4. Weekend Deals -->
+        <div class="karthika-mini-promo" role="region" aria-label="Weekend Deals">
+          <div class="karthika-mini-promo-icon" aria-hidden="true">
+            <span style="font-size: 24px; font-weight: 800;">%</span>
+          </div>
+          <div class="karthika-mini-promo-copy">
+            <h2>Weekend Deals</h2>
+            <p>Up to 30% off on top brands</p>
+          </div>
+          <a href="#" class="karthika-mini-promo-button">View offers</a>
+        </div>
+
         <!-- 5. Popular this week -->
-        <div class="karthika-grid-section">
+        <div class="karthika-grid-section karthika-preview-popular-mini">
           <div class="karthika-section-head">
             <h2 class="karthika-section-head-title">Popular this week</h2>
             <a href="#" class="karthika-section-head-link">See all</a>
           </div>
-          <div class="karthika-two-col-grid">
+          <div class="karthika-popular-mini-grid">
+            <a href="#" class="karthika-popular-mini-card">
+              <span class="karthika-popular-mini-media"><img src="https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=360&q=80" alt="Broccoli Fresh"></span>
+              <span class="karthika-popular-mini-title">Broccoli Fresh</span>
+            </a>
+            <a href="#" class="karthika-popular-mini-card">
+              <span class="karthika-popular-mini-media"><img src="https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=360&q=80" alt="Avocado Fresh Hass"></span>
+              <span class="karthika-popular-mini-title">Avocado Fresh Hass</span>
+            </a>
+            <a href="#" class="karthika-popular-mini-card">
+              <span class="karthika-popular-mini-media"><img src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=360&q=80" alt="Fresh Red Vine Tomatoes"></span>
+              <span class="karthika-popular-mini-title">Fresh Red Vine Tomatoes</span>
+            </a>
+            <a href="#" class="karthika-popular-mini-card">
+              <span class="karthika-popular-mini-media"><img src="https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80" alt="Sweet Crisp Bell Peppers"></span>
+              <span class="karthika-popular-mini-title">Sweet Crisp Bell Peppers</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="karthika-grid-section karthika-preview-legacy-popular">
             <!-- Card 1 -->
             <div class="karthika-compact-card">
               <div class="karthika-compact-media">
@@ -386,7 +418,7 @@ Fresh Veggies</h2>
             <a href="#" class="karthika-section-head-link">See all</a>
           </div>
 
-          <div class="karthika-two-col-grid">
+          <div class="karthika-deals-three-grid">
             <div class="karthika-compact-card">
               <div class="karthika-compact-media" style="background: #FEE2E2;">
                 <div class="karthika-card-badge">22% OFF</div>
@@ -454,6 +486,70 @@ Fresh Veggies</h2>
                     <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)">
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #FEE2E2;">
+                <div class="karthika-card-badge">24% OFF</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=360&q=80" alt="Organic Red Onion" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">medium, 1 kg</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
+                </div>
+                <a href="#" class="karthika-compact-title">Organic Red Onion</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$2.90</span>
+                    <span class="karthika-price-original">$3.80</span>
+                    <span class="karthika-price-discount-tag">-24%</span>
+                  </div>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)"><span aria-hidden="true">-</span></button>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)"><span aria-hidden="true">+</span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #DCFCE7;">
+                <div class="karthika-card-badge">24% OFF</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=360&q=80" alt="Fresh Green Spinach Bunch" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">fresh bunch, 300gm</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
+                </div>
+                <a href="#" class="karthika-compact-title">Fresh Green Spinach</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$2.20</span>
+                    <span class="karthika-price-original">$2.90</span>
+                    <span class="karthika-price-discount-tag">-24%</span>
+                  </div>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)"><span aria-hidden="true">-</span></button>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)"><span aria-hidden="true">+</span></button>
                   </div>
                 </div>
               </div>

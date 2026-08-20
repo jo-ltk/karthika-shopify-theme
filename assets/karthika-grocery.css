@@ -608,9 +608,7 @@ body {
   text-decoration: none;
   color: var(--karthika-text-dark);
   flex-shrink: 0;
-  width: calc((100% - 30px) / 4);
-  min-width: 76px;
-  max-width: 96px;
+  width: 96px;
   scroll-snap-align: start;
   transition: transform 0.15s ease;
 }
@@ -620,12 +618,11 @@ body {
 }
 
 .karthika-category-card-img-box {
-  width: 100%;
-  aspect-ratio: 1 / 0.82;
-  height: auto;
-  border-radius: 14px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   background: #FFFFFF;
-  border: 1px solid var(--karthika-border);
+  border: 2px solid var(--karthika-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -648,8 +645,6 @@ body {
 }
 
 .karthika-category-card-name {
-  width: 100%;
-  margin-top: 7px;
   font-size: 11px;
   font-weight: 600;
   text-align: center;
@@ -735,6 +730,148 @@ body {
 .karthika-product-section--carousel .karthika-section-head {
   margin-top: 2px;
   margin-bottom: 8px;
+}
+
+.karthika-popular-mini-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 0 6px;
+  margin-bottom: 18px;
+  scroll-snap-type: x mandatory;
+}
+
+.karthika-deals-three-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 0 8px;
+  margin-bottom: 24px;
+  scroll-snap-type: x mandatory;
+}
+
+.karthika-deals-three-grid > .karthika-compact-card {
+  flex: 0 0 calc((100% - 16px) / 3);
+  min-width: 0;
+  padding: 6px;
+  border-radius: 14px;
+  height: auto;
+  align-self: flex-start;
+  scroll-snap-align: start;
+}
+
+.karthika-deals-three-grid .karthika-compact-media {
+  margin-bottom: 6px;
+  border-radius: 10px;
+}
+
+.karthika-deals-three-grid .karthika-compact-info {
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+.karthika-deals-three-grid .karthika-card-meta-row {
+  display: block;
+  margin-bottom: 3px;
+}
+
+.karthika-deals-three-grid .karthika-compact-pack,
+.karthika-deals-three-grid .karthika-stock-badge {
+  display: block;
+  overflow: hidden;
+  font-size: 8px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+}
+
+.karthika-deals-three-grid .karthika-stock-badge {
+  margin-top: 2px;
+}
+
+.karthika-deals-three-grid .karthika-compact-title {
+  min-height: 0;
+  margin-bottom: 3px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.karthika-deals-three-grid .karthika-price-container {
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+.karthika-deals-three-grid .karthika-price-main-row {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.karthika-deals-three-grid .karthika-price-current {
+  font-size: 12px;
+}
+
+.karthika-deals-three-grid .karthika-price-original,
+.karthika-deals-three-grid .karthika-price-discount-tag {
+  display: none;
+}
+
+.karthika-deals-three-grid .karthika-card-action-bar {
+  min-height: 28px;
+}
+
+.karthika-deals-three-grid .karthika-stepper-add-btn {
+  min-height: 28px;
+  padding: 4px 2px;
+  font-size: 9px;
+}
+
+.karthika-deals-three-grid .karthika-add-btn-icon {
+  font-size: 13px;
+}
+
+.karthika-popular-mini-card {
+  display: flex;
+  flex: 0 0 calc((100% - 24px) / 4);
+  max-width: 120px;
+  min-width: 72px;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--karthika-text-dark);
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+
+.karthika-popular-mini-media {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid #ECECE8;
+  border-radius: 14px;
+  background: #F4F5EF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.karthika-popular-mini-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.karthika-popular-mini-title {
+  display: -webkit-box;
+  overflow: hidden;
+  min-height: 28px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.karthika-preview-legacy-popular {
+  display: none;
 }
 
 .karthika-product-section--carousel .karthika-two-col-grid > .karthika-compact-card {
