@@ -1,9 +1,5 @@
 {
   "sections": {
-    "switcher": {
-      "type": "karthika-segmented-switcher",
-      "settings": {}
-    },
     "promo_banner": {
       "type": "karthika-promo-banner",
       "settings": {
@@ -93,7 +89,6 @@
     }
   },
   "order": [
-    "switcher",
     "promo_banner",
     "category_discovery",
     "popular_this_week",

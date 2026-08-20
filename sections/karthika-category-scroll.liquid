@@ -1,9 +1,4 @@
-{% doc %}
-  Karthika Supermarket - Shop by Category Horizontal Scroll Section
-  Compact photo cards featuring authentic grocery categories.
-{% enddoc %}
-
-<div id="karthika-categories" class="karthika-category-section">
+<div id="karthika-categories-{{ section.id }}" class="karthika-category-section">
   <div class="karthika-section-head" style="margin-top: 4px;">
     <h2 class="karthika-section-head-title">{{ section.settings.title | default: 'Shop by category' }}</h2>
     <a href="{{ routes.collections_url }}" class="karthika-section-head-link">
@@ -11,81 +6,97 @@
     </a>
   </div>
 
-  <div class="karthika-category-scroll-wrap karthika-hide-scrollbar">
-    {%- if section.blocks.size > 0 -%}
-      {%- for block in section.blocks -%}
-        {%- assign col = collections[block.settings.collection] -%}
-        <a href="{% if col != empty %}{{ col.url }}{% else %}{{ block.settings.custom_link | default: routes.all_products_collection_url }}{% endif %}" class="karthika-category-card" {{ block.shopify_attributes }}>
+  <div class="karthika-category-scroll-outer">
+    <div class="karthika-category-scroll-wrap karthika-hide-scrollbar" id="karthikaCatScroll-{{ section.id }}">
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- assign col = collections[block.settings.collection] -%}
+          <a href="{% if col != empty %}{{ col.url }}{% else %}{{ block.settings.custom_link | default: routes.all_products_collection_url }}{% endif %}" class="karthika-category-card" {{ block.shopify_attributes }}>
+            <div class="karthika-category-card-img-box">
+              {%- if block.settings.image != blank -%}
+                <img src="{{ block.settings.image | image_url: width: 140 }}" alt="{{ block.settings.title | escape }}" class="karthika-category-card-img" width="72" height="72" loading="lazy">
+              {%- else -%}
+                <img src="{{ block.settings.demo_image_url | default: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=140&q=80' }}" alt="{{ block.settings.title | escape }}" class="karthika-category-card-img" width="72" height="72" loading="lazy">
+              {%- endif -%}
+            </div>
+            <span class="karthika-category-card-name">{{ block.settings.title | default: col.title | default: 'Category' }}</span>
+          </a>
+        {%- endfor -%}
+      {%- else -%}
+        <!-- Default High-Quality Category Cards -->
+        <a href="/collections/all" class="karthika-category-card">
           <div class="karthika-category-card-img-box">
-            {%- if block.settings.image != blank -%}
-              <img src="{{ block.settings.image | image_url: width: 140 }}" alt="{{ block.settings.title | escape }}" class="karthika-category-card-img" width="64" height="64" loading="lazy">
-            {%- else -%}
-              <img src="{{ block.settings.demo_image_url | default: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=140&q=80' }}" alt="{{ block.settings.title | escape }}" class="karthika-category-card-img" width="64" height="64" loading="lazy">
-            {%- endif -%}
+            <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=140&q=80" alt="Rice & Grains" class="karthika-category-card-img" width="72" height="72" loading="lazy">
           </div>
-          <span class="karthika-category-card-name">{{ block.settings.title | default: col.title | default: 'Category' }}</span>
+          <span class="karthika-category-card-name">Rice & Grains</span>
         </a>
-      {%- endfor -%}
-    {%- else -%}
-      <!-- Default High-Quality Category Cards with Real Photography -->
-      <a href="/collections/all" class="karthika-category-card">
-        <div class="karthika-category-card-img-box">
-          <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=140&q=80" alt="Rice & Grains" class="karthika-category-card-img" width="64" height="64" loading="lazy">
-        </div>
-        <span class="karthika-category-card-name">Rice & Grains</span>
-      </a>
+        <a href="/collections/all" class="karthika-category-card">
+          <div class="karthika-category-card-img-box">
+            <img src="https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=140&q=80" alt="Dairy" class="karthika-category-card-img" width="72" height="72" loading="lazy">
+          </div>
+          <span class="karthika-category-card-name">Dairy</span>
+        </a>
+        <a href="/collections/all" class="karthika-category-card">
+          <div class="karthika-category-card-img-box">
+            <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=140&q=80" alt="Snacks" class="karthika-category-card-img" width="72" height="72" loading="lazy">
+          </div>
+          <span class="karthika-category-card-name">Snacks</span>
+        </a>
+        <a href="/collections/all" class="karthika-category-card">
+          <div class="karthika-category-card-img-box">
+            <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=140&q=80" alt="Personal Care" class="karthika-category-card-img" width="72" height="72" loading="lazy">
+          </div>
+          <span class="karthika-category-card-name">Personal Care</span>
+        </a>
+        <a href="/collections/all" class="karthika-category-card">
+          <div class="karthika-category-card-img-box">
+            <img src="https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=140&q=80" alt="Pooja Items" class="karthika-category-card-img" width="72" height="72" loading="lazy">
+          </div>
+          <span class="karthika-category-card-name">Pooja Items</span>
+        </a>
+        <a href="/collections/all" class="karthika-category-card">
+          <div class="karthika-category-card-img-box">
+            <img src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=140&q=80" alt="Frozen" class="karthika-category-card-img" width="72" height="72" loading="lazy">
+          </div>
+          <span class="karthika-category-card-name">Frozen</span>
+        </a>
+        <a href="/collections/all" class="karthika-category-card">
+          <div class="karthika-category-card-img-box">
+            <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=140&q=80" alt="Spices" class="karthika-category-card-img" width="72" height="72" loading="lazy">
+          </div>
+          <span class="karthika-category-card-name">Spices</span>
+        </a>
+        <a href="/collections/all" class="karthika-category-card">
+          <div class="karthika-category-card-img-box">
+            <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=140&q=80" alt="Beverages" class="karthika-category-card-img" width="72" height="72" loading="lazy">
+          </div>
+          <span class="karthika-category-card-name">Beverages</span>
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
 
-      <a href="/collections/all" class="karthika-category-card">
-        <div class="karthika-category-card-img-box">
-          <img src="https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=140&q=80" alt="Kerala Favourites" class="karthika-category-card-img" width="64" height="64" loading="lazy">
-        </div>
-        <span class="karthika-category-card-name">Kerala Favourites</span>
-      </a>
-
-      <a href="/collections/all" class="karthika-category-card">
-        <div class="karthika-category-card-img-box">
-          <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=140&q=80" alt="Spices & Masalas" class="karthika-category-card-img" width="64" height="64" loading="lazy">
-        </div>
-        <span class="karthika-category-card-name">Spices</span>
-      </a>
-
-      <a href="/collections/all" class="karthika-category-card">
-        <div class="karthika-category-card-img-box">
-          <img src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=140&q=80" alt="Fresh Produce" class="karthika-category-card-img" width="64" height="64" loading="lazy">
-        </div>
-        <span class="karthika-category-card-name">Fresh Produce</span>
-      </a>
-
-      <a href="/collections/all" class="karthika-category-card">
-        <div class="karthika-category-card-img-box">
-          <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=140&q=80" alt="Snacks" class="karthika-category-card-img" width="64" height="64" loading="lazy">
-        </div>
-        <span class="karthika-category-card-name">Snacks</span>
-      </a>
-
-      <a href="/collections/all" class="karthika-category-card">
-        <div class="karthika-category-card-img-box">
-          <img src="https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=140&q=80" alt="Dairy" class="karthika-category-card-img" width="64" height="64" loading="lazy">
-        </div>
-        <span class="karthika-category-card-name">Dairy</span>
-      </a>
-
-      <a href="/collections/all" class="karthika-category-card">
-        <div class="karthika-category-card-img-box">
-          <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=140&q=80" alt="Beverages" class="karthika-category-card-img" width="64" height="64" loading="lazy">
-        </div>
-        <span class="karthika-category-card-name">Beverages</span>
-      </a>
-
-      <a href="/collections/all" class="karthika-category-card">
-        <div class="karthika-category-card-img-box">
-          <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=140&q=80" alt="Pickles & Oils" class="karthika-category-card-img" width="64" height="64" loading="lazy">
-        </div>
-        <span class="karthika-category-card-name">Pickles & Oils</span>
-      </a>
-    {%- endif -%}
+  <!-- Scroll indicator dots -->
+  <div class="karthika-cat-indicator" id="karthikaCatDots-{{ section.id }}" aria-hidden="true">
+    <span class="karthika-cat-dot is-active"></span>
+    <span class="karthika-cat-dot"></span>
+    <span class="karthika-cat-dot"></span>
   </div>
 </div>
+
+<script>
+  (function() {
+    var wrap = document.getElementById('karthikaCatScroll-{{ section.id }}');
+    var dotsWrap = document.getElementById('karthikaCatDots-{{ section.id }}');
+    if (!wrap || !dotsWrap) return;
+    var dots = dotsWrap.querySelectorAll('.karthika-cat-dot');
+    wrap.addEventListener('scroll', function() {
+      var ratio = wrap.scrollLeft / (wrap.scrollWidth - wrap.clientWidth || 1);
+      var idx = ratio < 0.33 ? 0 : ratio < 0.66 ? 1 : 2;
+      dots.forEach(function(d, i) { d.classList.toggle('is-active', i === idx); });
+    }, { passive: true });
+  })();
+</script>
 
 {% schema %}
 {

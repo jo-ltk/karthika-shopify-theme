@@ -1,56 +1,88 @@
 {% doc %}
-  Renders the mobile grocery app header matching the exact reference.
-  Features:
-  - Top row: Express delivery location selector + outline search & notification icons
-  - Large compact 48px search input ("Search groceries, spices, snacks...")
+  Karthika Supermarket — Redesigned Mobile Header
+  Layout: Single horizontal row — Logo (left) | Search (center, flexible) | Cart (right)
+  Below header: compact delivery location strip
 {% enddoc %}
 
+{%- liquid
+  assign cart_count = cart.item_count
+-%}
+
 <header class="karthika-mobile-header" role="banner">
-  <!-- Top Location & Action Row -->
-  <div class="karthika-header-top-row">
-    <!-- Location Selector (Left) -->
-    <div class="karthika-header-location-box karthika-change-location-btn" role="button" tabindex="0" aria-label="Select delivery location">
-      <div class="karthika-header-location-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-          <circle cx="12" cy="10" r="3"></circle>
-        </svg>
-      </div>
-      <div class="karthika-header-location-text">
-        <div class="karthika-location-badge-row">
-          <span class="karthika-location-sub">Express delivery</span>
+  <div class="karthika-header-row">
+
+    <!-- Logo (Left) -->
+    <a href="{{ routes.root_url }}" class="karthika-header-logo" aria-label="{{ shop.name }}">
+      {%- if settings.logo != blank -%}
+        <img
+          src="{{ settings.logo | image_url: width: 160 }}"
+          alt="{{ shop.name | escape }}"
+          class="karthika-header-logo-img"
+          width="80"
+          height="36"
+          loading="eager"
+        >
+      {%- else -%}
+        <div class="karthika-header-logo-text">
+          <svg class="karthika-logo-icon" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <rect width="28" height="28" rx="8" fill="#B40000"/>
+            <path d="M7 10h4l2 5 2-7 2 5h4" stroke="#FFD200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="21" cy="19" r="2" fill="#FFD200"/>
+            <circle cx="10" cy="19" r="2" fill="#FFD200"/>
+            <path d="M6 8h16" stroke="#FFD200" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <div class="karthika-logo-wordmark">
+            <span class="karthika-logo-name">Karthika</span>
+            <span class="karthika-logo-tagline">Supermarket</span>
+          </div>
         </div>
-        <span class="karthika-location-main karthika-delivery-address">Tampines Central, Singapore 529538</span>
-      </div>
+      {%- endif -%}
+    </a>
+
+    <!-- Search Bar (Centre, flexible) -->
+    <div
+      class="karthika-header-search karthika-search-bar-trigger"
+      role="search"
+      tabindex="0"
+      aria-label="Search groceries"
+    >
+      <svg class="karthika-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <span class="karthika-search-placeholder">Search for products...</span>
     </div>
 
-    <!-- Search & Notification Icons (Right) -->
-    <div class="karthika-header-actions">
-      <!-- Search Button Icon -->
-      <button type="button" class="karthika-header-action-btn karthika-search-bar-trigger" aria-label="Search groceries">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-      </button>
+    <!-- Cart Icon (Right) -->
+    <a
+      href="{{ routes.cart_url }}"
+      class="karthika-header-cart"
+      aria-label="Cart ({{ cart_count }} items)"
+      id="karthika-cart-icon-header"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      {%- if cart_count > 0 -%}
+        <span class="karthika-cart-badge" aria-label="{{ cart_count }} items in cart">
+          {{- cart_count | at_most: 99 -}}
+        </span>
+      {%- endif -%}
+    </a>
 
-      <!-- Notification Button Icon -->
-      <a href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" class="karthika-header-action-btn" aria-label="Notifications and account">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
-        <span class="karthika-notification-dot"></span>
-      </a>
-    </div>
-  </div>
-
-  <!-- Integrated Prominent Search Bar -->
-  <div class="karthika-header-search-bar karthika-search-bar-trigger" role="button" tabindex="0" aria-label="Search groceries">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="11" cy="11" r="8"></circle>
-      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-    <span class="karthika-header-search-placeholder">Search groceries, spices, snacks...</span>
   </div>
 </header>
+
+<!-- Delivery Location Strip -->
+<div class="karthika-delivery-strip karthika-change-location-btn" role="button" tabindex="0" aria-label="Change delivery location">
+  <svg class="karthika-delivery-pin" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+  </svg>
+  <span class="karthika-delivery-label">Deliver to:</span>
+  <span class="karthika-delivery-address">Tampines Central, Singapore</span>
+  <svg class="karthika-delivery-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+    <polyline points="6 9 12 15 18 9"></polyline>
+  </svg>
+</div>
