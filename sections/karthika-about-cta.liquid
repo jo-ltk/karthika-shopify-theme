@@ -1,0 +1,76 @@
+<section class="karthika-about-cta">
+  <div class="karthika-about-cta__inner">
+    <p class="karthika-about-section-label">READY TO SHOP</p>
+    <h2>Ready to fill your basket?</h2>
+    <p>Discover fresh groceries, everyday essentials and favourites from home.</p>
+    <a class="karthika-about-cta__button" href="{{ routes.root_url }}">Start Shopping <span aria-hidden="true">→</span></a>
+  </div>
+
+  <style>
+    .karthika-about-cta {
+      background: var(--karthika-bg-body);
+      padding: 34px 0 60px;
+      color: var(--karthika-text-dark);
+    }
+
+    .karthika-about-cta__inner {
+      width: min(700px, calc(100% - 64px));
+      margin: 0 auto;
+      padding: clamp(26px, 5vw, 52px) clamp(20px, 4vw, 42px);
+      background: #fff;
+      border: 1px solid var(--karthika-border);
+      border-radius: 30px;
+      text-align: center;
+    }
+
+    .karthika-about-cta__inner h2 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.06em;
+      font-weight: 800;
+    }
+
+    .karthika-about-cta__inner p {
+      margin: 0 auto;
+      max-width: 500px;
+      color: var(--karthika-text-muted);
+      font-size: 1.04rem;
+      line-height: 1.7;
+    }
+
+    .karthika-about-cta__button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 28px;
+      margin-top: 26px;
+      border-radius: var(--karthika-radius-btn);
+      background: var(--karthika-red);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    @media screen and (max-width: 768px) {
+      .karthika-about-cta__inner {
+        width: min(100%, calc(100% - 24px));
+      }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Karthika About CTA",
+  "tag": "section",
+  "class": "karthika-about-cta-section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Karthika About CTA"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,207 @@
+<section class="karthika-about-values">
+  <div class="karthika-about-values__inner">
+    <div class="karthika-about-values__intro">
+      <p class="karthika-about-section-label">WHAT WE CARE ABOUT</p>
+      <h2>Thoughtful essentials, every day.</h2>
+    </div>
+
+    <div class="karthika-about-values__grid">
+      <article class="karthika-about-values__card">
+        <div class="karthika-about-values__icon">F</div>
+        <h3>Freshness</h3>
+        <p>Carefully selected everyday groceries.</p>
+      </article>
+
+      <article class="karthika-about-values__card">
+        <div class="karthika-about-values__icon">Q</div>
+        <h3>Quality</h3>
+        <p>Products customers can trust.</p>
+      </article>
+
+      <article class="karthika-about-values__card">
+        <div class="karthika-about-values__icon">C</div>
+        <h3>Convenience</h3>
+        <p>Simple browsing, ordering and delivery.</p>
+      </article>
+
+      <article class="karthika-about-values__card">
+        <div class="karthika-about-values__icon">L</div>
+        <h3>Local Flavour</h3>
+        <p>Kerala favourites and familiar products.</p>
+      </article>
+    </div>
+
+    <div class="karthika-about-values__feature">
+      <div class="karthika-about-values__feature-copy">
+        <p class="karthika-about-section-label">WHY KARTHIKA</p>
+        <h2>More than a grocery store.</h2>
+        <p>
+          Karthika combines the convenience of online shopping with the familiarity of a local supermarket, making everyday essentials feel easy, reliable and personal.
+        </p>
+      </div>
+
+      <div class="karthika-about-values__feature-list" aria-label="Karthika highlights">
+        <div><span>01</span><strong>Fresh groceries</strong></div>
+        <div><span>02</span><strong>Kerala favourites</strong></div>
+        <div><span>03</span><strong>Fast delivery</strong></div>
+        <div><span>04</span><strong>Easy ordering</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .karthika-about-values {
+      background: var(--karthika-bg-body);
+      padding: 28px 0 26px;
+      color: var(--karthika-text-dark);
+    }
+
+    .karthika-about-values__inner {
+      width: min(1280px, calc(100% - 64px));
+      margin: 0 auto;
+    }
+
+    .karthika-about-values__intro {
+      margin-bottom: 28px;
+    }
+
+    .karthika-about-values__intro h2 {
+      margin: 0;
+      max-width: 720px;
+      font-size: clamp(2.1rem, 3vw, 3.25rem);
+      line-height: 1.08;
+      letter-spacing: -0.06em;
+      font-weight: 800;
+    }
+
+    .karthika-about-values__grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 20px;
+      margin-bottom: 34px;
+    }
+
+    .karthika-about-values__card {
+      background: #fff;
+      border: 1px solid var(--karthika-border);
+      border-radius: 24px;
+      padding: 24px 22px;
+    }
+
+    .karthika-about-values__icon {
+      display: inline-grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--karthika-yellow-light);
+      color: var(--karthika-text-dark);
+      font-size: 0.9rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .karthika-about-values__card h3 {
+      margin: 0 0 10px;
+      font-size: 1.25rem;
+      letter-spacing: -0.04em;
+    }
+
+    .karthika-about-values__card p {
+      margin: 0;
+      color: var(--karthika-text-muted);
+      font-size: 0.96rem;
+      line-height: 1.65;
+    }
+
+    .karthika-about-values__feature {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: clamp(24px, 4vw, 42px);
+      background: #fff;
+      border: 1px solid var(--karthika-border);
+      border-radius: 30px;
+      padding: clamp(24px, 3vw, 42px);
+    }
+
+    .karthika-about-values__feature-copy h2 {
+      margin: 0 0 14px;
+      font-size: clamp(2.1rem, 3vw, 3.2rem);
+      line-height: 1.08;
+      letter-spacing: -0.06em;
+    }
+
+    .karthika-about-values__feature-copy p {
+      margin: 0;
+      color: var(--karthika-text-muted);
+      font-size: 1.05rem;
+      line-height: 1.75;
+      max-width: 560px;
+    }
+
+    .karthika-about-values__feature-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      align-content: center;
+    }
+
+    .karthika-about-values__feature-list div {
+      background: var(--karthika-bg-surface);
+      border: 1px solid var(--karthika-border);
+      border-radius: 20px;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .karthika-about-values__feature-list span {
+      color: var(--karthika-red);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .karthika-about-values__feature-list strong {
+      color: var(--karthika-text-dark);
+      font-size: 1rem;
+      line-height: 1.3;
+      letter-spacing: -0.03em;
+    }
+
+    @media screen and (max-width: 980px) {
+      .karthika-about-values__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .karthika-about-values__feature {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      .karthika-about-values__inner {
+        width: min(100%, calc(100% - 24px));
+      }
+
+      .karthika-about-values__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Karthika About Values",
+  "tag": "section",
+  "class": "karthika-about-values-section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Karthika About Values"
+    }
+  ]
+}
+{% endschema %}

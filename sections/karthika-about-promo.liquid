@@ -1,0 +1,89 @@
+<section class="karthika-about-promo">
+  <div class="karthika-about-promo__inner">
+    <div class="karthika-about-promo__content">
+      <h2>Your everyday grocery run,<br>made simpler.</h2>
+      <a class="karthika-about-promo__button" href="{{ routes.all_products_collection_url }}">Shop Karthika <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+
+  <style>
+    .karthika-about-promo {
+      padding: 26px 0 0;
+      background: var(--karthika-bg-body);
+    }
+
+    .karthika-about-promo__inner {
+      position: relative;
+      width: min(1280px, calc(100% - 64px));
+      margin: 0 auto;
+      min-height: 440px;
+      display: flex;
+      align-items: flex-end;
+      border-radius: 34px;
+      overflow: hidden;
+      border: 1px solid var(--karthika-border);
+      background: linear-gradient(135deg, rgba(0,0,0,0.18), rgba(0,0,0,0.04)),
+        url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+    }
+
+    .karthika-about-promo__content {
+      width: 100%;
+      padding: clamp(26px, 4vw, 46px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      background: linear-gradient(180deg, rgba(23,23,23,0.12) 0%, rgba(23,23,23,0.62) 100%);
+      color: #fff;
+    }
+
+    .karthika-about-promo__content h2 {
+      margin: 0;
+      max-width: 620px;
+      font-size: clamp(2.2rem, 3vw, 4rem);
+      line-height: 1.04;
+      letter-spacing: -0.06em;
+      font-weight: 800;
+    }
+
+    .karthika-about-promo__button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 26px;
+      border-radius: var(--karthika-radius-btn);
+      background: #fff;
+      color: var(--karthika-text-dark);
+      text-decoration: none;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    @media screen and (max-width: 768px) {
+      .karthika-about-promo__inner {
+        width: min(100%, calc(100% - 24px));
+        min-height: 360px;
+      }
+
+      .karthika-about-promo__content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Karthika About Promo",
+  "tag": "section",
+  "class": "karthika-about-promo-section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Karthika About Promo"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,31 @@
+{{ 'template-collection.css' | asset_url | stylesheet_tag }}
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'component-facets.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign category_handles = 'fresh-fruits,vegetables,rice-grains,spices-masala,dairy-eggs,indian-snacks,beverages,personal-care' | split: ','
+  assign category_labels = 'Fresh Fruits,Vegetables,Rice & Grains,Spices & Masala,Dairy & Eggs,Indian Snacks,Beverages,Personal Care' | split: ','
+  assign category_images = 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=420&q=80,https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=420&q=80,https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=420&q=80,https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=420&q=80,https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=420&q=80,https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=420&q=80,https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=420&q=80,https://images.unsplash.com/photo-1585421514738-01798e348b17?auto=format&fit=crop&w=420&q=80' | split: ','
+-%}
+
+<section class="karthika-category-desktop" aria-label="{{ collection.title | escape }}">
+  <div class="karthika-category-desktop__inner">
+    <nav class="karthika-category-desktop__breadcrumb" aria-label="Breadcrumb"><a href="{{ routes.root_url }}">Home</a><span aria-hidden="true">›</span><a href="{{ routes.collections_url }}">Categories</a><span aria-hidden="true">›</span><strong>{{ collection.title }}</strong></nav>
+    <div class="karthika-category-desktop__hero"><div><span class="karthika-category-desktop__eyebrow">Fresh &amp; authentic</span><h1>Shop our categories</h1><p>Everyday groceries, trusted brands, and fresh picks delivered from Karthika Supermarket.</p><a class="karthika-category-desktop__button karthika-category-desktop__button--red" href="#karthika-collection-products">Shop now <span aria-hidden="true">→</span></a></div><img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=960&q=85" alt="Fresh vegetables and groceries" width="960" height="420"></div>
+    <div class="karthika-category-desktop__section-heading"><span>Featured categories</span><a href="{{ routes.collections_url }}">View all</a></div>
+    <div class="karthika-category-desktop__categories" aria-label="Featured categories">
+      {%- for handle in category_handles -%}{%- assign category = collections[handle] -%}{%- if category != blank -%}<a class="karthika-category-desktop__category" href="{{ category.url }}"><img src="{{ category_images[forloop.index0] }}" alt="{{ category_labels[forloop.index0] }}" width="180" height="130" loading="lazy"><strong>{{ category_labels[forloop.index0] }}</strong><small>{{ category.all_products_count }} items</small></a>{%- endif -%}{%- endfor -%}
+    </div>
+
+    {%- paginate collection.products by section.settings.products_per_page -%}
+      <div class="karthika-category-desktop__toolbar" id="karthika-collection-products"><div><h2>{{ collection.title }}</h2><span>{{ collection.products_count }} products</span></div><form class="karthika-category-desktop__sort" method="get"><label for="KarthikaSortBy">Sort by</label><select id="KarthikaSortBy" name="sort_by" onchange="this.form.submit()">{%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}{%- for option in collection.sort_options -%}<option value="{{ option.value }}"{% if option.value == sort_by %} selected{% endif %}>{{ option.name }}</option>{%- endfor -%}</select></form></div>
+      <div class="karthika-category-desktop__catalog"><aside class="karthika-category-desktop__filters" aria-label="Collection filters"><div class="karthika-category-desktop__filter-title"><strong>Filters</strong><a href="{{ collection.url }}">Clear all</a></div>{%- render 'facets', results: collection, enable_filtering: true, enable_sorting: false, filter_type: 'vertical', paginate: paginate -%}</aside><div class="karthika-category-desktop__products">{%- if collection.products_count == 0 -%}<div class="karthika-category-desktop__empty"><h2>No products found.</h2><p>Try clearing your filters or browse the full supermarket.</p><a class="karthika-category-desktop__button karthika-category-desktop__button--red" href="{{ routes.all_products_collection_url }}">Continue shopping</a></div>{%- else -%}<ul class="karthika-category-desktop__grid" role="list">{%- for product in collection.products -%}<li>{%- render 'card-product', card_product: product, media_aspect_ratio: 'square', show_secondary_image: true, show_vendor: true, show_rating: true, lazy_load: true, quick_add: 'none', section_id: section.id, product_view_context: 'collection' -%}</li>{%- endfor -%}</ul>{%- if paginate.pages > 1 -%}{%- render 'pagination', paginate: paginate, anchor: '#karthika-collection-products' -%}{%- endif -%}{%- endif -%}</div></div>
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{"name":"Karthika Category Desktop","class":"karthika-category-desktop-section","settings":[{"type":"range","id":"products_per_page","min":8,"max":36,"step":4,"default":16,"label":"Products per page"}]}
+{% endschema %}

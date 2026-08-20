@@ -1,0 +1,72 @@
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+
+<section class="karthika-collections-desktop" aria-labelledby="KarthikaCollectionsHeading">
+  <div class="karthika-collections-desktop__inner">
+    <nav class="karthika-collections-desktop__breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a><span aria-hidden="true">&#8250;</span><strong>Categories</strong>
+    </nav>
+    <div class="karthika-collections-desktop__intro">
+      <div>
+        <span class="karthika-collections-desktop__eyebrow">Fresh &amp; authentic</span>
+        <h1 id="KarthikaCollectionsHeading">Shop our categories</h1>
+        <p>Everyday groceries, trusted brands, and fresh picks delivered from Karthika Supermarket.</p>
+      </div>
+      <div class="karthika-collections-desktop__intro-accent" aria-hidden="true">K</div>
+    </div>
+
+    <div class="karthika-collections-desktop__toolbar">
+      <div>
+        <span class="karthika-collections-desktop__eyebrow">Browse the aisle</span>
+        <h2>All categories</h2>
+      </div>
+      <label class="karthika-collections-desktop__search-control">
+        <span>Search categories</span>
+        <input type="search" placeholder="Try rice, spices..." aria-label="Search categories" data-karthika-collection-search>
+      </label>
+    </div>
+
+    <div class="karthika-collections-desktop__grid" data-karthika-collection-grid>
+      {%- for collection in collections -%}
+        {%- unless collection.handle == 'frontpage' -%}
+          <a class="karthika-collections-desktop__card" href="{{ collection.url }}" data-collection-name="{{ collection.title | escape }}">
+            <div class="karthika-collections-desktop__card-media">
+              {%- if collection.featured_image -%}
+                {{ collection.featured_image | image_url: width: 720 | image_tag: loading: 'lazy', widths: '360,540,720', sizes: '(min-width: 1200px) 22vw, 45vw', alt: collection.title }}
+              {%- else -%}
+                {{ 'collection-1' | placeholder_svg_tag: 'karthika-collections-desktop__placeholder' }}
+              {%- endif -%}
+            </div>
+            <div class="karthika-collections-desktop__card-copy">
+              <h3>{{ collection.title }}</h3>
+              <span>{{ collection.all_products_count }} products <span aria-hidden="true">&#8594;</span></span>
+            </div>
+          </a>
+        {%- endunless -%}
+      {%- endfor -%}
+    </div>
+    <p class="karthika-collections-desktop__empty" data-karthika-collection-empty hidden>No categories match your search.</p>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('input', function (event) {
+    if (!event.target.matches('[data-karthika-collection-search]')) return;
+    var query = event.target.value.trim().toLowerCase();
+    var cards = document.querySelectorAll('[data-karthika-collection-grid] [data-collection-name]');
+    var visible = 0;
+    cards.forEach(function (card) {
+      var matches = card.dataset.collectionName.toLowerCase().includes(query);
+      card.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    var empty = document.querySelector('[data-karthika-collection-empty]');
+    if (empty) empty.hidden = visible !== 0;
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Karthika Collections",
+  "settings": []
+}
+{% endschema %}

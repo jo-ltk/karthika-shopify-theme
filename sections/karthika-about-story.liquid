@@ -1,0 +1,198 @@
+<section class="karthika-about-story">
+  <div class="karthika-about-story__inner">
+    <div class="karthika-about-story__header">
+      <p class="karthika-about-section-label">OUR STORY</p>
+      <h2>Built around the way people actually shop.</h2>
+    </div>
+
+    <div class="karthika-about-story__grid">
+      <div class="karthika-about-story__media">
+        {% assign story_image = section.settings.image %}
+        {% if story_image != blank %}
+          {{ story_image | image_url: width: 1000 | image_tag: loading: 'lazy', widths: '500,800,1000', sizes: '(min-width: 1200px) 48vw, 100vw', alt: 'Grocery shopping and essentials at Karthika' }}
+        {% else %}
+          <img
+            src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80"
+            alt="Grocery shopping and essentials at Karthika"
+            width="1000"
+            height="760"
+            loading="lazy"
+          >
+        {% endif %}
+      </div>
+
+      <div class="karthika-about-story__content">
+        <p>
+          Karthika was designed to make grocery shopping simple, convenient and familiar, especially for customers who want everyday essentials and Kerala favourites without the usual hassle.
+        </p>
+
+        <div class="karthika-about-story__tags" aria-label="Key values">
+          <span>Fresh products</span>
+          <span>Everyday essentials</span>
+          <span>Kerala favourites</span>
+          <span>Simple delivery</span>
+        </div>
+
+        <div class="karthika-about-story__stats">
+          <div class="karthika-about-story__stat">
+            <strong>Daily</strong>
+            <span>Fresh essentials</span>
+          </div>
+          <div class="karthika-about-story__stat">
+            <strong>Local</strong>
+            <span>Kerala favourites</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .karthika-about-story {
+      background: var(--karthika-bg-body);
+      padding: 32px 0 16px;
+      color: var(--karthika-text-dark);
+    }
+
+    .karthika-about-story__inner {
+      width: min(1280px, calc(100% - 64px));
+      margin: 0 auto;
+    }
+
+    .karthika-about-story__header {
+      margin-bottom: 28px;
+    }
+
+    .karthika-about-section-label {
+      margin: 0 0 12px;
+      color: var(--karthika-red);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .karthika-about-story__header h2 {
+      margin: 0;
+      max-width: 650px;
+      font-size: clamp(2.2rem, 3vw, 3.5rem);
+      line-height: 1.08;
+      letter-spacing: -0.06em;
+      font-weight: 800;
+    }
+
+    .karthika-about-story__grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: clamp(24px, 4vw, 42px);
+      align-items: center;
+    }
+
+    .karthika-about-story__media {
+      background: var(--karthika-bg-card-img);
+      border: 1px solid var(--karthika-border);
+      border-radius: 32px;
+      overflow: hidden;
+      min-height: 480px;
+    }
+
+    .karthika-about-story__media img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .karthika-about-story__content {
+      background: #fff;
+      border: 1px solid var(--karthika-border);
+      border-radius: 28px;
+      padding: clamp(22px, 3vw, 36px);
+    }
+
+    .karthika-about-story__content p {
+      margin: 0;
+      color: var(--karthika-text-muted);
+      font-size: 1.04rem;
+      line-height: 1.75;
+    }
+
+    .karthika-about-story__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .karthika-about-story__tags span {
+      background: var(--karthika-red-subtle);
+      color: var(--karthika-red);
+      border: 1px solid #f4d7d7;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .karthika-about-story__stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .karthika-about-story__stat {
+      background: var(--karthika-bg-surface);
+      border: 1px solid var(--karthika-border);
+      border-radius: 20px;
+      padding: 20px 18px;
+    }
+
+    .karthika-about-story__stat strong {
+      display: block;
+      color: var(--karthika-text-dark);
+      font-size: 1.4rem;
+      letter-spacing: -0.04em;
+    }
+
+    .karthika-about-story__stat span {
+      color: var(--karthika-text-muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    @media screen and (max-width: 768px) {
+      .karthika-about-story__inner {
+        width: min(100%, calc(100% - 24px));
+      }
+
+      .karthika-about-story__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .karthika-about-story__media {
+        min-height: 280px;
+      }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Karthika About Story",
+  "tag": "section",
+  "class": "karthika-about-story-section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Story image"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Karthika About Story"
+    }
+  ]
+}
+{% endschema %}

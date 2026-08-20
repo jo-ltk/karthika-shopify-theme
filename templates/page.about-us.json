@@ -1,0 +1,35 @@
+{
+  "sections": {
+    "hero": {
+      "type": "karthika-about-hero",
+      "settings": {
+        "image": ""
+      }
+    },
+    "story": {
+      "type": "karthika-about-story",
+      "settings": {
+        "image": ""
+      }
+    },
+    "values": {
+      "type": "karthika-about-values",
+      "settings": {}
+    },
+    "promo": {
+      "type": "karthika-about-promo",
+      "settings": {}
+    },
+    "cta": {
+      "type": "karthika-about-cta",
+      "settings": {}
+    }
+  },
+  "order": [
+    "hero",
+    "story",
+    "values",
+    "promo",
+    "cta"
+  ]
+}

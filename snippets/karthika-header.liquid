@@ -6,7 +6,91 @@
 
 {%- liquid
   assign cart_count = cart.item_count
+  assign home_url = routes.root_url
+  assign categories_url = routes.collections_url
+  assign search_url = routes.search_url
+  assign offers_url = routes.all_products_collection_url
+  assign about_url = routes.root_url
+
+  if pages['offers'] != blank
+    assign offers_url = pages['offers'].url
+  elsif collections['offers'] != blank
+    assign offers_url = collections['offers'].url
+  endif
+
+  if pages['about-us'] != blank
+    assign about_url = pages['about-us'].url
+  elsif pages['about_us'] != blank
+    assign about_url = pages['about_us'].url
+  endif
+
+  assign is_home = false
+  assign is_categories = false
+  assign is_search = false
+  assign is_offers = false
+  assign is_about = false
+
+  if template.name == 'index' or request.path == '/' or request.path == home_url
+    assign is_home = true
+  endif
+
+  if template.name == 'collection' or template.name == 'list-collections' or request.path contains '/collections'
+    assign is_categories = true
+  endif
+
+  if template.name == 'search' or request.path == search_url
+    assign is_search = true
+  endif
+
+  if template.name == 'collection' and collection.handle == 'offers'
+    assign is_offers = true
+  elsif request.path == offers_url or request.path contains '/collections/all'
+    assign is_offers = true
+  endif
+
+  if template.name == 'page' and page.handle == 'about-us'
+    assign is_about = true
+  elsif request.path contains '/pages/about-us' or request.path contains '/pages/about_us'
+    assign is_about = true
+  endif
 -%}
+
+<div class="karthika-desktop-header" role="banner">
+  <div class="karthika-desktop-header__utility">
+    <div class="karthika-desktop-header__utility-inner">
+      <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#128666;</span> Free delivery on orders above &#8377;499</span>
+      <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#9906;</span> Delivering to <strong>682024, Kochi</strong> <span aria-hidden="true">&#8964;</span></span>
+      <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#128241;</span> Download App</span>
+      <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#9716;</span> Track Order</span>
+    </div>
+  </div>
+  <div class="karthika-desktop-header__main">
+    <a href="{{ home_url }}" class="karthika-desktop-header__brand" aria-label="{{ shop.name }}">
+      {%- if settings.logo != blank -%}
+        <img src="{{ settings.logo | image_url: width: 240 }}" alt="{{ shop.name | escape }}" width="120" height="42" loading="eager">
+      {%- else -%}
+        KARTHIKA<span>.</span>
+      {%- endif -%}
+    </a>
+    <nav class="karthika-desktop-header__nav" aria-label="Main navigation">
+      <a href="{{ home_url }}"{% if is_home %} class="is-active" aria-current="page"{% endif %}>Home</a>
+      <a href="{{ categories_url }}"{% if is_categories %} class="is-active" aria-current="page"{% endif %}>Categories</a>
+      <a href="{{ search_url }}"{% if is_search %} class="is-active" aria-current="page"{% endif %}>Search</a>
+      <a href="{{ offers_url }}"{% if is_offers %} class="is-active" aria-current="page"{% endif %}>Offers</a>
+      <a href="{{ about_url }}"{% if is_about %} class="is-active" aria-current="page"{% endif %}>About Us</a>
+    </nav>
+    <div class="karthika-desktop-header__actions">
+      <a class="karthika-desktop-header__search" href="{{ search_url }}" aria-label="Search products">
+        <span>Search for products...</span><span aria-hidden="true">&#9906;</span>
+      </a>
+      <a class="karthika-desktop-header__order" href="{{ routes.all_products_collection_url }}">Order Now</a>
+      <a class="karthika-desktop-header__cart" href="{{ routes.cart_url }}" aria-label="Cart ({{ cart_count }} items)">
+        <span aria-hidden="true">&#128722;</span><b>{{ cart_count }}</b>
+      </a>
+      <a class="karthika-desktop-header__account" href="{{ routes.account_url }}"><span aria-hidden="true">&#128100;</span> Account</a>
+    </div>
+  </div>
+</div>
 
 <header class="karthika-mobile-header" role="banner">
   <div class="karthika-header-row">
