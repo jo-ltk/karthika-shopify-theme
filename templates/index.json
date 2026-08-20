@@ -2,10 +2,21 @@
   "sections": {
     "promo_banner": {
       "type": "karthika-promo-banner",
+      "blocks": {
+        "promo_1": {
+          "type": "slide",
+          "settings": {
+            "badge": "20% OFF FIRST ORDER",
+            "title": "Fresh Kerala favourites",
+            "subtitle": "Delivered across Singapore",
+            "button_text": "Shop now"
+          }
+        }
+      },
+      "block_order": ["promo_1"],
       "settings": {
-        "badge": "20% OFF FIRST ORDER",
-        "title": "Fresh Kerala favourites",
-        "subtitle": "Delivered across Singapore"
+        "autoplay": true,
+        "autoplay_speed": 4
       }
     },
     "category_discovery": {
