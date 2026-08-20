@@ -22,6 +22,8 @@
     async init() {
       await this.refreshCartState();
       this.bindEvents();
+      this.bindCartSummary();
+      this.bindScrollNavigation();
       this.syncAllSteppers();
     },
 
@@ -128,7 +130,73 @@
       } else {
         const cartBtn = document.querySelector('#cart-icon-bubble') || document.querySelector('.karthika-cart-trigger');
         if (cartBtn) cartBtn.click();
+        else window.location.href = window.routes?.cart_url || '/cart';
       }
+    },
+
+    bindCartSummary() {
+      const summary = document.querySelector('.karthika-floating-cart');
+      if (!summary) return;
+
+      document.addEventListener('karthika:cart-updated', (event) => {
+        this.renderCartSummary(event.detail, summary);
+      });
+
+      if (window.PUB_SUB_EVENTS && typeof subscribe === 'function') {
+        subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
+          const cart = event?.cartData;
+          if (cart?.items) this.renderCartSummary(cart, summary);
+          else this.refreshCartState();
+        });
+      }
+
+      summary.addEventListener('click', () => this.openCartDrawer());
+    },
+
+    renderCartSummary(cart, summary) {
+      const count = cart?.item_count || 0;
+      const countEl = summary.querySelector('.karthika-floating-cart-count');
+      const thumbnailsEl = summary.querySelector('.karthika-floating-cart-thumbnails');
+
+      if (countEl) countEl.textContent = `${count} ITEMS`;
+      if (thumbnailsEl) {
+        const images = (cart?.items || []).slice(0, 3).filter((item) => item.image).map((item) => {
+          const image = document.createElement('img');
+          image.src = item.image;
+          image.alt = '';
+          image.width = 36;
+          image.height = 36;
+          image.loading = 'lazy';
+          return image;
+        });
+        thumbnailsEl.replaceChildren(...images);
+      }
+
+      summary.classList.toggle('is-empty', count === 0);
+      summary.setAttribute('aria-hidden', count === 0 ? 'true' : 'false');
+      summary.tabIndex = count === 0 ? -1 : 0;
+      summary.setAttribute('aria-label', `View cart (${count} items)`);
+      if (count > 0) {
+        summary.classList.remove('is-updated');
+        requestAnimationFrame(() => summary.classList.add('is-updated'));
+      }
+    },
+
+    bindScrollNavigation() {
+      const nav = document.querySelector('.karthika-bottom-nav');
+      const summary = document.querySelector('.karthika-floating-cart');
+      if (!nav) return;
+
+      let lastScrollY = window.scrollY;
+      window.addEventListener('scroll', () => {
+        const currentScrollY = window.scrollY;
+        const delta = currentScrollY - lastScrollY;
+        if (Math.abs(delta) < 4) return;
+        const isHidden = delta > 0 && currentScrollY > 24;
+        nav.classList.toggle('is-hidden', isHidden);
+        summary?.classList.toggle('is-nav-hidden', isHidden);
+        lastScrollY = currentScrollY;
+      }, { passive: true });
     },
 
     bindEvents() {

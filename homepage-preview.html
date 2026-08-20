@@ -635,6 +635,36 @@ Fresh Veggies</h2>
                 </div>
               </div>
             </div>
+
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #FFF7ED;">
+                <div class="karthika-card-badge">Staple</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=360&q=80" alt="Palakkadan Matta Rice" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">red rice, 5kg</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
+                </div>
+                <a href="#" class="karthika-compact-title">Palakkadan Matta Rice</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$12.00</span>
+                  </div>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)"><span aria-hidden="true">-</span></button>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)"><span aria-hidden="true">+</span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -780,10 +810,53 @@ Fresh Veggies</h2>
                 </div>
               </div>
             </div>
+
+            <div class="karthika-compact-card">
+              <div class="karthika-compact-media" style="background: #FFF7ED;">
+                <div class="karthika-card-badge karthika-card-badge--new">NEW</div>
+                <a href="#"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=360&q=80" alt="Kerala Chemba Puttu Podi" class="karthika-compact-img"></a>
+              </div>
+              <div class="karthika-compact-info">
+                <div class="karthika-card-meta-row">
+                  <span class="karthika-compact-pack">red rice flour, 1kg</span>
+                  <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
+                </div>
+                <a href="#" class="karthika-compact-title">Kerala Chemba Puttu Podi</a>
+                <div class="karthika-price-container">
+                  <div class="karthika-price-main-row">
+                    <span class="karthika-price-current">$3.90</span>
+                  </div>
+                </div>
+                <div class="karthika-card-action-bar karthika-stepper">
+                  <button type="button" class="karthika-stepper-add-btn" aria-label="Add to cart" onclick="toggleStepper(this)">
+                    <span class="karthika-add-btn-icon">+</span>
+                    <span class="karthika-add-btn-text">ADD</span>
+                  </button>
+                  <div class="karthika-compact-stepper">
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, -1)"><span aria-hidden="true">-</span></button>
+                    <span class="karthika-compact-stepper-val">1</span>
+                    <button type="button" class="karthika-stepper-act-btn" onclick="changeQty(this, 1)"><span aria-hidden="true">+</span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
       </div>
+
+      <button type="button" class="karthika-floating-cart" aria-label="View cart (2 items)">
+        <span class="karthika-floating-cart-copy">
+          <strong class="karthika-floating-cart-label">CART</strong>
+          <span class="karthika-floating-cart-count" id="previewFloatingCartCount">2 ITEMS</span>
+        </span>
+        <span class="karthika-floating-cart-thumbnails" aria-hidden="true">
+          <img src="https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=96&q=80" alt="" width="54" height="54">
+          <img src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=96&q=80" alt="" width="54" height="54">
+        </span>
+        <span class="karthika-floating-cart-arrow" aria-hidden="true">&#8250;</span>
+        <span class="karthika-floating-cart-progress" aria-hidden="true"><span></span></span>
+      </button>
 
       <!-- 10. Polished 5-Tab Mobile Bottom Navigation -->
       <nav class="karthika-bottom-nav" aria-label="Mobile Navigation">
@@ -853,9 +926,22 @@ Fresh Veggies</h2>
     function updateCartCount(delta) {
       cartTotal = Math.max(0, cartTotal + delta);
       const badge = document.getElementById('previewCartBadge');
+      const floatingCart = document.querySelector('.karthika-floating-cart');
+      const floatingCartCount = document.getElementById('previewFloatingCartCount');
       if (badge) {
         badge.textContent = cartTotal;
         badge.style.display = cartTotal > 0 ? 'flex' : 'none';
+      }
+      if (floatingCart && floatingCartCount) {
+        floatingCartCount.textContent = cartTotal + ' ITEMS';
+        floatingCart.classList.toggle('is-empty', cartTotal === 0);
+        floatingCart.setAttribute('aria-hidden', cartTotal === 0 ? 'true' : 'false');
+        floatingCart.setAttribute('aria-label', 'View cart (' + cartTotal + ' items)');
+        floatingCart.tabIndex = cartTotal === 0 ? -1 : 0;
+        if (cartTotal > 0) {
+          floatingCart.classList.remove('is-updated');
+          requestAnimationFrame(() => floatingCart.classList.add('is-updated'));
+        }
       }
     }
 

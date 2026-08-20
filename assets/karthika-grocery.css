@@ -713,7 +713,7 @@ body {
    ========================================================================== */
 .karthika-two-col-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-bottom: 24px;
 }
@@ -755,8 +755,8 @@ body {
   min-width: 0;
   padding: 6px;
   border-radius: 14px;
-  height: auto;
-  align-self: flex-start;
+  height: 254px;
+  align-self: stretch;
   scroll-snap-align: start;
 }
 
@@ -789,7 +789,7 @@ body {
 }
 
 .karthika-deals-three-grid .karthika-compact-title {
-  min-height: 0;
+  min-height: 24px;
   margin-bottom: 3px;
   font-size: 10px;
   line-height: 1.2;
@@ -1627,6 +1627,158 @@ body {
   transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+.karthika-bottom-nav.is-hidden {
+  transform: translateY(calc(100% + 24px));
+}
+
+.karthika-floating-cart {
+  position: fixed;
+  z-index: 1001;
+  left: 50%;
+  bottom: calc(14px + var(--karthika-bottom-nav-height) + 22px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  width: min(360px, calc(100vw - 32px));
+  min-height: 112px;
+  padding: 16px 16px 21px 22px;
+  gap: 14px;
+  border: 0;
+  border-radius: 26px;
+  background: var(--karthika-red);
+  color: #FFFFFF;
+  box-shadow: 0 12px 28px rgba(180, 0, 0, 0.3);
+  transform: translate(-50%, 0);
+  transition: bottom 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+  cursor: pointer;
+  text-align: left;
+}
+
+.karthika-floating-cart.is-empty {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 18px) scale(0.96);
+}
+
+.karthika-floating-cart.is-nav-hidden {
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+}
+
+.karthika-floating-cart.is-updated {
+  animation: karthika-floating-cart-pop 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.karthika-floating-cart-copy {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.05;
+}
+
+.karthika-floating-cart-label {
+  font-size: 27px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+}
+
+.karthika-floating-cart-count {
+  margin-top: 7px;
+  color: var(--karthika-yellow);
+  font-size: 20px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.karthika-floating-cart-thumbnails {
+  display: flex;
+  align-items: center;
+  min-width: 36px;
+}
+
+.karthika-floating-cart-thumbnails img {
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  margin-left: -14px;
+  border: 3px solid #FFFFFF;
+  border-radius: 14px;
+  background: #FFFFFF;
+}
+
+.karthika-floating-cart-thumbnails img:first-child {
+  margin-left: 0;
+}
+
+.karthika-floating-cart-arrow {
+  color: var(--karthika-yellow);
+  font-size: 52px;
+  font-weight: 300;
+  line-height: 0.6;
+  margin-top: -4px;
+}
+
+.karthika-floating-cart-progress {
+  position: absolute;
+  right: 19px;
+  bottom: 10px;
+  left: 19px;
+  height: 7px;
+  overflow: hidden;
+  border-radius: var(--karthika-radius-pill);
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.karthika-floating-cart-progress span {
+  display: block;
+  width: 86%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--karthika-yellow);
+}
+
+@keyframes karthika-floating-cart-pop {
+  0% { transform: translate(-50%, 12px) scale(0.94); }
+  65% { transform: translate(-50%, -3px) scale(1.02); }
+  100% { transform: translate(-50%, 0) scale(1); }
+}
+
+@media screen and (max-width: 360px) {
+  .karthika-floating-cart {
+    gap: 9px;
+    padding-left: 17px;
+  }
+
+  .karthika-floating-cart-label {
+    font-size: 23px;
+  }
+
+  .karthika-floating-cart-count {
+    font-size: 17px;
+  }
+
+  .karthika-floating-cart-thumbnails img {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .karthika-floating-cart {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .karthika-bottom-nav,
+  .karthika-floating-cart {
+    transition: none;
+  }
+
+  .karthika-floating-cart.is-updated {
+    animation: none;
+  }
+}
+
 @media screen and (min-width: 990px) {
   .karthika-bottom-nav {
     display: none !important;
@@ -1705,6 +1857,10 @@ body {
 /* ==========================================================================
    10. MODALS (Location Selector & Search Overlay)
    ========================================================================== */
+.karthika-delivery-modal {
+  display: none !important;
+}
+
 .karthika-modal-backdrop {
   display: none;
   position: fixed;

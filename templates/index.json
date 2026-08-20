@@ -44,7 +44,7 @@
         "link_text": "See all",
         "collection": "all",
         "preset_type": "popular",
-        "products_to_show": 4,
+        "products_to_show": 6,
         "carousel": false
       }
     },
@@ -64,7 +64,7 @@
         "link_text": "See all",
         "collection": "all",
         "preset_type": "deals",
-        "products_to_show": 4
+        "products_to_show": 6
       }
     },
     "kerala_favourites": {
@@ -75,7 +75,7 @@
         "link_text": "See all",
         "collection": "all",
         "preset_type": "kerala",
-        "products_to_show": 4
+        "products_to_show": 6
       }
     },
     "smart_bundles": {
@@ -104,7 +104,7 @@
         "link_text": "See all",
         "collection": "all",
         "preset_type": "new_arrivals",
-        "products_to_show": 4
+        "products_to_show": 6
       }
     }
   },
