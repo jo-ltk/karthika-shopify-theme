@@ -1,6 +1,6 @@
 /**
  * Karthika Supermarket - Client Grocery Engine
- * Handles Cart State, Quantity Steppers, Predictive Search, Location Selector & AI Meal Assistant
+ * Handles cart state and product interactions against the Shopify Cart API.
  */
 
 (function () {
@@ -8,15 +8,22 @@
 
   window.Karthika = window.Karthika || {};
 
-  /* --------------------------------------------------------------------------
-     1. Cart State & Quantity Steppers
-     -------------------------------------------------------------------------- */
   const CartManager = {
     state: {
       item_count: 0,
       total_price: 0,
       items: [],
       variantMap: {}
+    },
+
+    getRoot() {
+      return window.Shopify?.routes?.root || window.routes?.root || '/';
+    },
+
+    getCartEndpoint(action) {
+      const root = this.getRoot();
+      const base = root.endsWith('/') ? root : `${root}/`;
+      return `${base}${action}.js`;
     },
 
     async init() {
@@ -29,16 +36,16 @@
 
     async refreshCartState() {
       try {
-        const response = await fetch(`${window.routes?.cart_url || '/cart'}.js`);
+        const response = await fetch(this.getCartEndpoint('cart'));
         if (!response.ok) return;
         const cart = await response.json();
-        this.state.item_count = cart.item_count;
-        this.state.total_price = cart.total_price;
-        this.state.items = cart.items;
-        
+        this.state.item_count = cart.item_count || 0;
+        this.state.total_price = cart.total_price || 0;
+        this.state.items = cart.items || [];
+
         this.state.variantMap = {};
-        cart.items.forEach(item => {
-          this.state.variantMap[item.variant_id] = item.quantity;
+        this.state.items.forEach((item) => {
+          this.state.variantMap[item.variant_id] = item.quantity || 0;
         });
 
         this.updateBadges();
@@ -51,8 +58,8 @@
 
     updateBadges() {
       const count = this.state.item_count || 0;
-      document.querySelectorAll('.karthika-nav-badge, .karthika-cart-badge, .cart-count-bubble span').forEach(badge => {
-        badge.textContent = count;
+      document.querySelectorAll('.karthika-nav-badge, .karthika-cart-badge, .cart-count-bubble span').forEach((badge) => {
+        badge.textContent = String(count);
         if (count > 0) {
           badge.style.display = 'flex';
           badge.classList.remove('hidden');
@@ -63,16 +70,16 @@
     },
 
     syncAllSteppers() {
-      document.querySelectorAll('.karthika-stepper').forEach(stepper => {
+      document.querySelectorAll('.karthika-stepper').forEach((stepper) => {
         const variantId = parseInt(stepper.dataset.variantId, 10);
         if (!variantId) return;
 
         const qty = this.state.variantMap[variantId] || 0;
         const qtyDisplay = stepper.querySelector('.karthika-stepper-qty');
-        
+
         if (qty > 0) {
           stepper.classList.add('is-added');
-          if (qtyDisplay) qtyDisplay.textContent = qty;
+          if (qtyDisplay) qtyDisplay.textContent = String(qty);
         } else {
           stepper.classList.remove('is-added');
           if (qtyDisplay) qtyDisplay.textContent = '1';
@@ -83,17 +90,17 @@
     async add(variantId, quantity = 1, openDrawer = false) {
       try {
         const formData = new FormData();
-        formData.append('id', variantId);
-        formData.append('quantity', quantity);
+        formData.append('id', Number(variantId));
+        formData.append('quantity', Number(quantity));
 
-        const response = await fetch(`${window.routes?.cart_add_url || '/cart/add'}.js`, {
+        const response = await fetch(this.getCartEndpoint('cart/add'), {
           method: 'POST',
           body: formData
         });
 
         if (!response.ok) {
-          const errData = await response.json();
-          alert(errData.description || 'Could not add item to cart.');
+          const errData = await response.json().catch(() => ({}));
+          alert(errData?.description || 'Could not add item to cart.');
           return;
         }
 
@@ -104,20 +111,26 @@
         }
       } catch (err) {
         console.error('[Karthika Cart] Add error:', err);
+        alert('Unable to add this product to the cart right now. Please try again.');
       }
     },
 
     async change(variantId, quantity) {
       try {
-        const response = await fetch(`${window.routes?.cart_change_url || '/cart/change'}.js`, {
+        const nextQty = Number(quantity);
+        const response = await fetch(this.getCartEndpoint('cart/change'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: String(variantId), quantity: quantity })
+          body: JSON.stringify({ id: String(variantId), quantity: nextQty })
         });
 
-        if (response.ok) {
-          await this.refreshCartState();
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          console.warn('[Karthika Cart] Change rejected:', errData);
+          return;
         }
+
+        await this.refreshCartState();
       } catch (err) {
         console.error('[Karthika Cart] Change error:', err);
       }
@@ -205,70 +218,54 @@
     },
 
     bindEvents() {
-      // Stepper Add Button Click
       document.addEventListener('click', async (e) => {
         const addBtn = e.target.closest('.karthika-stepper-add-btn');
         if (addBtn) {
           const stepper = addBtn.closest('.karthika-stepper');
           const variantId = stepper?.dataset?.variantId;
-          
           if (variantId) {
             await this.add(variantId, 1, false);
-          } else {
-            // Demo fallback
-            stepper.classList.add('is-added');
-            this.state.item_count = (this.state.item_count || 0) + 1;
-            this.updateBadges();
           }
           return;
         }
 
-        // Stepper Minus Click
         const minusBtn = e.target.closest('.karthika-stepper-btn--minus');
         if (minusBtn) {
           const stepper = minusBtn.closest('.karthika-stepper');
           const variantId = stepper?.dataset?.variantId;
           const qtyEl = stepper.querySelector('.karthika-stepper-qty');
-          let currentQty = parseInt(qtyEl?.textContent || '1', 10);
-          
+          const currentQty = parseInt(qtyEl?.textContent || '1', 10);
+
           if (variantId) {
-            await this.change(variantId, Math.max(0, currentQty - 1));
-          } else {
-            // Demo fallback
-            currentQty = currentQty - 1;
-            if (currentQty <= 0) {
-              stepper.classList.remove('is-added');
-              if (qtyEl) qtyEl.textContent = '1';
+            const nextQty = Math.max(0, currentQty - 1);
+            if (nextQty === 0) {
+              await this.change(variantId, 0);
             } else {
-              if (qtyEl) qtyEl.textContent = currentQty;
+              await this.change(variantId, nextQty);
             }
-            this.state.item_count = Math.max(0, (this.state.item_count || 1) - 1);
-            this.updateBadges();
           }
           return;
         }
 
-        // Stepper Plus Click
         const plusBtn = e.target.closest('.karthika-stepper-btn--plus');
         if (plusBtn) {
           const stepper = plusBtn.closest('.karthika-stepper');
           const variantId = stepper?.dataset?.variantId;
           const qtyEl = stepper.querySelector('.karthika-stepper-qty');
-          let currentQty = parseInt(qtyEl?.textContent || '1', 10);
-          
+          const currentQty = parseInt(qtyEl?.textContent || '1', 10);
+
           if (variantId) {
-            await this.change(variantId, currentQty + 1);
-          } else {
-            // Demo fallback
-            currentQty = currentQty + 1;
-            if (qtyEl) qtyEl.textContent = currentQty;
-            this.state.item_count = (this.state.item_count || 0) + 1;
-            this.updateBadges();
+            const nextQty = currentQty + 1;
+            const cartQty = this.state.variantMap[variantId] || 0;
+            if (cartQty > 0) {
+              await this.change(variantId, nextQty);
+            } else {
+              await this.add(variantId, nextQty, false);
+            }
           }
           return;
         }
 
-        // Cart Trigger
         const cartTrigger = e.target.closest('.karthika-cart-trigger');
         if (cartTrigger) {
           e.preventDefault();

@@ -1,13 +1,6 @@
-{% doc %}
+{%- comment -%}
   Renders a header drawer menu for mobile and desktop.
-
-  @param {boolean} [show_country_selector] - Whether to render the country selector in the drawer.
-  @param {boolean} [show_language_selector] - Whether to render the language selector in the drawer.
-  @param {boolean} [show_social_links] - Whether to render social links list in the drawer.
-
-  @example
-  {% render 'header-drawer', show_language_selector: true %}
-{% enddoc %}
+{%- endcomment -%}
 
 <header-drawer data-breakpoint="{% if section.settings.menu_type_desktop == 'drawer' %}desktop{% else %}tablet{% endif %}">
   <details id="Details-menu-drawer-container" class="menu-drawer-container">

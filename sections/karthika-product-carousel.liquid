@@ -1,7 +1,7 @@
-{% doc %}
+{%- comment -%}
   Karthika Supermarket - Grocery Product Grid Section
   Renders responsive 2-column mobile / 4-5 column desktop product grid.
-{% enddoc %}
+{%- endcomment -%}
 
 <div class="karthika-grid-section{% if section.settings.carousel %} karthika-product-section--carousel{% endif %}">
   <div class="karthika-section-head">
@@ -29,37 +29,10 @@
         {%- endif -%}
       {%- endfor -%}
     {%- else -%}
-      <!-- Demo products matching reference image & grocery categories -->
-      {%- if section.settings.preset_type == 'kerala' -%}
-        {% render 'karthika-card-product', demo_title: "Kerala Banana Chips", demo_brand: "Karthika Special", demo_pack: "250gm", demo_price: "$4.50", demo_rating: "4.8", demo_img: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Pure Coconut Oil (Cold Pressed)", demo_brand: "Kera Fresh", demo_pack: "1 Litre", demo_price: "$8.20", demo_rating: "4.9", demo_img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Palakkadan Matta Rice", demo_brand: "Double Horse", demo_pack: "5kg", demo_price: "$12.00", demo_rating: "4.7", demo_img: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Kerala Roasted Puttu Podi", demo_brand: "Brahmins", demo_pack: "1kg", demo_price: "$3.80", demo_rating: "4.8", demo_img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Kerala Fish Curry Masala", demo_brand: "Eastern", demo_pack: "100g", demo_price: "$2.60", demo_rating: "4.7", demo_img: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Nendran Banana", demo_brand: "Fresh Farm", demo_pack: "1kg", demo_price: "$3.20", demo_rating: "4.6", demo_img: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=360&q=80" %}
-      {%- elsif section.settings.preset_type == 'new_arrivals' -%}
-        {% render 'karthika-card-product', demo_title: "Kerala Jackfruit Chips (Hot & Crispy)", demo_brand: "Karthika Special", demo_pack: "200gm", demo_price: "$5.20", demo_rating: "4.9", demo_badge: "NEW", demo_img: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Fresh Tender Green Jackfruit Curry Cut", demo_brand: "Fresh Farm", demo_pack: "500gm", demo_price: "$4.80", demo_rating: "4.7", demo_badge: "NEW", demo_img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Kerala Chemba Puttu Podi (Red Rice)", demo_brand: "Brahmins", demo_pack: "1kg", demo_price: "$3.90", demo_rating: "4.8", demo_badge: "NEW", demo_img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Nadan Mango Pickle (Spicy & Sour)", demo_brand: "Grandma's", demo_pack: "400gm", demo_price: "$3.40", demo_rating: "4.8", demo_badge: "NEW", demo_img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Fresh Curry Leaves", demo_brand: "Local Farm", demo_pack: "100g", demo_price: "$1.80", demo_rating: "4.6", demo_badge: "NEW", demo_img: "https://images.unsplash.com/photo-1607305387299-a3d9611cd469?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Tender Coconut Water", demo_brand: "Fresh Farm", demo_pack: "1 litre", demo_price: "$4.20", demo_rating: "4.7", demo_badge: "NEW", demo_img: "https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=360&q=80" %}
-      {%- elsif section.settings.preset_type == 'deals' -%}
-        {% render 'karthika-card-product', demo_title: "Fresh Farm Red Tomato", demo_brand: "Local Farm", demo_pack: "1kg", demo_price: "$3.50", demo_compare: "$4.50", demo_badge: "22% OFF", demo_rating: "4.6", demo_img: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Mixed Sweet Bell Peppers", demo_brand: "Fresh Farm", demo_pack: "3 pcs", demo_price: "$4.80", demo_compare: "$6.00", demo_badge: "20% OFF", demo_rating: "4.5", demo_img: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Organic Red Onion", demo_brand: "Fresh Harvest", demo_pack: "1kg", demo_price: "$2.90", demo_compare: "$3.80", demo_badge: "24% OFF", demo_rating: "4.7", demo_img: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Fresh Green Spinach Bunch", demo_brand: "Hydroponic", demo_pack: "300gm", demo_price: "$2.20", demo_compare: "$2.90", demo_badge: "24% OFF", demo_rating: "4.4", demo_img: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Fresh Garden Cucumber", demo_brand: "Local Farm", demo_pack: "500g", demo_price: "$1.90", demo_compare: "$2.50", demo_badge: "20% OFF", demo_rating: "4.5", demo_img: "https://images.unsplash.com/photo-1604977042946-1eecc30f269e?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product', demo_title: "Farm Fresh Carrots", demo_brand: "Fresh Harvest", demo_pack: "500g", demo_price: "$2.40", demo_compare: "$3.00", demo_badge: "20% OFF", demo_rating: "4.6", demo_img: "https://images.unsplash.com/photo-1445282768818-728615cc910a?auto=format&fit=crop&w=360&q=80" %}
-      {%- else -%}
-        <!-- Popular this week default matching reference image -->
-        {% render 'karthika-card-product-mini', demo_title: "Broccoli Fresh", demo_img: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product-mini', demo_title: "Avocado Fresh Hass", demo_img: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product-mini', demo_title: "Fresh Red Vine Tomatoes", demo_img: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product-mini', demo_title: "Sweet Crisp Bell Peppers", demo_img: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product-mini', demo_title: "Fresh Green Spinach", demo_img: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=360&q=80" %}
-        {% render 'karthika-card-product-mini', demo_title: "Sweet Nendran Banana", demo_img: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=360&q=80" %}
-      {%- endif -%}
+      <div class="karthika-empty-state" role="status" aria-live="polite">
+        <p>No products are available in this collection yet.</p>
+        <a href="{{ routes.all_products_collection_url }}" class="karthika-section-head-link">Browse all products</a>
+      </div>
     {%- endif -%}
   </div>
 </div>

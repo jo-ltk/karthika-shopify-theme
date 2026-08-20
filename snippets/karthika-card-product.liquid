@@ -1,40 +1,37 @@
-{% doc %}
-  Renders the compact mobile-app style product card.
-  
-  Features:
-  - Modern quick-commerce left-aligned product card hierarchy
-  - Soft neutral / pastel background container for product image with discount pill
-  - Pack size / weight and subtle in-stock indicator
-  - 2-line clamped product title
-  - Polished 2026 grocery price container with tabular numbers and subtle discount tag
-  - Full-width integrated thumb-friendly "+ ADD" and prominent quantity stepper
-  - Supports both real Shopify product objects and realistic grocery fallbacks
-{% enddoc %}
+{%- comment -%}
+  Renders the compact mobile-app style product card using Shopify product data only.
+{%- endcomment -%}
 
 {%- if card_product and card_product != empty -%}
   {%- liquid
     assign current_variant = card_product.selected_or_first_available_variant
+    assign is_available = false
+    if current_variant and current_variant.available
+      assign is_available = true
+    elsif card_product.available
+      assign is_available = true
+    endif
+
     assign on_sale = false
     if card_product.compare_at_price > card_product.price
       assign on_sale = true
       assign save_percent = card_product.compare_at_price | minus: card_product.price | times: 100.0 | divided_by: card_product.compare_at_price | round
     endif
 
-    assign rating_val = "4.3"
-    if card_product.metafields.reviews.rating.value != blank
-      assign rating_val = card_product.metafields.reviews.rating.value
+    assign pack_size = card_product.vendor | default: 'Karthika'
+    if current_variant and current_variant.title != 'Default Title' and current_variant.title != blank
+      assign pack_size = current_variant.title
+    elsif card_product.variants.first and card_product.variants.first.weight > 0
+      assign pack_size = card_product.variants.first.weight | weight_with_unit
     endif
 
-    assign pack_size = card_product.vendor | default: "Karthika"
-    if current_variant.title != 'Default Title' and current_variant.title != blank
-      assign pack_size = current_variant.title
-    elsif card_product.variants.first.weight > 0
-      assign pack_size = card_product.variants.first.weight | weight_with_unit
+    assign inventory_label = 'Sold out'
+    if is_available
+      assign inventory_label = 'In stock'
     endif
   -%}
 
-  <div class="karthika-compact-card" data-product-id="{{ card_product.id }}">
-    <!-- Image Media Box with Pastel Background & Discount Pill -->
+  <div class="karthika-compact-card" data-product-id="{{ card_product.id }}" data-variant-id="{{ current_variant.id }}">
     <div class="karthika-compact-media">
       {%- if on_sale -%}
         <div class="karthika-card-badge">{{ save_percent }}% OFF</div>
@@ -53,32 +50,23 @@
             class="karthika-compact-img"
           >
         {%- else -%}
-          <img
-            src="{{ demo_img | default: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=360&q=80' }}"
-            alt="{{ card_product.title | escape }}"
-            loading="lazy"
-            width="200"
-            height="200"
-            class="karthika-compact-img"
-          >
+          <div class="karthika-compact-media-placeholder" aria-label="Product image unavailable" role="img">
+            <span>{{ card_product.title | truncate: 24 | escape }}</span>
+          </div>
         {%- endif -%}
       </a>
     </div>
 
-    <!-- Product Info Container -->
     <div class="karthika-compact-info">
-      <!-- Pack Size / Meta Row with In Stock Indicator -->
       <div class="karthika-card-meta-row">
         <span class="karthika-compact-pack">{{ pack_size }}</span>
-        <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
+        <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> {{ inventory_label }}</span>
       </div>
 
-      <!-- Product Title -->
       <a href="{{ card_product.url }}" class="karthika-compact-title" title="{{ card_product.title | escape }}">
         {{ card_product.title | escape }}
       </a>
 
-      <!-- Modern Polished Price Container -->
       <div class="karthika-price-container">
         <div class="karthika-price-main-row">
           <span class="karthika-price-current">{{ card_product.price | money }}</span>
@@ -89,11 +77,10 @@
         </div>
       </div>
 
-      <!-- Integrated Thumb-Friendly Add / Quantity Action Control -->
-      <div class="karthika-card-action-bar karthika-stepper" data-variant-id="{{ current_variant.id }}">
-        <button type="button" class="karthika-stepper-add-btn" aria-label="Add {{ card_product.title | escape }} to cart">
+      <div class="karthika-card-action-bar karthika-stepper" data-variant-id="{{ current_variant.id }}" data-product-available="{{ is_available }}">
+        <button type="button" class="karthika-stepper-add-btn" aria-label="Add {{ card_product.title | escape }} to cart"{% unless is_available %} disabled aria-disabled="true"{% endunless %}>
           <span class="karthika-add-btn-icon">+</span>
-          <span class="karthika-add-btn-text">ADD</span>
+          <span class="karthika-add-btn-text">{% if is_available %}ADD{% else %}SOLD OUT{% endif %}</span>
         </button>
 
         <div class="karthika-compact-stepper">
@@ -104,78 +91,6 @@
           <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--plus" aria-label="Increase quantity">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
           </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-{%- else -%}
-  <!-- Realistic Demo Grocery Card (Exact reference mockup fallback) -->
-  {%- liquid
-    assign d_title = demo_title | default: "Broccoli Fresh"
-    assign d_brand = demo_brand | default: "Farm Fresh"
-    assign d_pack = demo_pack | default: "500gm"
-    assign d_price = demo_price | default: "$10.00"
-    assign d_compare = demo_compare | default: ""
-    assign d_badge = demo_badge | default: ""
-    assign d_rating = demo_rating | default: "4.3"
-    assign d_img = demo_img | default: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=360&q=80"
-  -%}
-
-  <div class="karthika-compact-card" data-demo="true">
-    <!-- Image Media Box with Pastel Background & Top-Left Rounded Discount Pill -->
-    <div class="karthika-compact-media">
-      {%- if d_badge != blank -%}
-        <div class="karthika-card-badge">{{ d_badge }}</div>
-      {%- endif -%}
-
-      <a href="/products/preview" aria-label="{{ d_title | escape }}">
-        <img
-          src="{{ d_img }}"
-          alt="{{ d_title | escape }}"
-          loading="lazy"
-          width="200"
-          height="200"
-          class="karthika-compact-img"
-        >
-      </a>
-    </div>
-
-    <!-- Product Info Container -->
-    <div class="karthika-compact-info">
-      <!-- Pack Size / Meta Row with In Stock Indicator -->
-      <div class="karthika-card-meta-row">
-        <span class="karthika-compact-pack">{% if d_pack != blank %}{{ d_pack }}{% else %}{{ d_brand }}{% endif %}</span>
-        <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> In stock</span>
-      </div>
-
-      <!-- Product Title -->
-      <a href="/products/preview" class="karthika-compact-title" title="{{ d_title | escape }}">
-        {{ d_title }}
-      </a>
-
-      <!-- Modern Polished Price Container -->
-      <div class="karthika-price-container">
-        <div class="karthika-price-main-row">
-          <span class="karthika-price-current">{{ d_price }}</span>
-          {%- if d_compare != blank -%}
-            <span class="karthika-price-original">{{ d_compare }}</span>
-            <span class="karthika-price-discount-tag">SALE</span>
-          {%- endif -%}
-        </div>
-      </div>
-
-      <!-- Integrated Thumb-Friendly Add / Quantity Action Control -->
-      <div class="karthika-card-action-bar karthika-stepper" data-demo="true">
-        <button type="button" class="karthika-stepper-add-btn" aria-label="Add {{ d_title | escape }} to cart" onclick="const p = this.closest('.karthika-card-action-bar'); p.classList.add('is-added'); if(window.Karthika && window.Karthika.Cart) window.Karthika.Cart.updateBadges();">
-          <span class="karthika-add-btn-icon">+</span>
-          <span class="karthika-add-btn-text">ADD</span>
-        </button>
-
-        <div class="karthika-compact-stepper">
-          <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--minus" aria-label="Decrease quantity" onclick="const p = this.closest('.karthika-card-action-bar'); const v = p.querySelector('.karthika-compact-stepper-val'); let count = parseInt(v.textContent, 10) - 1; if(count <= 0) { p.classList.remove('is-added'); v.textContent = '1'; } else { v.textContent = count; }">&minus;</button>
-          <span class="karthika-compact-stepper-val karthika-stepper-qty">1</span>
-          <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--plus" aria-label="Increase quantity" onclick="const v = this.closest('.karthika-card-action-bar').querySelector('.karthika-compact-stepper-val'); v.textContent = parseInt(v.textContent, 10) + 1;">&plus;</button>
         </div>
       </div>
     </div>
