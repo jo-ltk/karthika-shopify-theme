@@ -59,8 +59,25 @@
                 </div>
 
                 <div class="totals">
-                  <h2 class="totals__total">{{ 'sections.cart.estimated_total' | t }}</h2>
-                  <p class="totals__total-value">{{ cart.total_price | money_with_currency }}</p>
+                  <h2 class="totals__total">Subtotal</h2>
+                  <p class="totals__total-value">{{ cart.total_price | money }}</p>
+                </div>
+
+                {%- if cart.total_discount > 0 -%}
+                  <div class="totals totals--discount">
+                    <h2 class="totals__total">Discount</h2>
+                    <p class="totals__total-value">-{{ cart.total_discount | money }}</p>
+                  </div>
+                {%- endif -%}
+
+                <div class="totals totals--shipping">
+                  <h2 class="totals__total">Delivery</h2>
+                  <p class="totals__total-value">Calculated at checkout</p>
+                </div>
+
+                <div class="totals totals--grand">
+                  <h2 class="totals__total">Final total</h2>
+                  <p class="totals__total-value">{{ cart.total_price | money }}</p>
                 </div>
 
                 <small class="tax-note caption-large rte">

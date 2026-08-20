@@ -1,140 +1,50 @@
-{{ 'component-card.css' | asset_url | stylesheet_tag }}
-{{ 'section-collection-list.css' | asset_url | stylesheet_tag }}
+{{ 'karthika-grocery.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign fruit_collection = collections['fresh-fruits'] | default: collections['fruits']
+  assign vegetable_collection = collections['vegetables'] | default: collections['fresh-vegetables']
+  assign rice_collection = collections['rice-grains'] | default: collections['rice-and-grains']
+  assign spices_collection = collections['spices-masala'] | default: collections['spices']
+  assign dairy_collection = collections['dairy-eggs'] | default: collections['dairy']
+  assign snacks_collection = collections['indian-snacks'] | default: collections['snacks']
+  assign beverages_collection = collections['beverages'] | default: collections['drinks']
+  assign household_collection = collections['household']
+-%}
 
-<div class="page-width">
-  <h1 class="title title--primary inline-richtext{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-    {{ section.settings.title }}
-  </h1>
-  {%- liquid
-    case section.settings.sort
-      when 'products_high', 'products_low'
-        assign collections = collections | sort: 'all_products_count'
-      when 'date', 'date_reversed'
-        assign collections = collections | sort: 'published_at'
-    endcase
-
-    if section.settings.sort == 'products_high' or section.settings.sort == 'date_reversed' or section.settings.sort == 'alphabetical_reversed'
-      assign collections = collections | reverse
-    endif
-
-    assign moduloResult = 28 | modulo: section.settings.columns_desktop
-    assign paginate_by = 30
-    if moduloResult == 0
-      assign paginate_by = 28
-    endif
-  -%}
-  {%- paginate collections by paginate_by -%}
-    <ul
-      class="collection-list grid grid--{{ section.settings.columns_desktop }}-col-desktop grid--{{ section.settings.columns_mobile }}-col-tablet-down"
-      role="list"
-    >
-      {%- for collection in collections -%}
-        <li
-          class="collection-list__item grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-          {% if settings.animations_reveal_on_scroll %}
-            data-cascade
-            style="--animation-order: {{ forloop.index }};"
-          {% endif %}
-        >
-          {% render 'card-collection',
-            card_collection: collection,
-            media_aspect_ratio: section.settings.image_ratio,
-            columns: 3
-          %}
-        </li>
-      {%- endfor -%}
-    </ul>
-    {% render 'pagination', paginate: paginate %}
-  {%- endpaginate -%}
-</div>
-{% schema %}
-{
-  "name": "t:sections.main-list-collections.name",
-  "class": "section",
-  "settings": [
-    {
-      "type": "inline_richtext",
-      "id": "title",
-      "label": "t:sections.main-list-collections.settings.title.label",
-      "default": "t:sections.main-list-collections.settings.title.default"
-    },
-    {
-      "type": "select",
-      "id": "sort",
-      "options": [
-        {
-          "value": "alphabetical",
-          "label": "t:sections.main-list-collections.settings.sort.options__1.label"
-        },
-        {
-          "value": "alphabetical_reversed",
-          "label": "t:sections.main-list-collections.settings.sort.options__2.label"
-        },
-        {
-          "value": "date_reversed",
-          "label": "t:sections.main-list-collections.settings.sort.options__3.label"
-        },
-        {
-          "value": "date",
-          "label": "t:sections.main-list-collections.settings.sort.options__4.label"
-        },
-        {
-          "value": "products_high",
-          "label": "t:sections.main-list-collections.settings.sort.options__5.label"
-        },
-        {
-          "value": "products_low",
-          "label": "t:sections.main-list-collections.settings.sort.options__6.label"
-        }
-      ],
-      "default": "alphabetical",
-      "label": "t:sections.main-list-collections.settings.sort.label"
-    },
-    {
-      "type": "select",
-      "id": "image_ratio",
-      "options": [
-        {
-          "value": "adapt",
-          "label": "t:sections.main-list-collections.settings.image_ratio.options__1.label"
-        },
-        {
-          "value": "portrait",
-          "label": "t:sections.main-list-collections.settings.image_ratio.options__2.label"
-        },
-        {
-          "value": "square",
-          "label": "t:sections.main-list-collections.settings.image_ratio.options__3.label"
-        }
-      ],
-      "default": "adapt",
-      "label": "t:sections.main-list-collections.settings.image_ratio.label"
-    },
-    {
-      "type": "range",
-      "id": "columns_desktop",
-      "min": 1,
-      "max": 6,
-      "step": 1,
-      "default": 3,
-      "label": "t:sections.main-list-collections.settings.columns_desktop.label"
-    },
-    {
-      "type": "select",
-      "id": "columns_mobile",
-      "options": [
-        {
-          "value": "1",
-          "label": "t:sections.main-list-collections.settings.columns_mobile.options__1.label"
-        },
-        {
-          "value": "2",
-          "label": "t:sections.main-list-collections.settings.columns_mobile.options__2.label"
-        }
-      ],
-      "default": "2",
-      "label": "t:sections.main-list-collections.settings.columns_mobile.label"
-    }
-  ]
-}
-{% endschema %}
+<section class="karthika-category-browser" id="KarthikaCategoriesPage">
+  <div class="karthika-category-browser__intro"><h1>{{ section.settings.title | default: 'Categories' }}</h1><p>Browse groceries by what you're looking for</p></div>
+  <div class="karthika-category-browser__quick karthika-hide-scrollbar" aria-label="Quick category filters">
+    <button class="is-active" type="button" data-category-target="all">All</button><button type="button" data-category-target="fresh-fruits">Fresh</button><button type="button" data-category-target="rice-grains">Pantry</button><button type="button" data-category-target="indian-snacks">Snacks</button><button type="button" data-category-target="beverages">Drinks</button><button type="button" data-category-target="household">Household</button>
+  </div>
+  <nav class="karthika-category-browser__rail karthika-hide-scrollbar" aria-label="Main categories">
+    <button class="is-active" type="button" data-category-target="all">All Categories</button><button type="button" data-category-target="fresh-fruits">Fresh Fruits</button><button type="button" data-category-target="vegetables">Vegetables</button><button type="button" data-category-target="rice-grains">Rice &amp; Grains</button><button type="button" data-category-target="spices-masala">Spices &amp; Masala</button><button type="button" data-category-target="dals-pulses">Dals &amp; Pulses</button><button type="button" data-category-target="atta-flours">Atta &amp; Flours</button><button type="button" data-category-target="dairy-eggs">Dairy &amp; Eggs</button><button type="button" data-category-target="frozen-foods">Frozen Foods</button><button type="button" data-category-target="indian-snacks">Indian Snacks</button><button type="button" data-category-target="beverages">Beverages</button><button type="button" data-category-target="pickles">Pickles</button><button type="button" data-category-target="personal-care">Personal Care</button><button type="button" data-category-target="household">Household</button><button type="button" data-category-target="baby-care">Baby Care</button><button type="button" data-category-target="kitchen">Kitchen</button><button type="button" data-category-target="pooja-items">Pooja Items</button>
+  </nav>
+  <div class="karthika-category-browser__content">
+    <div class="karthika-category-browser__heading"><div><p id="KarthikaCategoryEyebrow">Explore the supermarket</p><h2 id="KarthikaCategoryTitle">All Categories</h2></div><a id="KarthikaCategoryViewAll" href="{{ routes.all_products_collection_url }}">View all</a></div>
+    <div class="karthika-category-browser__grid" id="KarthikaCategoryGrid" aria-live="polite"></div>
+  </div>
+  <div class="karthika-category-browser__discovery">
+    <div class="karthika-category-browser__heading"><div><p>Easy picks</p><h2>Popular Categories</h2></div></div>
+    <div class="karthika-category-browser__discovery-grid">
+      <a href="{{ rice_collection.url | default: routes.all_products_collection_url }}" class="karthika-discovery-card"><img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=420&q=80" alt="Rice grains" width="210" height="126" loading="lazy"><span>Kerala Favourites</span></a><a href="{{ snacks_collection.url | default: routes.all_products_collection_url }}" class="karthika-discovery-card"><img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=420&q=80" alt="Indian snacks" width="210" height="126" loading="lazy"><span>Indian Snacks</span></a><a href="{{ vegetable_collection.url | default: routes.all_products_collection_url }}" class="karthika-discovery-card"><img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=420&q=80" alt="Fresh vegetables" width="210" height="126" loading="lazy"><span>Fresh Vegetables</span></a><a href="{{ rice_collection.url | default: routes.all_products_collection_url }}" class="karthika-discovery-card"><img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=420&q=80" alt="Rice and grains" width="210" height="126" loading="lazy"><span>Rice &amp; Grains</span></a>
+    </div>
+    <div class="karthika-category-browser__heading"><div><p>Customer favourites</p><h2>Trending Right Now</h2></div></div>
+    <div class="karthika-category-browser__chips"><a href="{{ snacks_collection.url | default: routes.all_products_collection_url }}">Banana Chips</a><a href="{{ rice_collection.url | default: routes.all_products_collection_url }}">Matta Rice</a><a href="{{ routes.all_products_collection_url }}">Coconut Oil</a><a href="{{ spices_collection.url | default: routes.all_products_collection_url }}">Biryani Masala</a></div>
+    <div class="karthika-category-browser__heading"><div><p>Make shopping simpler</p><h2>Shop by Need</h2></div></div>
+    <div class="karthika-category-browser__need-grid"><a href="{{ routes.all_products_collection_url }}">Breakfast<br><small>Essentials</small></a><a href="{{ routes.all_products_collection_url }}">Quick<br><small>Dinner</small></a><a href="{{ snacks_collection.url | default: routes.all_products_collection_url }}">Tea Time<br><small>Favourites</small></a><a href="{{ routes.all_products_collection_url }}">Kids<br><small>Snacks</small></a><a href="{{ routes.all_products_collection_url }}">Kerala<br><small>Kitchen</small></a><a href="{{ routes.all_products_collection_url }}">Cooking<br><small>Essentials</small></a></div>
+  </div>
+</section>
+<script>
+  (function () {
+    var page = document.getElementById('KarthikaCategoriesPage'); if (!page) return;
+    document.body.classList.add('karthika-categories-route');
+    var allUrl = {{ routes.all_products_collection_url | json }}, urls = {'fresh-fruits': {{ fruit_collection.url | default: routes.all_products_collection_url | json }}, vegetables: {{ vegetable_collection.url | default: routes.all_products_collection_url | json }}, 'rice-grains': {{ rice_collection.url | default: routes.all_products_collection_url | json }}, 'spices-masala': {{ spices_collection.url | default: routes.all_products_collection_url | json }}, 'dairy-eggs': {{ dairy_collection.url | default: routes.all_products_collection_url | json }}, 'indian-snacks': {{ snacks_collection.url | default: routes.all_products_collection_url | json }}, beverages: {{ beverages_collection.url | default: routes.all_products_collection_url | json }}, household: {{ household_collection.url | default: routes.all_products_collection_url | json }}};
+    var image = {fruit:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=420&q=80',veg:'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=420&q=80',rice:'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=420&q=80',spice:'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=420&q=80',snack:'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=420&q=80',dairy:'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=420&q=80',beverage:'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=420&q=80',home:'https://images.unsplash.com/photo-1585421514738-01798e348b17?auto=format&fit=crop&w=420&q=80'};
+    var make = function(names,key,tone,count){return names.map(function(n){return[n,count || '12+ items',key,tone];});};
+    var groups = {all:{title:'All Categories',cards:[['Fresh Fruits','120+ items','fresh-fruits','fruit'],['Vegetables','150+ items','vegetables','veg'],['Rice & Grains','80+ items','rice-grains','rice'],['Spices & Masala','200+ items','spices-masala','spice'],['Dairy & Eggs','90+ items','dairy-eggs','dairy'],['Indian Snacks','120+ items','indian-snacks','snack'],['Beverages','100+ items','beverages','beverage'],['Household','80+ items','household','home']]},'fresh-fruits':{title:'Fresh Fruits',cards:make(['Apples','Bananas','Mangoes','Oranges','Grapes','Watermelon','Papaya','Pineapple','Pomegranate','Berries'],'fresh-fruits','fruit','12+ items')},vegetables:{title:'Vegetables',cards:make(['Leafy Vegetables','Tomatoes','Potatoes','Onions','Carrots','Beans','Bell Peppers','Cucumber','Brinjal','Okra'],'vegetables','veg','15+ items')},'rice-grains':{title:'Rice & Grains',cards:make(['Basmati Rice','Kerala Rice','Matta Rice','Idli Rice','Brown Rice','Sona Masoori','Millets','Quinoa'],'rice-grains','rice')},'spices-masala':{title:'Spices & Masala',cards:make(['Turmeric','Chilli Powder','Coriander Powder','Garam Masala','Biryani Masala','Sambar Powder','Rasam Powder','Pepper','Cardamom','Cinnamon'],'spices-masala','spice','20+ items')},'dairy-eggs':{title:'Dairy & Eggs',cards:make(['Milk','Curd','Paneer','Butter','Cheese','Eggs'],'dairy-eggs','dairy')},'indian-snacks':{title:'Indian Snacks',cards:make(['Banana Chips','Murukku','Mixture','Biscuits','Namkeen','Kerala Snacks'],'indian-snacks','snack')},beverages:{title:'Beverages',cards:make(['Tea','Coffee','Juices','Soft Drinks','Health Drinks','Coconut Water'],'beverages','beverage')}};
+    [['dals-pulses','Dals & Pulses',['Toor Dal','Moong Dal','Chana Dal','Rajma','Chickpeas'],'rice'],['atta-flours','Atta & Flours',['Whole Wheat Atta','Rice Flour','Besan','Ragi Flour','Appam Mix'],'rice'],['frozen-foods','Frozen Foods',['Parotta','Chapati','Frozen Vegetables','Frozen Snacks','Frozen Seafood'],'veg'],['pickles','Pickles',['Mango Pickle','Lime Pickle','Garlic Pickle','Mixed Vegetable Pickle'],'spice'],['personal-care','Personal Care',['Shampoo','Soap','Toothpaste','Skincare','Hair Care'],'home'],['household','Household',['Cleaning','Laundry','Kitchen Cleaning','Tissue','Storage'],'home'],['baby-care','Baby Care',['Diapers','Baby Food','Baby Bath','Baby Essentials'],'home'],['kitchen','Kitchen',['Cookware','Storage','Kitchen Tools','Disposable Tableware'],'home'],['pooja-items','Pooja Items',['Agarbatti','Camphor','Pooja Oil','Wicks','Pooja Kits'],'spice']].forEach(function(g){groups[g[0]]={title:g[1],cards:make(g[2],g[0],g[3])};});
+    var grid=document.getElementById('KarthikaCategoryGrid'), title=document.getElementById('KarthikaCategoryTitle'), eyebrow=document.getElementById('KarthikaCategoryEyebrow'), viewAll=document.getElementById('KarthikaCategoryViewAll');
+    function select(key){var group=groups[key]||groups.all; title.textContent=group.title; eyebrow.textContent=key==='all'?'Explore the supermarket':'Browse '+group.title.toLowerCase(); viewAll.href=urls[key]||allUrl; grid.innerHTML=group.cards.map(function(card,i){return '<a class="karthika-category-browser__card karthika-category-browser__card--'+(i%5)+'" href="'+(urls[card[2]]||allUrl)+'"><img src="'+image[card[3]]+'" alt="'+card[0]+'" width="190" height="128" loading="lazy"><span><strong>'+card[0]+'</strong><small>'+card[1]+'</small></span><b aria-hidden="true">›</b></a>';}).join(''); page.querySelectorAll('[data-category-target]').forEach(function(button){button.classList.toggle('is-active',button.dataset.categoryTarget===key);});}
+    page.addEventListener('click',function(event){var button=event.target.closest('[data-category-target]');if(!button)return;select(button.dataset.categoryTarget);button.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});});select('all');
+  })();
+</script>
+{% schema %}{"name":"Categories","class":"section","settings":[{"type":"text","id":"title","label":"Title","default":"Categories"}]}{% endschema %}

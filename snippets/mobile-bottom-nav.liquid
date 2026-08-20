@@ -34,7 +34,7 @@
   </button>
 
   <!-- 4. Cart -->
-  <button type="button" class="karthika-nav-item karthika-cart-trigger" aria-label="Open Cart Drawer" style="background: none; border: none; padding: 0; cursor: pointer;">
+  <a href="{{ routes.cart_url }}" class="karthika-nav-item karthika-cart-trigger {% if template.name == 'cart' %}is-active{% endif %}" aria-label="Open cart" style="background: none; border: none; padding: 0; cursor: pointer;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
       <circle cx="9" cy="20" r="1.5"></circle>
       <circle cx="18" cy="20" r="1.5"></circle>
@@ -44,7 +44,7 @@
     <span class="karthika-nav-badge" {% if cart.item_count == 0 %}style="display: none;"{% endif %}>
       {{ cart.item_count }}
     </span>
-  </button>
+  </a>
 
   <!-- 5. Account -->
   <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="karthika-nav-item {% if template.name contains 'customer' %}is-active{% endif %}">

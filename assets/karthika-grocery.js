@@ -124,13 +124,16 @@
     },
 
     openCartDrawer() {
+      const cartUrl = window.routes?.cart_url || '/cart';
+      const cartPage = document.body?.classList.contains('template-cart');
+
+      if (cartPage) return;
+
       const drawer = document.querySelector('cart-drawer') || document.querySelector('#CartDrawer');
-      if (drawer && typeof drawer.open === 'function') {
+      if (drawer && typeof drawer.open === 'function' && window.location.pathname !== cartUrl) {
         drawer.open();
       } else {
-        const cartBtn = document.querySelector('#cart-icon-bubble') || document.querySelector('.karthika-cart-trigger');
-        if (cartBtn) cartBtn.click();
-        else window.location.href = window.routes?.cart_url || '/cart';
+        window.location.href = cartUrl;
       }
     },
 
@@ -150,7 +153,9 @@
         });
       }
 
-      summary.addEventListener('click', () => this.openCartDrawer());
+      summary.addEventListener('click', () => {
+        window.location.href = window.routes?.cart_url || '/cart';
+      });
     },
 
     renderCartSummary(cart, summary) {
@@ -338,23 +343,57 @@
           return;
         }
 
+        const backBtn = e.target.closest('.karthika-search-modal-back');
+        if (backBtn) {
+          this.close();
+          return;
+        }
+
         const closeBtn = e.target.closest('.karthika-search-modal-close');
         if (closeBtn) {
           this.close();
           return;
         }
 
-        const searchChip = e.target.closest('.karthika-search-chip');
+        const searchChip = e.target.closest('.karthika-search-chip, .karthika-search-category');
         if (searchChip) {
           const query = searchChip.dataset.query;
           if (query) {
             const input = document.querySelector('.karthika-search-modal-input');
             if (input) {
               input.value = query;
-              input.closest('form')?.submit();
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              input.closest('form')?.requestSubmit();
             }
           }
         }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          const modal = document.querySelector('#KarthikaSearchModal');
+          if (modal?.classList.contains('is-open')) {
+            this.close();
+          }
+        }
+      });
+
+      document.addEventListener('input', (event) => {
+        const input = event.target.closest('.karthika-search-modal-input');
+        if (!input) return;
+        this.syncEmptyState();
+      });
+    },
+
+    syncEmptyState() {
+      const modal = document.querySelector('#KarthikaSearchModal');
+      if (!modal) return;
+      const input = modal.querySelector('.karthika-search-modal-input');
+      const hasQuery = !!(input && input.value.trim().length > 0);
+      modal.classList.toggle('has-query', hasQuery);
+
+      document.querySelectorAll('.karthika-nav-search-trigger').forEach((trigger) => {
+        trigger.classList.toggle('is-active', modal.classList.contains('is-open'));
       });
     },
 
@@ -362,6 +401,7 @@
       const modal = document.querySelector('#KarthikaSearchModal');
       if (modal) {
         modal.classList.add('is-open');
+        this.syncEmptyState();
         setTimeout(() => {
           modal.querySelector('.karthika-search-modal-input')?.focus();
         }, 100);
@@ -370,7 +410,12 @@
 
     close() {
       const modal = document.querySelector('#KarthikaSearchModal');
-      if (modal) modal.classList.remove('is-open');
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      this.syncEmptyState();
+      document.querySelectorAll('.karthika-nav-search-trigger').forEach((trigger) => {
+        trigger.classList.remove('is-active');
+      });
     }
   };
 

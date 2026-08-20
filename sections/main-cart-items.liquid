@@ -38,9 +38,10 @@
     </div>
 
     <div class="cart__warnings">
-      <h1 class="cart__empty-text">{{ 'sections.cart.empty' | t }}</h1>
-      <a href="{{ routes.all_products_collection_url }}" class="button">
-        {{ 'general.continue_shopping' | t }}
+      <h1 class="cart__empty-text">Your cart is empty</h1>
+      <p class="cart__empty-subtext">Add some groceries and they’ll appear here.</p>
+      <a href="{{ routes.root_url }}" class="button">
+        Start shopping
       </a>
 
       {%- if shop.customer_accounts_enabled and customer == null -%}

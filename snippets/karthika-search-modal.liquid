@@ -1,70 +1,109 @@
 {% doc %}
-  Renders the app-style predictive search overlay with recent searches, trending grocery tags, and categories.
+  Renders the Karthika mobile search screen using Shopify predictive search and the real search route.
 {% enddoc %}
 
-<div id="KarthikaSearchModal" class="karthika-search-modal" role="dialog" aria-modal="true" aria-labelledby="SearchModalTitle">
+<div id="KarthikaSearchModal" class="karthika-search-modal" role="dialog" aria-modal="true" aria-labelledby="KarthikaSearchModalInput">
   <div class="karthika-search-modal-content">
     <div class="karthika-search-modal-header">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--karthika-text-muted);">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-      <form action="{{ routes.search_url }}" method="get" role="search" style="flex: 1; display: flex;">
+      <button type="button" class="karthika-search-modal-back" aria-label="Back to previous screen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"></path>
+        </svg>
+      </button>
+
+      {%- if settings.predictive_search_enabled -%}
+        <predictive-search class="karthika-live-search" data-loading-text="{{ 'accessibility.loading' | t }}">
+      {%- endif -%}
+
+      <form action="{{ routes.search_url }}" method="get" role="search" class="karthika-search-modal-form">
         <input type="hidden" name="type" value="product">
-        <input
-          id="SearchModalTitle"
-          type="search"
-          name="q"
-          class="karthika-search-modal-input"
-          placeholder="Search groceries, brands, spices, Kerala snacks..."
-          autocomplete="off"
-          autofocus
-        >
+        <div class="karthika-search-modal-input-shell">
+          <svg class="karthika-search-modal-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+          </svg>
+          <input
+            id="KarthikaSearchModalInput"
+            type="search"
+            name="q"
+            class="karthika-search-modal-input"
+            value="{{ search.terms | escape }}"
+            placeholder="Search groceries, spices, Kerala snacks..."
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-label="Search groceries"
+          >
+          <button type="reset" class="karthika-search-modal-reset" aria-label="Clear search">&times;</button>
+          <button type="submit" class="karthika-search-modal-submit" aria-label="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+            </svg>
+          </button>
+        </div>
+        <input type="hidden" name="options[prefix]" value="last">
+
+        {%- if settings.predictive_search_enabled -%}
+          <div class="predictive-search predictive-search--header karthika-predictive-search" tabindex="-1" data-predictive-search>
+            {%- render 'loading-spinner', class: 'predictive-search__loading-state' -%}
+          </div>
+          <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
+        {%- endif -%}
       </form>
-      <button type="button" class="karthika-search-modal-close" aria-label="Close search">&times;</button>
+
+      {%- if settings.predictive_search_enabled -%}
+        </predictive-search>
+      {%- endif -%}
     </div>
 
     <div class="karthika-search-modal-body">
-      <!-- Trending Searches -->
-      <div class="karthika-search-group">
-        <div class="karthika-search-group-title">Trending Grocery Searches</div>
-        <div class="karthika-search-tag-chips">
-          <span class="karthika-search-chip" data-query="Basmati Rice">🍚 Basmati Rice</span>
-          <span class="karthika-search-chip" data-query="Aashirvaad Atta">🌾 Aashirvaad Atta</span>
-          <span class="karthika-search-chip" data-query="Kerala Banana Chips">🍌 Kerala Banana Chips</span>
-          <span class="karthika-search-chip" data-query="Narasus Filter Coffee">☕ Filter Coffee</span>
-          <span class="karthika-search-chip" data-query="Coconut Oil">🥥 Pure Coconut Oil</span>
-          <span class="karthika-search-chip" data-query="Biryani Masala">🌶️ Eastern Biryani Masala</span>
-          <span class="karthika-search-chip" data-query="Toor Dal">🥣 Toor Dal</span>
-          <span class="karthika-search-chip" data-query="Pooja Agarbatti">🪔 Pooja Agarbatti</span>
+      <div class="karthika-search-empty-state">
+        <div class="karthika-search-group">
+          <div class="karthika-search-group-title">Recent Searches</div>
+          <div class="karthika-search-tag-chips">
+            <button type="button" class="karthika-search-chip" data-query="Basmati Rice">Basmati Rice</button>
+            <button type="button" class="karthika-search-chip" data-query="Banana Chips">Banana Chips</button>
+            <button type="button" class="karthika-search-chip" data-query="Coconut Oil">Coconut Oil</button>
+            <button type="button" class="karthika-search-chip" data-query="Filter Coffee">Filter Coffee</button>
+          </div>
         </div>
-      </div>
 
-      <!-- Suggested Categories -->
-      <div class="karthika-search-group">
-        <div class="karthika-search-group-title">Shop by Category</div>
-        <div class="karthika-search-tag-chips">
-          <a href="/collections/all?filter=rice" class="karthika-search-chip">Rice & Grains</a>
-          <a href="/collections/all?filter=spices" class="karthika-search-chip">Spices & Masalas</a>
-          <a href="/collections/all?filter=kerala" class="karthika-search-chip">Kerala Essentials</a>
-          <a href="/collections/all?filter=snacks" class="karthika-search-chip">Indian Snacks & Sweets</a>
-          <a href="/collections/all?filter=pooja" class="karthika-search-chip">Pooja Items</a>
-          <a href="/collections/all?filter=frozen" class="karthika-search-chip">Frozen & Ready-to-Eat</a>
+        <div class="karthika-search-group">
+          <div class="karthika-search-group-title">Popular Searches</div>
+          <div class="karthika-search-tag-chips">
+            <button type="button" class="karthika-search-chip" data-query="Rice">Rice</button>
+            <button type="button" class="karthika-search-chip" data-query="Spices">Spices</button>
+            <button type="button" class="karthika-search-chip" data-query="Snacks">Snacks</button>
+            <button type="button" class="karthika-search-chip" data-query="Kerala Products">Kerala Products</button>
+            <button type="button" class="karthika-search-chip" data-query="Vegetables">Vegetables</button>
+            <button type="button" class="karthika-search-chip" data-query="Dairy">Dairy</button>
+          </div>
         </div>
-      </div>
 
-      <!-- Natural Language AI Search Prompts -->
-      <div class="karthika-search-group" style="background: var(--karthika-yellow-light); padding: 12px; border-radius: var(--karthika-radius-md); border: 1px solid #FFE082;">
-        <div style="font-size: 11px; font-weight: 800; color: var(--karthika-red); text-transform: uppercase; margin-bottom: 4px;">
-          ✨ AI Smart Search Examples
-        </div>
-        <div style="font-size: 13px; color: var(--karthika-text-dark); margin-bottom: 8px;">
-          Try searching what you are preparing:
-        </div>
-        <div class="karthika-search-tag-chips">
-          <span class="karthika-search-chip" data-query="Chicken Biryani" style="background: #fff;">"What do I need for biryani?"</span>
-          <span class="karthika-search-chip" data-query="Appam Stew" style="background: #fff;">"Kerala breakfast for 4"</span>
-          <span class="karthika-search-chip" data-query="Dosa" style="background: #fff;">"Everything for crispy dosa"</span>
+        <div class="karthika-search-group">
+          <div class="karthika-search-group-title">Popular Categories</div>
+          <div class="karthika-search-category-grid">
+            <button type="button" class="karthika-search-category" data-query="Rice & Grains">
+              <span>Rice</span>
+            </button>
+            <button type="button" class="karthika-search-category" data-query="Spices & Masalas">
+              <span>Spices</span>
+            </button>
+            <button type="button" class="karthika-search-category" data-query="Snacks">
+              <span>Snacks</span>
+            </button>
+            <button type="button" class="karthika-search-category" data-query="Kerala Specials">
+              <span>Kerala</span>
+            </button>
+            <button type="button" class="karthika-search-category" data-query="Vegetables">
+              <span>Veg</span>
+            </button>
+            <button type="button" class="karthika-search-category" data-query="Dairy & Milk">
+              <span>Dairy</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
