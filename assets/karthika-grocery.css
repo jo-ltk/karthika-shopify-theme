@@ -1883,18 +1883,22 @@ body {
   position: fixed;
   z-index: 1001;
   left: 50%;
-  bottom: calc(14px + var(--karthika-bottom-nav-height) + 22px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(14px + var(--karthika-bottom-nav-height) + 14px + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: center;
-  width: min(360px, calc(100vw - 32px));
-  min-height: 112px;
-  padding: 16px 16px 21px 22px;
-  gap: 14px;
-  border: 0;
-  border-radius: 26px;
-  background: var(--karthika-red);
-  color: #FFFFFF;
-  box-shadow: 0 12px 28px rgba(180, 0, 0, 0.3);
+  justify-content: center;
+  width: auto;
+  max-width: calc(100vw - 32px);
+  min-height: 48px;
+  padding: 8px 16px;
+  gap: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: var(--karthika-radius-pill);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  color: var(--karthika-red);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9);
   transform: translate(-50%, 0);
   transition: bottom 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
   cursor: pointer;
@@ -1917,39 +1921,40 @@ body {
 
 .karthika-floating-cart-copy {
   display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
+  align-items: baseline;
+  gap: 6px;
+  flex: 0 1 auto;
   min-width: 0;
-  line-height: 1.05;
+  line-height: 1;
 }
 
 .karthika-floating-cart-label {
-  font-size: 27px;
-  font-weight: 850;
-  letter-spacing: -0.02em;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .karthika-floating-cart-count {
-  margin-top: 7px;
-  color: var(--karthika-yellow);
-  font-size: 20px;
-  font-weight: 850;
-  letter-spacing: 0.04em;
+  color: var(--karthika-red);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .karthika-floating-cart-thumbnails {
   display: flex;
   align-items: center;
-  min-width: 36px;
+  min-width: 0;
 }
 
 .karthika-floating-cart-thumbnails img {
-  width: 54px;
-  height: 54px;
+  width: 26px;
+  height: 26px;
   object-fit: cover;
-  margin-left: -14px;
-  border: 3px solid #FFFFFF;
-  border-radius: 14px;
+  margin-left: -8px;
+  border: 2px solid #FFFFFF;
+  border-radius: 8px;
   background: #FFFFFF;
 }
 
@@ -1958,30 +1963,14 @@ body {
 }
 
 .karthika-floating-cart-arrow {
-  color: var(--karthika-yellow);
-  font-size: 52px;
-  font-weight: 300;
+  color: var(--karthika-red);
+  font-size: 22px;
+  font-weight: 400;
   line-height: 0.6;
-  margin-top: -4px;
 }
 
 .karthika-floating-cart-progress {
-  position: absolute;
-  right: 19px;
-  bottom: 10px;
-  left: 19px;
-  height: 7px;
-  overflow: hidden;
-  border-radius: var(--karthika-radius-pill);
-  background: rgba(255, 255, 255, 0.22);
-}
-
-.karthika-floating-cart-progress span {
-  display: block;
-  width: 86%;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--karthika-yellow);
+  display: none;
 }
 
 @keyframes karthika-floating-cart-pop {
@@ -1992,21 +1981,18 @@ body {
 
 @media screen and (max-width: 360px) {
   .karthika-floating-cart {
-    gap: 9px;
-    padding-left: 17px;
+    gap: 7px;
+    padding: 7px 13px;
   }
 
-  .karthika-floating-cart-label {
-    font-size: 23px;
-  }
-
+  .karthika-floating-cart-label,
   .karthika-floating-cart-count {
-    font-size: 17px;
+    font-size: 12px;
   }
 
   .karthika-floating-cart-thumbnails img {
-    width: 48px;
-    height: 48px;
+    width: 22px;
+    height: 22px;
   }
 }
 
