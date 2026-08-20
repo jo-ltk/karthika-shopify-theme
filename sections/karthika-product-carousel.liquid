@@ -3,7 +3,7 @@
   Renders responsive 2-column mobile / 4-5 column desktop product grid.
 {% enddoc %}
 
-<div class="karthika-grid-section">
+<div class="karthika-grid-section{% if section.settings.carousel %} karthika-product-section--carousel{% endif %}">
   <div class="karthika-section-head">
     <div class="karthika-section-head-title-wrap">
       <h2 class="karthika-section-head-title">{{ section.settings.title | default: 'Popular this week' }}</h2>
@@ -100,6 +100,12 @@
       "step": 2,
       "default": 4,
       "label": "Products to Show"
+    },
+    {
+      "type": "checkbox",
+      "id": "carousel",
+      "label": "Use horizontal carousel",
+      "default": false
     }
   ],
   "presets": [

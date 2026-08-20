@@ -39,6 +39,7 @@
   --karthika-shadow-float: 0 8px 24px rgba(0, 0, 0, 0.08);
 
   --karthika-bottom-nav-height: 64px;
+  --karthika-home-section-gap: 6px;
   --karthika-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -73,6 +74,10 @@ body {
   padding: 0 0 28px 0;
   overflow-x: hidden;
   position: relative;
+}
+
+.karthika-app-container > .shopify-section + .shopify-section {
+  margin-top: var(--karthika-home-section-gap) !important;
 }
 
 @media screen and (min-width: 990px) {
@@ -374,7 +379,7 @@ body {
    ========================================================================== */
 .karthika-promo-banner-wrap {
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: 6px;
   padding: 0 !important;
   position: relative;
   box-sizing: border-box;
@@ -580,7 +585,12 @@ body {
    4. CATEGORY DISCOVERY (HORIZONTAL PHOTO SCROLL)
    ========================================================================== */
 .karthika-category-section {
-  margin-bottom: 24px;
+  margin-bottom: 4px;
+}
+
+.shopify-section:has(.karthika-category-section) + .shopify-section:has(.karthika-mini-promo),
+.shopify-section:has(.karthika-mini-promo) + .shopify-section:has(.karthika-product-section--carousel) {
+  margin-top: 0;
 }
 
 .karthika-category-scroll-wrap {
@@ -598,7 +608,9 @@ body {
   text-decoration: none;
   color: var(--karthika-text-dark);
   flex-shrink: 0;
-  width: 100px;
+  width: calc((100% - 30px) / 4);
+  min-width: 76px;
+  max-width: 96px;
   scroll-snap-align: start;
   transition: transform 0.15s ease;
 }
@@ -608,16 +620,17 @@ body {
 }
 
 .karthika-category-card-img-box {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
+  width: 100%;
+  aspect-ratio: 1 / 0.82;
+  height: auto;
+  border-radius: 14px;
   background: #FFFFFF;
-  border: 2px solid var(--karthika-border);
+  border: 1px solid var(--karthika-border);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   box-shadow: var(--karthika-shadow-subtle);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -635,6 +648,8 @@ body {
 }
 
 .karthika-category-card-name {
+  width: 100%;
+  margin-top: 7px;
   font-size: 11px;
   font-weight: 600;
   text-align: center;
@@ -656,6 +671,15 @@ body {
   justify-content: space-between;
   margin-top: 18px;
   margin-bottom: 12px;
+}
+
+.karthika-section-head--compact {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.karthika-grid-section .karthika-section-head {
+  margin-top: 0;
 }
 
 .karthika-section-head-title-wrap {
@@ -697,6 +721,90 @@ body {
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-bottom: 24px;
+}
+
+.karthika-product-section--carousel .karthika-two-col-grid {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-right: -16px;
+  scroll-snap-type: x mandatory;
+}
+
+.karthika-product-section--carousel .karthika-section-head {
+  margin-top: 2px;
+  margin-bottom: 8px;
+}
+
+.karthika-product-section--carousel .karthika-two-col-grid > .karthika-compact-card {
+  flex: 0 0 calc((100% - 10px) / 2);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+@media screen and (min-width: 750px) {
+  .karthika-product-section--carousel .karthika-two-col-grid > .karthika-compact-card {
+    flex-basis: 220px;
+  }
+}
+
+.karthika-mini-promo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 4px;
+  padding: 12px 12px 12px 14px;
+  background: #FFF4D8;
+  border: 1px solid #F8E2A9;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.karthika-mini-promo-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  color: var(--karthika-red);
+}
+
+.karthika-mini-promo-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.karthika-mini-promo-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.karthika-mini-promo-copy h2 {
+  margin: 0;
+  color: var(--karthika-text-dark);
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.karthika-mini-promo-copy p {
+  margin: 3px 0 0;
+  color: var(--karthika-text-muted);
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.karthika-mini-promo-button {
+  flex: 0 0 auto;
+  padding: 9px 13px;
+  border-radius: 9px;
+  background: var(--karthika-yellow);
+  color: var(--karthika-text-dark);
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 @media screen and (min-width: 750px) {
@@ -1059,6 +1167,65 @@ body {
   letter-spacing: -0.2px;
   line-height: 1;
   padding: 0 4px;
+}
+
+@media screen and (max-width: 749px) {
+  .karthika-product-section--carousel .karthika-compact-card {
+    padding: 7px 7px 8px;
+    border-radius: 15px;
+  }
+
+  .karthika-product-section--carousel .karthika-compact-media {
+    aspect-ratio: 1 / 0.84;
+    border-radius: 11px;
+    margin-bottom: 6px;
+  }
+
+  .karthika-product-section--carousel .karthika-compact-info {
+    padding: 0 1px 1px;
+  }
+
+  .karthika-product-section--carousel .karthika-card-meta-row {
+    margin-bottom: 3px;
+  }
+
+  .karthika-product-section--carousel .karthika-compact-pack {
+    font-size: 10.5px;
+  }
+
+  .karthika-product-section--carousel .karthika-stock-badge {
+    font-size: 9px;
+    gap: 3px;
+  }
+
+  .karthika-product-section--carousel .karthika-compact-title {
+    font-size: 12px;
+    line-height: 1.2;
+    min-height: 29px;
+    margin-bottom: 5px;
+  }
+
+  .karthika-product-section--carousel .karthika-price-container {
+    margin-bottom: 6px;
+  }
+
+  .karthika-product-section--carousel .karthika-price-current {
+    font-size: 16px;
+  }
+
+  .karthika-product-section--carousel .karthika-card-action-bar {
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .karthika-product-section--carousel .karthika-stepper-add-btn {
+    border-radius: 10px;
+    font-size: 12px;
+  }
+
+  .karthika-product-section--carousel .karthika-add-btn-text {
+    font-size: 12px;
+  }
 }
 
 /* ==========================================================================

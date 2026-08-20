@@ -33,7 +33,16 @@
         "link_text": "See all",
         "collection": "all",
         "preset_type": "popular",
-        "products_to_show": 4
+        "products_to_show": 6,
+        "carousel": false
+      }
+    },
+    "weekend_deals": {
+      "type": "karthika-mini-promo",
+      "settings": {
+        "title": "Weekend Deals",
+        "subtitle": "Up to 30% off on top brands",
+        "button_label": "View offers"
       }
     },
     "todays_deals": {
@@ -93,6 +102,7 @@
     "category_discovery",
     "popular_this_week",
     "todays_deals",
+    "weekend_deals",
     "kerala_favourites",
     "smart_bundles",
     "karthika_ai",
