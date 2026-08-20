@@ -8,8 +8,6 @@
     assign is_available = false
     if current_variant and current_variant.available
       assign is_available = true
-    elsif card_product.available
-      assign is_available = true
     endif
 
     assign on_sale = false
@@ -31,7 +29,17 @@
     endif
   -%}
 
-  <div class="karthika-compact-card" data-product-id="{{ card_product.id }}" data-variant-id="{{ current_variant.id }}">
+  <div
+    class="karthika-compact-card"
+    data-product-id="{{ card_product.id }}"
+    data-variant-id="{{ current_variant.id }}"
+    data-debug-product-available="{{ card_product.available }}"
+    data-debug-variant-id="{{ current_variant.id }}"
+    data-debug-variant-available="{{ current_variant.available }}"
+    data-debug-variant-inventory-quantity="{{ current_variant.inventory_quantity }}"
+    data-debug-variant-inventory-management="{{ current_variant.inventory_management }}"
+    data-debug-variant-inventory-policy="{{ current_variant.inventory_policy }}"
+  >
     <div class="karthika-compact-media">
       {%- if on_sale -%}
         <div class="karthika-card-badge">{{ save_percent }}% OFF</div>
