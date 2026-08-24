@@ -75,17 +75,6 @@
         "products_to_show": 6
       }
     },
-    "smart_bundles": {
-      "type": "karthika-smart-bundles",
-      "settings": {
-        "badge": "SMART BUNDLE",
-        "title": "Kerala Breakfast Combo",
-        "items_text": "Puttu Podi + Kadala (500g) + Grated Coconut + Nendran Banana",
-        "price": "$12.80",
-        "compare_price": "$15.80",
-        "save_text": "Save $3.00"
-      }
-    },
     "karthika_ai": {
       "type": "karthika-ai-assistant",
       "settings": {
@@ -113,7 +102,6 @@
     "popular_this_week",
     "todays_deals",
     "kerala_favourites",
-    "smart_bundles",
     "karthika_ai",
     "new_arrivals"
   ]
