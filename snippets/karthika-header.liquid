@@ -107,12 +107,19 @@
       </svg>
     </div>
 
-    <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="karthika-header-profile" aria-label="Account">
+    <button
+      type="button"
+      class="karthika-header-profile karthika-account-trigger"
+      aria-label="Account"
+      aria-haspopup="dialog"
+      data-account-href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+      style="background:none;border:none;padding:0;cursor:pointer;"
+    >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
         <circle cx="12" cy="8" r="3.5"></circle>
         <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
       </svg>
-    </a>
+    </button>
   </div>
 
   <div

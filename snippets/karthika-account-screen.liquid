@@ -1,0 +1,117 @@
+{%- comment -%}
+  Karthika Supermarket — Mobile Account / Login Screen
+  Full-screen overlay triggered by the profile icon in the mobile header.
+  Slide-up panel with blue hero, branding, grocery decorations, login CTA,
+  account option rows, and app version footer.
+{%- endcomment -%}
+
+{%- liquid
+  assign login_url = routes.account_login_url
+  assign account_url = routes.account_url
+  assign target_url = login_url
+  if customer
+    assign target_url = account_url
+  endif
+-%}
+
+<div id="karthika-account-screen" class="karthika-account-screen" aria-modal="true" role="dialog" aria-label="Account" hidden>
+
+  <!-- Blue hero -->
+  <div class="kas-hero">
+
+    <!-- Back button -->
+    <button class="kas-back-btn" id="kas-back-btn" aria-label="Go back" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <!-- Decorative grocery elements (CSS-rendered emoji/shapes, no external imgs) -->
+    <div class="kas-deco" aria-hidden="true">
+      <span class="kas-deco__item kas-deco__tomato">🍅</span>
+      <span class="kas-deco__item kas-deco__lemon">🍋</span>
+      <span class="kas-deco__item kas-deco__pepper">🫑</span>
+      <span class="kas-deco__item kas-deco__apple">🍎</span>
+      <span class="kas-deco__item kas-deco__milk">🥛</span>
+      <span class="kas-deco__item kas-deco__egg">🥚</span>
+      <span class="kas-deco__item kas-deco__orange">🍊</span>
+    </div>
+
+    <!-- Central Karthiga branding -->
+    <div class="kas-brand" aria-label="Karthiga Supermarket">
+      {%- if settings.logo != blank -%}
+        <img
+          class="kas-brand__logo-img"
+          src="{{ settings.logo | image_url: width: 280 }}"
+          alt="{{ shop.name | escape }}"
+          width="140"
+          height="50"
+          loading="eager"
+        >
+      {%- else -%}
+        <div class="kas-brand__wordmark">
+          <span class="kas-brand__name">Karthiga</span>
+          <span class="kas-brand__sub">Supermarket</span>
+        </div>
+      {%- endif -%}
+    </div>
+
+  </div><!-- /kas-hero -->
+
+  <!-- White login panel -->
+  <div class="kas-panel">
+
+    <a href="{{ target_url }}" class="kas-login-btn" id="kas-login-btn">
+      {%- if customer -%}My Account{%- else -%}Login{%- endif -%}
+    </a>
+
+    {%- unless customer -%}
+    <p class="kas-terms">
+      By tapping, I accept the
+      <a href="/policies/terms-of-service" class="kas-terms__link">terms of service</a>
+      &amp;
+      <a href="/policies/privacy-policy" class="kas-terms__link">privacy policy</a>
+    </p>
+    {%- endunless -%}
+
+    <!-- Account options card -->
+    <div class="kas-options-card" role="list">
+
+      <a href="{{ routes.all_products_collection_url }}" class="kas-option-row" role="listitem">
+        <span class="kas-option-row__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </span>
+        <span class="kas-option-row__label">Offers</span>
+        <span class="kas-option-row__chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </span>
+      </a>
+
+      <div class="kas-divider" role="separator" aria-hidden="true"></div>
+
+      <a href="/pages/contact" class="kas-option-row" role="listitem">
+        <span class="kas-option-row__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </span>
+        <span class="kas-option-row__label">Feedback</span>
+        <span class="kas-option-row__chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </span>
+      </a>
+
+    </div><!-- /kas-options-card -->
+
+    <!-- App version -->
+    <p class="kas-version">App version 1.0.0</p>
+
+  </div><!-- /kas-panel -->
+
+</div><!-- /karthika-account-screen -->

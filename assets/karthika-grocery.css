@@ -3171,3 +3171,340 @@ body {
   font-size: 20px;
   line-height: 1;
 }
+
+/* ==========================================================================
+   Karthika Account Screen — Mobile Full-Screen Overlay
+   ========================================================================== */
+
+/* ---- Overlay root ---- */
+.karthika-account-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  background: #0755F5;
+  /* Hidden by default; JS removes `hidden` attr + adds .is-open */
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.karthika-account-screen.is-open {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---- Hero section (blue) ---- */
+.kas-hero {
+  position: relative;
+  flex: 1 0 auto;
+  min-height: 58svh;
+  background: #0755F5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 56px);
+  padding-bottom: 60px;
+  overflow: hidden;
+}
+
+/* ---- Back button ---- */
+.kas-back-btn {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  left: 14px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.18s ease;
+}
+
+.kas-back-btn:active { background: rgba(255, 255, 255, 0.32); }
+
+.kas-back-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ---- Decorative grocery emojis ---- */
+.kas-deco {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.kas-deco__item {
+  position: absolute;
+  font-size: 52px;
+  line-height: 1;
+  opacity: 0.55;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.18));
+  user-select: none;
+}
+
+/* Positioned around the edges, not covering center */
+.kas-deco__tomato  { top: 10%;  left: -8px;  transform: rotate(-18deg); }
+.kas-deco__lemon   { top: 5%;   right: -6px; transform: rotate(22deg); }
+.kas-deco__pepper  { bottom: 22%; left: -10px; transform: rotate(12deg); font-size: 44px; }
+.kas-deco__apple   { bottom: 18%; right: -8px; transform: rotate(-14deg); }
+.kas-deco__milk    { top: 42%;  left: -10px; transform: rotate(8deg); font-size: 40px; }
+.kas-deco__egg     { bottom: 30%; right: -4px; transform: rotate(-10deg); font-size: 38px; }
+.kas-deco__orange  { top: 60%;  right: 6px;  transform: rotate(18deg); font-size: 42px; }
+
+/* ---- Branding ---- */
+.kas-brand {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.kas-brand__logo-img {
+  max-width: 160px;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
+.kas-brand__wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.kas-brand__name {
+  display: block;
+  font-family: var(--karthika-font-sans);
+  font-size: clamp(42px, 12vw, 60px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  color: #ffffff;
+  line-height: 1;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+
+.kas-brand__sub {
+  display: block;
+  font-family: var(--karthika-font-sans);
+  font-size: clamp(13px, 3.6vw, 17px);
+  font-weight: 500;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1;
+}
+
+/* ---- White login panel ---- */
+.kas-panel {
+  position: relative;
+  z-index: 3;
+  background: #ffffff;
+  border-radius: 28px 28px 0 0;
+  padding: 32px 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  box-shadow: 0 -8px 32px rgba(7, 85, 245, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+/* ---- Login button ---- */
+.kas-login-btn {
+  display: block;
+  width: 100%;
+  height: 56px;
+  line-height: 56px;
+  text-align: center;
+  background: #0755F5;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  font-family: var(--karthika-font-sans);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 4px 16px rgba(7, 85, 245, 0.35);
+}
+
+.kas-login-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(7, 85, 245, 0.25);
+}
+
+/* ---- Terms text ---- */
+.kas-terms {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: #8c939e;
+  line-height: 1.5;
+}
+
+.kas-terms__link {
+  color: #8c939e;
+  text-decoration: underline;
+}
+
+/* ---- Options card ---- */
+.kas-options-card {
+  background: #f5f6f8;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.kas-option-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px;
+  text-decoration: none;
+  color: #171717;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease;
+}
+
+.kas-option-row:active { background: rgba(0,0,0,0.04); }
+
+.kas-option-row__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid #d9dde5;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kas-option-row__icon svg {
+  width: 16px;
+  height: 16px;
+  color: #555;
+}
+
+.kas-option-row__label {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.kas-option-row__chevron {
+  color: #b0b7c3;
+}
+
+.kas-option-row__chevron svg {
+  width: 18px;
+  height: 18px;
+}
+
+.kas-divider {
+  height: 1px;
+  background: #e9ebef;
+  margin: 0 16px;
+}
+
+/* ---- App version ---- */
+.kas-version {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: #b0b7c3;
+  letter-spacing: 0.3px;
+}
+
+/* ==========================================================================
+   Account Screen Animations
+   ========================================================================== */
+
+/* Default state (before open): hero fades in, panel slides up */
+@media (prefers-reduced-motion: no-preference) {
+  .karthika-account-screen {
+    transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 0.28s;
+  }
+
+  .kas-brand {
+    opacity: 0;
+    transform: scale(0.88) translateY(8px);
+    transition: opacity 0.4s 0.12s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.4s 0.12s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .kas-deco__item {
+    opacity: 0;
+    transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .kas-panel {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.36s 0.06s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.36s 0.06s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Opened state */
+  .karthika-account-screen.is-open .kas-brand {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  .karthika-account-screen.is-open .kas-deco__item {
+    opacity: 0.55;
+  }
+
+  .karthika-account-screen.is-open .kas-deco__tomato  { transition-delay: 0.18s; }
+  .karthika-account-screen.is-open .kas-deco__lemon   { transition-delay: 0.22s; }
+  .karthika-account-screen.is-open .kas-deco__pepper  { transition-delay: 0.26s; }
+  .karthika-account-screen.is-open .kas-deco__apple   { transition-delay: 0.3s; }
+  .karthika-account-screen.is-open .kas-deco__milk    { transition-delay: 0.2s; }
+  .karthika-account-screen.is-open .kas-deco__egg     { transition-delay: 0.24s; }
+  .karthika-account-screen.is-open .kas-deco__orange  { transition-delay: 0.28s; }
+
+  .karthika-account-screen.is-open .kas-panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect reduced-motion: instant show/hide only */
+@media (prefers-reduced-motion: reduce) {
+  .karthika-account-screen,
+  .kas-brand,
+  .kas-deco__item,
+  .kas-panel {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ---- Desktop: hide account overlay (desktop uses nav link directly) ---- */
+@media screen and (min-width: 750px) {
+  .karthika-account-screen { display: none !important; }
+}
+

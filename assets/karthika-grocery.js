@@ -507,3 +507,100 @@
     AIAssistantManager.init();
   });
 })();
+
+/* ==========================================================================
+   Karthika Account Screen — Mobile overlay open/close
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  // Only activate the overlay on mobile viewports (< 750 px).
+  // On desktop the CSS hides the overlay, but the trigger button is also in
+  // the header — clicking it on desktop should fall back to the direct account
+  // page link instead of opening the (invisible) overlay.
+  function isMobile() {
+    return window.matchMedia('(max-width: 749px)').matches;
+  }
+
+  const AccountScreen = {
+    overlay: null,
+    backBtn: null,
+    _openedBy: null, // track which trigger opened the overlay
+
+    init() {
+      this.overlay = document.getElementById('karthika-account-screen');
+      this.backBtn = document.getElementById('kas-back-btn');
+
+      if (!this.overlay) return;
+
+      // Bind all triggers that may be added to the page
+      document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('.karthika-account-trigger');
+        if (!trigger) return;
+
+        if (!isMobile()) {
+          // On desktop let the browser navigate to the account/login URL
+          // stored in a data attribute placed by the server-rendered markup.
+          const href = trigger.dataset.accountHref;
+          if (href) window.location.href = href;
+          return;
+        }
+
+        e.preventDefault();
+        this._openedBy = trigger;
+        this.open();
+      });
+
+      if (this.backBtn) {
+        this.backBtn.addEventListener('click', () => this.close());
+      }
+
+      // Close on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.isOpen()) this.close();
+      });
+    },
+
+    isOpen() {
+      return this.overlay && this.overlay.classList.contains('is-open');
+    },
+
+    open() {
+      if (!this.overlay) return;
+      this.overlay.removeAttribute('hidden');
+      // Force reflow so CSS transition fires correctly
+      void this.overlay.offsetWidth;
+      this.overlay.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      this.backBtn && this.backBtn.focus();
+    },
+
+    close() {
+      if (!this.overlay) return;
+      this.overlay.classList.remove('is-open');
+      document.body.style.overflow = '';
+
+      // After CSS transition ends, hide from accessibility tree.
+      // Fallback timeout guards against cases where transitionend never fires
+      // (e.g. prefers-reduced-motion: reduce, display:none mid-animation).
+      let settled = false;
+      const finalise = () => {
+        if (settled) return;
+        settled = true;
+        this.overlay.setAttribute('hidden', '');
+        this.overlay.removeEventListener('transitionend', finalise);
+      };
+      this.overlay.addEventListener('transitionend', finalise);
+      setTimeout(finalise, 400); // max transition duration + buffer
+
+      // Return focus to the element that originally opened the overlay
+      const returnTarget = this._openedBy || document.querySelector('.karthika-account-trigger');
+      this._openedBy = null;
+      if (returnTarget) returnTarget.focus();
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    AccountScreen.init();
+  });
+})();
