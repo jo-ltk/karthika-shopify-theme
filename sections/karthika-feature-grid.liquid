@@ -1,0 +1,97 @@
+{%- comment -%}
+  Karthika Feature Grid — two-column grid of large tappable cards, many blocks so the page scrolls.
+{%- endcomment -%}
+
+<div class="karthika-feature-grid-wrap">
+  {%- if section.settings.title != blank -%}
+    <div class="karthika-section-head karthika-section-head--compact">
+      <h2 class="karthika-section-head-title">{{ section.settings.title }}</h2>
+      {%- if section.settings.link_text != blank -%}
+        <a href="{{ section.settings.link | default: routes.collections_url }}" class="karthika-section-head-link">{{ section.settings.link_text }}</a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="karthika-feature-grid">
+    {%- for block in section.blocks -%}
+      <a
+        href="{{ block.settings.link | default: routes.all_products_collection_url }}"
+        class="karthika-feature-card"
+        style="background-color: {{ block.settings.bg_color | default: '#EAF4DE' }};"
+        {{ block.shopify_attributes }}
+      >
+        <span class="karthika-feature-card-label">{{ block.settings.title | default: 'Collection' }}</span>
+        {%- if block.settings.image != blank -%}
+          <img
+            src="{{ block.settings.image | image_url: width: 300 }}"
+            alt="{{ block.settings.title | escape }}"
+            class="karthika-feature-card-img"
+            width="120"
+            height="120"
+            loading="lazy"
+          >
+        {%- elsif block.settings.demo_image_url != blank -%}
+          <img
+            src="{{ block.settings.demo_image_url }}"
+            alt="{{ block.settings.title | escape }}"
+            class="karthika-feature-card-img"
+            width="120"
+            height="120"
+            loading="lazy"
+            onerror="this.style.display='none'"
+          >
+        {%- endif -%}
+      </a>
+    {%- endfor -%}
+  </div>
+
+  <a href="{{ routes.all_products_collection_url }}" class="karthika-rakhi-banner" aria-label="Shop Raksha Bandhan gifts">
+    <span class="karthika-rakhi-banner-copy">
+      <span>Gifts for the ones you love</span>
+      <strong>Celebrate Raksha Bandhan</strong>
+    </span>
+    <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=260&q=85" alt="Gift boxes for Raksha Bandhan" width="150" height="92" loading="lazy">
+    <span class="karthika-rakhi-banner-arrow" aria-hidden="true">&#8594;</span>
+  </a>
+</div>
+
+{% schema %}
+{
+  "name": "Karthika Feature Grid",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Section title" },
+    { "type": "text", "id": "link_text", "label": "Link text", "default": "See all" },
+    { "type": "url", "id": "link", "label": "Link" }
+  ],
+  "blocks": [
+    {
+      "type": "feature_card",
+      "name": "Card",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "demo_image_url", "label": "Demo image URL" },
+        { "type": "color", "id": "bg_color", "label": "Background color", "default": "#EAF4DE" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Karthika Feature Grid",
+      "blocks": [
+        { "type": "feature_card", "settings": { "title": "Onam specials", "bg_color": "#EAF4DE", "demo_image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=300&q=80" } },
+        { "type": "feature_card", "settings": { "title": "Sadya & payasam", "bg_color": "#FFF6DC", "demo_image_url": "https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=300&q=80" } },
+        { "type": "feature_card", "settings": { "title": "Pookkalam & celebration", "bg_color": "#FCEAEA", "demo_image_url": "https://images.unsplash.com/photo-1600684646107-cd777b111b70?auto=format&fit=crop&w=300&q=80" } },
+        { "type": "feature_card", "settings": { "title": "Glam up for the festival", "bg_color": "#EDEBFB", "demo_image_url": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80" } },
+        { "type": "feature_card", "settings": { "title": "Fresh vegetables", "bg_color": "#E7EEDA", "demo_image_url": "https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=300&q=80" } },
+        { "type": "feature_card", "settings": { "title": "Kerala snacks", "bg_color": "#FFEDA8", "demo_image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=300&q=80" } },
+        { "type": "feature_card", "settings": { "title": "Dairy delights", "bg_color": "#EAF4DE", "demo_image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=300&q=80" } },
+        { "type": "feature_card", "settings": { "title": "Home essentials", "bg_color": "#FCEAEA", "demo_image_url": "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=300&q=80" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,41 +1,43 @@
 {
   "sections": {
     "desktop_home": { "type": "karthika-desktop-home", "settings": { "products_collection": "all" } },
-    "promo_banner": {
-      "type": "karthika-promo-banner",
+    "quick_tabs": {
+      "type": "karthika-quick-tabs",
       "blocks": {
-        "promo_1": {
-          "type": "slide",
-          "settings": {
-            "badge": "20% OFF FIRST ORDER",
-            "title": "Fresh Kerala favourites",
-            "subtitle": "Delivered across Singapore",
-            "button_text": "Shop now"
-          }
-        }
+        "tab_1": { "type": "tab_item", "settings": { "label": "All", "icon": "🛍️" } },
+        "tab_2": { "type": "tab_item", "settings": { "label": "Electronics", "icon": "🎧" } },
+        "tab_3": { "type": "tab_item", "settings": { "label": "50% Off", "icon": "🏷️" } },
+        "tab_4": { "type": "tab_item", "settings": { "label": "Monsoon", "icon": "☔" } },
+        "tab_5": { "type": "tab_item", "settings": { "label": "Beauty", "icon": "💄" } }
       },
-      "block_order": ["promo_1"],
+      "block_order": ["tab_1", "tab_2", "tab_3", "tab_4", "tab_5"],
+      "settings": { "title": "Shop by mood" }
+    },
+    "festive_ad_banner": {
+      "type": "karthika-ad-banner",
       "settings": {
-        "autoplay": true,
-        "autoplay_speed": 4
+        "eyebrow": "FESTIVE SALE",
+        "title": "Poli Onam Sale",
+        "subtitle": "Onam specials, Sadya essentials & festive picks",
+        "background_color": "#EAF4DE"
       }
     },
-    "category_discovery": {
-      "type": "karthika-category-scroll",
+    "featured_grid": {
+      "type": "karthika-feature-grid",
       "blocks": {
-        "cat_1": { "type": "category_item", "settings": { "title": "Rice & Grains", "demo_image_url": "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=140&q=80" } },
-        "cat_2": { "type": "category_item", "settings": { "title": "Kerala Favourites", "demo_image_url": "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=140&q=80" } },
-        "cat_3": { "type": "category_item", "settings": { "title": "Spices", "demo_image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=140&q=80" } },
-        "cat_4": { "type": "category_item", "settings": { "title": "Fresh Produce", "demo_image_url": "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=140&q=80" } },
-        "cat_5": { "type": "category_item", "settings": { "title": "Snacks", "demo_image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=140&q=80" } },
-        "cat_6": { "type": "category_item", "settings": { "title": "Dairy", "demo_image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=140&q=80" } },
-        "cat_7": { "type": "category_item", "settings": { "title": "Beverages", "demo_image_url": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=140&q=80" } },
-        "cat_8": { "type": "category_item", "settings": { "title": "Pickles & Oils", "demo_image_url": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=140&q=80" } }
+        "card_1": { "type": "feature_card", "settings": { "title": "Onam specials", "bg_color": "#DDF4A8", "demo_image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=300&q=80" } },
+        "card_2": { "type": "feature_card", "settings": { "title": "Sadya & payasam", "bg_color": "#FFE58A", "demo_image_url": "https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=300&q=80" } },
+        "card_3": { "type": "feature_card", "settings": { "title": "Pookkalam & celebration", "bg_color": "#FFC9B8", "demo_image_url": "https://images.unsplash.com/photo-1604423043492-95d33ba90c3d?auto=format&fit=crop&w=300&q=80" } },
+        "card_4": { "type": "feature_card", "settings": { "title": "Glam up for the festival", "bg_color": "#CFE9FF", "demo_image_url": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80" } },
+        "card_5": { "type": "feature_card", "settings": { "title": "Fresh vegetables", "bg_color": "#E7EEDA", "demo_image_url": "https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=300&q=80" } },
+        "card_6": { "type": "feature_card", "settings": { "title": "Kerala snacks", "bg_color": "#FFEDA8", "demo_image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=300&q=80" } },
+        "card_7": { "type": "feature_card", "settings": { "title": "Dairy delights", "bg_color": "#EAF4DE", "demo_image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=300&q=80" } },
+        "card_8": { "type": "feature_card", "settings": { "title": "Home essentials", "bg_color": "#FCEAEA", "demo_image_url": "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=300&q=80" } }
       },
-      "block_order": ["cat_1", "cat_2", "cat_3", "cat_4", "cat_5", "cat_6", "cat_7", "cat_8"],
+      "block_order": ["card_1", "card_2", "card_3", "card_4", "card_5", "card_6", "card_7", "card_8"],
       "settings": {
-        "title": "Shop by category",
-        "link_text": "See all"
+        "title": "",
+        "link_text": ""
       }
     },
     "popular_this_week": {
@@ -47,14 +49,6 @@
         "preset_type": "popular",
         "products_to_show": 6,
         "carousel": false
-      }
-    },
-    "weekend_deals": {
-      "type": "karthika-mini-promo",
-      "settings": {
-        "title": "Weekend Deals",
-        "subtitle": "Up to 30% off on top brands",
-        "button_label": "View offers"
       }
     },
     "todays_deals": {
@@ -111,9 +105,9 @@
   },
   "order": [
     "desktop_home",
-    "promo_banner",
-    "category_discovery",
-    "weekend_deals",
+    "quick_tabs",
+    "festive_ad_banner",
+    "featured_grid",
     "popular_this_week",
     "todays_deals",
     "kerala_favourites",

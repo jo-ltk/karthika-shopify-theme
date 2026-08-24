@@ -1,0 +1,50 @@
+{%- comment -%}
+  Karthika Ad Banner — small festive/sale banner, sits below the quick tabs.
+{%- endcomment -%}
+
+<a
+  href="{{ section.settings.link | default: routes.all_products_collection_url }}"
+  class="karthika-ad-banner"
+  style="background-color: {{ section.settings.background_color | default: '#EAF4DE' }};"
+>
+  {%- if section.settings.video_url != blank -%}
+    <video
+      class="karthika-ad-banner-video"
+      src="{{ section.settings.video_url }}"
+      autoplay
+      muted
+      loop
+      playsinline
+      aria-hidden="true"
+    ></video>
+    <span class="karthika-ad-banner-video-overlay" aria-hidden="true"></span>
+  {%- endif -%}
+  <div class="karthika-ad-banner-copy">
+    {%- if section.settings.eyebrow != blank -%}
+      <span class="karthika-ad-banner-eyebrow">{{ section.settings.eyebrow }}</span>
+    {%- endif -%}
+    <h2 class="karthika-ad-banner-title">{{ section.settings.title | default: 'Poli Onam Sale' }}</h2>
+    {%- if section.settings.subtitle != blank -%}
+      <p class="karthika-ad-banner-subtitle">{{ section.settings.subtitle }}</p>
+    {%- endif -%}
+  </div>
+</a>
+
+{% schema %}
+{
+  "name": "Karthika Ad Banner",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow text" },
+    { "type": "text", "id": "title", "label": "Title", "default": "Poli Onam Sale" },
+    { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Festive savings on Sadya essentials" },
+    { "type": "url", "id": "link", "label": "Link" },
+    { "type": "text", "id": "video_url", "label": "Background video URL (dummy/placeholder)", "default": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
+    { "type": "color", "id": "background_color", "label": "Background color (fallback / behind video)", "default": "#EAF4DE" }
+  ],
+  "presets": [
+    { "name": "Karthika Ad Banner" }
+  ]
+}
+{% endschema %}

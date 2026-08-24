@@ -1,0 +1,83 @@
+{%- comment -%}
+  Karthika Quick Tabs — horizontal row of 5 mood/category tabs directly under the search bar.
+{%- endcomment -%}
+
+<div class="karthika-quick-tabs" id="KarthikaQuickTabs-{{ section.id }}" role="tablist" aria-label="{{ section.settings.title | default: 'Shop by mood' | escape }}">
+  {%- for block in section.blocks -%}
+    <button
+      type="button"
+      class="karthika-quick-tab{% if forloop.first %} is-active{% endif %}"
+      role="tab"
+      aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+      data-tab-link="{{ block.settings.link | default: routes.all_products_collection_url }}"
+      {{ block.shopify_attributes }}
+    >
+      <span class="karthika-quick-tab-icon" aria-hidden="true">
+        {%- if block.settings.image != blank -%}
+          <img src="{{ block.settings.image | image_url: width: 80 }}" alt="" width="24" height="24" loading="lazy">
+        {%- else -%}
+          {{ block.settings.icon | default: '🛒' }}
+        {%- endif -%}
+      </span>
+      <span class="karthika-quick-tab-label">{{ block.settings.label | default: 'Tab' }}</span>
+    </button>
+  {%- endfor -%}
+</div>
+
+<script>
+  (function () {
+    var wrap = document.getElementById('KarthikaQuickTabs-{{ section.id }}');
+    if (!wrap) return;
+    var tabs = wrap.querySelectorAll('.karthika-quick-tab');
+    wrap.addEventListener('click', function (event) {
+      var tab = event.target.closest('.karthika-quick-tab');
+      if (!tab) return;
+      tabs.forEach(function (t) {
+        t.classList.toggle('is-active', t === tab);
+        t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+      });
+      var link = tab.getAttribute('data-tab-link');
+      if (link) window.location.href = link;
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Karthika Quick Tabs",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Accessible title",
+      "default": "Shop by mood"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab_item",
+      "name": "Tab",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "All" },
+        { "type": "text", "id": "icon", "label": "Icon (emoji)", "default": "🛒" },
+        { "type": "image_picker", "id": "image", "label": "Icon image (optional, overrides emoji)" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Karthika Quick Tabs",
+      "blocks": [
+        { "type": "tab_item", "settings": { "label": "All", "icon": "🛍️" } },
+        { "type": "tab_item", "settings": { "label": "Electronics", "icon": "🎧" } },
+        { "type": "tab_item", "settings": { "label": "50% Off", "icon": "🏷️" } },
+        { "type": "tab_item", "settings": { "label": "Monsoon", "icon": "☔" } },
+        { "type": "tab_item", "settings": { "label": "Beauty", "icon": "💄" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
