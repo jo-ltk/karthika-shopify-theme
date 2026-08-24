@@ -15,11 +15,13 @@
     },
     "festive_ad_banner": {
       "type": "karthika-ad-banner",
+      "blocks": {
+        "banner_1": { "type": "slide", "settings": { "image": "", "link": "", "title": "Banner 1" } },
+        "banner_2": { "type": "slide", "settings": { "image": "", "link": "", "title": "Banner 2" } }
+      },
+      "block_order": ["banner_1", "banner_2"],
       "settings": {
-        "eyebrow": "FESTIVE SALE",
-        "title": "Poli Onam Sale",
-        "subtitle": "Onam specials, Sadya essentials & festive picks",
-        "background_color": "#EAF4DE"
+        "autoplay_speed": 5
       }
     },
     "featured_grid": {

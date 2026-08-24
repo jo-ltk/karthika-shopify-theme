@@ -13,45 +13,33 @@
   {%- endif -%}
 
   <div class="karthika-feature-grid">
-    {%- for block in section.blocks -%}
-      <a
-        href="{{ block.settings.link | default: routes.all_products_collection_url }}"
-        class="karthika-feature-card"
-        style="background-color: {{ block.settings.bg_color | default: '#EAF4DE' }};"
-        {{ block.shopify_attributes }}
-      >
-        <span class="karthika-feature-card-label">{{ block.settings.title | default: 'Collection' }}</span>
-        {%- if block.settings.image != blank -%}
-          <img
-            src="{{ block.settings.image | image_url: width: 300 }}"
-            alt="{{ block.settings.title | escape }}"
-            class="karthika-feature-card-img"
-            width="120"
-            height="120"
-            loading="lazy"
-          >
-        {%- elsif block.settings.demo_image_url != blank -%}
-          <img
-            src="{{ block.settings.demo_image_url }}"
-            alt="{{ block.settings.title | escape }}"
-            class="karthika-feature-card-img"
-            width="120"
-            height="120"
-            loading="lazy"
-            onerror="this.style.display='none'"
-          >
-        {%- endif -%}
-      </a>
-    {%- endfor -%}
+    <a href="{{ routes.all_products_collection_url }}" class="karthika-feature-card karthika-feature-card--masala">
+      <span class="karthika-feature-card-copy">
+        <strong class="karthika-feature-card-label">Masala<br>Snacks</strong>
+        <span class="karthika-feature-card-description">Spicy &amp; crunchy<br>favorites</span>
+      </span>
+      <span class="karthika-feature-card-arrow" aria-hidden="true">&#8594;</span>
+      <img src="{{ 'masala-snacks.png' | asset_url }}" alt="Masala Snacks" class="karthika-feature-card-img" width="300" height="275" loading="lazy">
+    </a>
+    <a href="{{ routes.all_products_collection_url }}" class="karthika-feature-card karthika-feature-card--dairy">
+      <span class="karthika-feature-card-copy">
+        <strong class="karthika-feature-card-label">Dairy<br>Delights</strong>
+        <span class="karthika-feature-card-description">Fresh &amp; pure<br>essentials</span>
+      </span>
+      <span class="karthika-feature-card-arrow" aria-hidden="true">&#8594;</span>
+      <img src="{{ 'dairy-delights.png' | asset_url }}" alt="Dairy Delights" class="karthika-feature-card-img" width="300" height="275" loading="lazy">
+    </a>
+    <a href="{{ routes.all_products_collection_url }}" class="karthika-feature-card karthika-feature-card--home">
+      <span class="karthika-feature-card-copy">
+        <strong class="karthika-feature-card-label">Home<br>Essentials</strong>
+        <span class="karthika-feature-card-description">Everything for<br>your home</span>
+      </span>
+      <span class="karthika-feature-card-arrow" aria-hidden="true">&#8594;</span>
+      <img src="{{ 'home-essentials.png' | asset_url }}" alt="Home Essentials" class="karthika-feature-card-img" width="300" height="200" loading="lazy">
+    </a>
   </div>
-
-  <a href="{{ routes.all_products_collection_url }}" class="karthika-rakhi-banner" aria-label="Shop Raksha Bandhan gifts">
-    <span class="karthika-rakhi-banner-copy">
-      <span>Gifts for the ones you love</span>
-      <strong>Celebrate Raksha Bandhan</strong>
-    </span>
-    <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=260&q=85" alt="Gift boxes for Raksha Bandhan" width="150" height="92" loading="lazy">
-    <span class="karthika-rakhi-banner-arrow" aria-hidden="true">&#8594;</span>
+  <a href="{{ routes.all_products_collection_url }}" class="karthika-feature-banner">
+    <img src="{{ 'raksha-bandhan-banner.png' | asset_url }}" alt="Gifts for the ones you love - Celebrate Raksha Bandhan" width="766" height="154" loading="lazy">
   </a>
 </div>
 

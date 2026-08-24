@@ -58,7 +58,7 @@
   --karthika-home-section-gap: 8px;
 
   /* ---- Typography ---- */
-  --karthika-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --karthika-font-sans: 'Gilroy', sans-serif;
   --karthika-weight-regular: 400;
   --karthika-weight-medium: 500;
   --karthika-weight-semibold: 600;
@@ -76,6 +76,18 @@ body {
   margin: 0;
   padding: 0;
   padding-bottom: calc(var(--karthika-bottom-nav-height) + 28px + env(safe-area-inset-bottom, 16px));
+}
+
+.karthika-app-container {
+  --font-body-family: var(--karthika-font-sans);
+  --font-heading-family: var(--karthika-font-sans);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
 
 /* Categories browser: a compact extension of the Karthika mobile app. */
@@ -101,7 +113,7 @@ body {
 @media screen and (min-width: 769px) {
   body:has(.karthika-collections-desktop) #shopify-section-main { display: none; }
 
-  .karthika-collections-desktop { --kc-ink: #151515; --kc-muted: #70706b; --kc-red: #b40000; --kc-yellow: #ffd200; --kc-green: #087443; display: block; min-height: 100vh; background: #f5f5f1; color: var(--kc-ink); font-family: 'Geist', sans-serif; }
+  .karthika-collections-desktop { --kc-ink: #151515; --kc-muted: #70706b; --kc-red: #b40000; --kc-yellow: #ffd200; --kc-green: #087443; display: block; min-height: 100vh; background: #f5f5f1; color: var(--kc-ink); font-family: var(--karthika-font-sans); }
   .karthika-collections-desktop__inner { width: min(1320px, calc(100% - 56px)); margin: 0 auto; padding: 24px 0 72px; }.karthika-collections-desktop__breadcrumb { display: flex; gap: 9px; align-items: center; margin-bottom: 20px; color: var(--kc-muted); font-size: 11px; }.karthika-collections-desktop__breadcrumb a { color: inherit; text-decoration: none; }.karthika-collections-desktop__breadcrumb strong { color: var(--kc-ink); }
   .karthika-collections-desktop__intro { display: flex; align-items: center; justify-content: space-between; min-height: 250px; padding: 42px clamp(28px, 5vw, 76px); overflow: hidden; border-radius: 24px; background: var(--kc-green); color: #fff; }.karthika-collections-desktop__intro h1 { max-width: 560px; margin: 10px 0 12px; font-size: clamp(42px, 5vw, 68px); line-height: .98; letter-spacing: 0; text-transform: uppercase; }.karthika-collections-desktop__intro p { max-width: 490px; margin: 0; color: rgba(255,255,255,.84); font-size: 15px; line-height: 1.5; }.karthika-collections-desktop__eyebrow { color: var(--kc-yellow); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }.karthika-collections-desktop__intro-accent { color: var(--kc-yellow); font-size: 240px; font-weight: 700; line-height: .7; opacity: .9; transform: rotate(-8deg); }
   .karthika-collections-desktop__toolbar { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 42px 2px 20px; }.karthika-collections-desktop__toolbar h2 { margin: 7px 0 0; font-size: 28px; letter-spacing: 0; }.karthika-collections-desktop__search-control { display: flex; align-items: center; gap: 12px; color: var(--kc-muted); font-size: 12px; }.karthika-collections-desktop__search-control input { width: 230px; padding: 12px 16px; border: 1px solid #deded8; border-radius: 999px; background: #fff; color: var(--kc-ink); font: inherit; }.karthika-collections-desktop__search-control input:focus { outline: 2px solid var(--kc-yellow); outline-offset: 2px; }
@@ -118,7 +130,7 @@ body {
 
 @media screen and (min-width: 769px) {
   .karthika-category-desktop-section { display: block; }
-  .karthika-category-desktop { --kd-ink: #111111; --kd-muted: #6b6b6b; --kd-green: #087443; --kd-red: #b40000; --kd-yellow: #ffd200; --kd-bg: #f7f7f5; background: var(--kd-bg); color: var(--kd-ink); font-family: 'Geist', sans-serif; }
+  .karthika-category-desktop { --kd-ink: #111111; --kd-muted: #6b6b6b; --kd-green: #087443; --kd-red: #b40000; --kd-yellow: #ffd200; --kd-bg: #f7f7f5; background: var(--kd-bg); color: var(--kd-ink); font-family: var(--karthika-font-sans); }
   .karthika-category-desktop__header { display: flex; align-items: center; gap: 38px; min-height: 76px; padding: 0 max(28px, calc((100% - 1320px) / 2)); background: #fff; border-bottom: 1px solid #ecece8; }
   .karthika-category-desktop__logo { display: flex; flex-direction: column; color: var(--kd-red); text-decoration: none; line-height: .9; min-width: 118px; }
   .karthika-category-desktop__logo strong { font-size: 22px; letter-spacing: .02em; }.karthika-category-desktop__logo span { color: #111; font-size: 8px; letter-spacing: .42em; margin-top: 5px; }
@@ -149,7 +161,7 @@ body {
   max-width: none;
   margin-left: auto;
   margin-right: auto;
-  background-color: var(--karthika-bg-body);
+  background-color: #FFFFFF;
   min-height: 100vh;
   box-sizing: border-box;
   padding: 0 0 28px 0;
@@ -198,7 +210,7 @@ body {
     z-index: 100;
     color: #111111;
     background: #ffffff;
-    font-family: 'Geist', sans-serif;
+    font-family: var(--karthika-font-sans);
   }
 
   .karthika-desktop-header__utility {
@@ -381,8 +393,8 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--karthika-bg-body);
-  padding: 16px 16px 8px;
+  background: #FFFFFF;
+  padding: 12px 16px 8px;
   box-shadow: none;
   box-sizing: border-box;
 }
@@ -393,8 +405,8 @@ body {
   justify-content: space-between;
   gap: 16px;
   width: 100%;
-  min-height: 48px;
-  margin-bottom: 14px;
+  min-height: 56px;
+  margin-bottom: 0;
 }
 
 .karthika-delivery-strip {
@@ -416,7 +428,7 @@ body {
   flex: 1;
   min-width: 0;
   flex-direction: column;
-  gap: 2px;
+  gap: 0px;
 }
 
 .karthika-delivery-pin {
@@ -426,18 +438,20 @@ body {
 }
 
 .karthika-delivery-label {
-  color: var(--karthika-text-dark);
-  font-size: 20px;
-  font-weight: var(--karthika-weight-heavy);
-  line-height: 1.1;
+  color: var(--karthika-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .karthika-delivery-address {
   display: block;
-  color: var(--karthika-text-muted);
-  font-size: 14px;
-  font-weight: var(--karthika-weight-medium);
-  line-height: 1.25;
+  color: var(--karthika-text-dark);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -448,46 +462,144 @@ body {
   height: 18px;
   color: var(--karthika-text-muted);
   stroke-width: 2.5;
+  flex-shrink: 0;
 }
 
-.karthika-header-profile {
-  display: grid;
+/* --- Header Icons Container --- */
+.karthika-header-icons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   flex: 0 0 auto;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: #343B32;
-  color: #FFFFFF;
-  text-decoration: none;
 }
 
-.karthika-header-profile svg {
-  width: 28px;
-  height: 28px;
+/* --- Account Button --- */
+.karthika-header-account {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  color: #222222;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease;
+}
+
+.karthika-header-account:hover {
+  opacity: 0.7;
+}
+
+.karthika-header-account:active {
+  opacity: 0.5;
+}
+
+.karthika-header-account svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- Bell Notification Icon --- */
+.karthika-header-notification {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  color: #222222;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  transition: opacity 0.2s ease;
+}
+
+.karthika-header-notification:hover {
+  opacity: 0.7;
+}
+
+.karthika-header-notification:active {
+  opacity: 0.5;
+}
+
+.karthika-header-notification svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- Cart Icon --- */
+.karthika-header-cart-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  color: #222222;
+  text-decoration: none;
+  border: none;
+  position: relative;
+  padding: 0;
+  transition: opacity 0.2s ease;
+}
+
+.karthika-header-cart-icon:hover {
+  opacity: 0.7;
+}
+
+.karthika-header-cart-icon:active {
+  opacity: 0.5;
+}
+
+.karthika-header-cart-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- Badges for Cart and Notifications --- */
+.karthika-header-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #D32F2F;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border: 2px solid #FFFFFF;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .karthika-header-search {
   width: 100%;
-  height: 56px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: var(--karthika-bg-white);
-  border: 1px solid var(--karthika-border);
-  border-radius: var(--karthika-radius-md);
-  padding: 0 18px 0 22px;
+  background: #F5F5F5;
+  border: 1px solid #E0E0E0;
+  border-radius: 12px;
+  padding: 0 16px;
   cursor: pointer;
   user-select: none;
-  box-shadow: var(--karthika-shadow-subtle);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-sizing: border-box;
+  margin-top: 6px;
 }
 
 .karthika-header-search:hover {
-  background: var(--karthika-bg-white);
-  border-color: #CAD8BA;
+  background: #F5F5F5;
+  border-color: #D0D0D0;
 }
 
 .karthika-header-search:focus-visible {
@@ -496,16 +608,24 @@ body {
 }
 
 .karthika-search-icon {
-  width: 27px;
-  height: 27px;
-  color: #60665C;
+  width: 22px;
+  height: 22px;
+  color: #999999;
+  flex-shrink: 0;
+  stroke-width: 2;
+}
+
+.karthika-search-barcode {
+  width: 22px;
+  height: 22px;
+  color: #2D5016;
   flex-shrink: 0;
   stroke-width: 2;
 }
 
 .karthika-search-placeholder {
-  font-size: 17px;
-  color: #888F84;
+  font-size: 15px;
+  color: #999999;
   font-weight: var(--karthika-weight-regular);
   white-space: nowrap;
   overflow: hidden;
@@ -513,52 +633,6 @@ body {
   flex: 1;
   min-width: 0;
   line-height: 1;
-}
-
-/* --- Cart (Right) --- */
-.karthika-header-cart {
-  flex-shrink: 0;
-  position: relative;
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  color: #222222;
-  border-radius: 50%;
-  transition: background 0.15s ease;
-}
-
-.karthika-header-cart:hover {
-  background: #F2F2F0;
-}
-
-.karthika-header-cart svg {
-  width: 22px;
-  height: 22px;
-  stroke-width: 1.8;
-}
-
-.karthika-cart-badge {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  background: var(--karthika-red);
-  color: #FFFFFF;
-  font-size: 9.5px;
-  font-weight: 800;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  border: 1.5px solid #FFFFFF;
-  box-sizing: border-box;
-  letter-spacing: -0.2px;
 }
 
 /* ==========================================================================
@@ -619,8 +693,9 @@ body {
    3. MODERN GROCERY-APP HERO CAROUSEL
    ========================================================================== */
 .karthika-promo-banner-wrap {
+  display: block;
   margin-top: 0;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
   padding: 0 !important;
   position: relative;
   box-sizing: border-box;
@@ -633,15 +708,25 @@ body {
   overflow: hidden;
   touch-action: pan-y pinch-zoom;
   user-select: none;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+  box-shadow: none;
   background-color: #1A1A1A;
 }
 
 .karthika-carousel-track {
   display: flex;
   width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 1;
   transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: transform;
+  overflow: hidden;
+  position: relative;
+}
+
+@media screen and (min-width: 750px) {
+  .karthika-ad-carousel-track {
+    height: 250px;
+  }
 }
 
 .karthika-carousel-slide {
@@ -649,7 +734,7 @@ body {
   width: 100%;
   min-width: 100%;
   position: relative;
-  height: 220px;
+  height: 100%;
   overflow: hidden;
   background-color: #1A3A1A;
   display: block;
@@ -659,7 +744,7 @@ body {
 
 @media screen and (min-width: 750px) {
   .karthika-carousel-slide {
-    height: 280px;
+    height: 100%;
   }
 }
 
@@ -669,8 +754,9 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center center;
+  background-color: #FFFFFF;
   z-index: 1;
   transition: transform 0.6s ease;
 }
@@ -681,6 +767,7 @@ body {
 
 /* Subtle, high-legibility ambient gradient overlay - keeps grocery imagery dominant */
 .karthika-promo-overlay {
+  display: none;
   position: absolute;
   inset: 0;
   background: linear-gradient(
@@ -694,12 +781,12 @@ body {
 }
 
 .karthika-promo-content {
+  display: none;
   position: relative;
   z-index: 3;
   padding: 18px 20px;
   max-width: 64%;
   color: #FFFFFF;
-  display: flex;
   flex-direction: column;
   justify-content: center;
   height: 100%;
@@ -798,16 +885,26 @@ body {
 
 /* Minimalist Pagination Pill */
 .karthika-carousel-pagination {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  padding: 8px 0 0 0;
+  position: absolute;
+  right: 0;
+  bottom: 6px;
+  left: 0;
+  z-index: 4;
+  padding: 0;
+  pointer-events: none;
+}
+
+.karthika-carousel-pagination .karthika-carousel-dot {
+  pointer-events: auto;
 }
 
 .karthika-carousel-dot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: var(--karthika-radius-pill);
   background-color: #D6D6D2;
   border: none;
@@ -818,7 +915,7 @@ body {
 
 .karthika-carousel-dot.is-active {
   width: 18px;
-  height: 5px;
+  height: 6px;
   background-color: var(--karthika-red, #B40000);
 }
 
@@ -826,7 +923,8 @@ body {
    4. CATEGORY DISCOVERY (HORIZONTAL PHOTO SCROLL)
    ========================================================================== */
 .karthika-category-section {
-  margin-bottom: 4px;
+  margin-top: 0;
+  margin-bottom: 2px;
 }
 
 .shopify-section:has(.karthika-category-section) + .shopify-section:has(.karthika-mini-promo),
@@ -905,8 +1003,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 18px;
-  margin-bottom: 12px;
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 .karthika-section-head--compact {
@@ -924,7 +1022,7 @@ body {
 }
 
 .karthika-section-head-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--karthika-text-dark);
   margin: 0;
@@ -954,9 +1052,13 @@ body {
    ========================================================================== */
 .karthika-two-col-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 24px;
+}
+
+.karthika-two-col-grid > * {
+  min-width: 0;
 }
 
 .karthika-product-section--carousel .karthika-two-col-grid {
@@ -2964,7 +3066,7 @@ body {
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  padding: 4px 0 10px;
+  padding: 4px 0 4px;
   margin-bottom: 0;
 }
 .karthika-quick-tab {
@@ -3009,97 +3111,167 @@ body {
   border-bottom-color: var(--karthika-red);
 }
 
-.karthika-ad-banner {
+.karthika-ad-banner-carousel {
   position: relative;
-  display: flex;
-  align-items: center;
-  min-height: 88px;
+  margin-top: -6px;
   margin-bottom: 12px;
-  padding: 14px 18px;
-  border-radius: var(--karthika-radius-md);
   overflow: hidden;
-  text-decoration: none;
-  box-shadow: var(--karthika-shadow-card);
-}
-.karthika-ad-banner-video {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  background: white;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.karthika-ad-banner-video-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: linear-gradient(100deg, rgba(234,244,222,0.92) 40%, rgba(234,244,222,0.35) 100%);
-}
-.karthika-ad-banner-copy { position: relative; z-index: 1; max-width: 68%; }
-.karthika-ad-banner-eyebrow {
-  display: inline-block;
-  margin-bottom: 4px;
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--karthika-red);
-}
-.karthika-ad-banner-title {
-  margin: 0 0 4px;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 19px;
-  line-height: 1.1;
-  font-weight: 700;
-  color: #2C4B1F;
-}
-.karthika-ad-banner-subtitle {
-  margin: 0;
-  font-size: 11.5px;
-  line-height: 1.3;
-  color: var(--karthika-text-muted);
-  font-weight: 500;
 }
 
-.karthika-feature-grid-wrap { margin-bottom: 18px; }
-.karthika-feature-grid {
+.karthika-ad-carousel-track {
   display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 1;
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
 }
-.karthika-feature-grid::-webkit-scrollbar { display: none; }
+
+.karthika-ad-carousel-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 100%;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+@media screen and (min-width: 750px) {
+  .karthika-ad-carousel-slide {
+    height: 100%;
+  }
+}
+
+.karthika-ad-banner-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  background-color: #FFFFFF;
+  z-index: 1;
+  transition: transform 0.6s ease;
+}
+
+.karthika-ad-carousel-slide:hover .karthika-ad-banner-img {
+  transform: scale(1.02);
+}
+
+/* Pagination Dots for Ad Banner */
+.karthika-ad-carousel-pagination {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0 0 0;
+}
+
+.karthika-ad-carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #D6D6D2;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.karthika-ad-carousel-dot.is-active {
+  width: 18px;
+  height: 6px;
+  background-color: var(--karthika-red, #B40000);
+}
+
+.karthika-feature-grid-wrap { margin-bottom: 4px; }
+.karthika-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
 .karthika-feature-card {
   position: relative;
-  flex: 0 0 132px;
-  height: 150px;
+  min-width: 0;
+  aspect-ratio: 0.78;
+  height: auto;
   overflow: hidden;
-  border-radius: var(--karthika-radius-md);
+  border-radius: 24px;
   border: 1px solid rgba(31, 41, 21, 0.08);
   text-decoration: none;
   box-shadow: var(--karthika-shadow-subtle);
   box-sizing: border-box;
 }
+.karthika-feature-card--masala { background: #fff1c9; }
+.karthika-feature-card--dairy { background: #edf5e4; }
+.karthika-feature-card--home { background: #eeecfb; }
+.karthika-feature-card-copy { position: relative; z-index: 2; display: block; max-width: 100%; padding: 16px 13px 0; }
 .karthika-feature-card-label {
-  position: relative;
-  z-index: 2;
   display: block;
-  padding: 14px 12px 0;
-  font-size: 13.5px;
+  font-family: var(--karthika-font-sans);
+  font-size: 15px;
   font-weight: 700;
-  line-height: 1.2;
-  color: var(--karthika-text-dark);
+  line-height: 1.08;
+  color: #111;
 }
+.karthika-feature-card-description {
+  display: block;
+  margin-top: 5px;
+  font-size: 9px;
+  line-height: 1.35;
+  color: #3c3c36;
+  white-space: nowrap;
+}
+.karthika-feature-card-arrow {
+  position: absolute;
+  left: 12px;
+  bottom: 11px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #c38a13;
+  color: #fff;
+  font-size: 21px;
+  font-weight: 300;
+  line-height: 1;
+}
+.karthika-feature-card--dairy .karthika-feature-card-arrow { background: #8bb66f; }
+.karthika-feature-card--home .karthika-feature-card-arrow { background: #8b80c5; }
 .karthika-feature-card-img {
   position: absolute;
-  right: -8px;
-  bottom: -8px;
-  width: 76%;
-  height: 68%;
+  right: -8%;
+  bottom: -8%;
+  width: 84%;
+  height: 42%;
   object-fit: contain;
   object-position: right bottom;
   mix-blend-mode: multiply;
+}
+.karthika-feature-card--dairy .karthika-feature-card-img { right: -5%; bottom: -7%; width: 70%; height: 70%; }
+.karthika-feature-card--home .karthika-feature-card-img { right: -6%; bottom: -5%; width: 82%; height: 58%; }
+.karthika-feature-banner {
+  display: block;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 18px;
+  line-height: 0;
+}
+.karthika-feature-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .karthika-rakhi-banner {

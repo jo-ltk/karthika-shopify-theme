@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 260" role="img" aria-labelledby="title desc">
+  <title id="title">Celebrate Raksha Bandhan</title>
+  <desc id="desc">Gifts for the ones you love. Celebrate Raksha Bandhan.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#b51d58"/>
+      <stop offset="0.58" stop-color="#dc2b72"/>
+      <stop offset="1" stop-color="#f06d9a"/>
+    </linearGradient>
+    <linearGradient id="box" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ee3d93"/>
+      <stop offset="1" stop-color="#8d0750"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="0" x2="1">
+      <stop offset="0" stop-color="#ffe59b"/>
+      <stop offset="1" stop-color="#d79632"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="260" fill="url(#bg)"/>
+  <circle cx="1230" cy="130" r="48" fill="#fff6eb" opacity=".96"/>
+  <path d="M1210 130h39m-16-16 16 16-16 16" fill="none" stroke="#c01b5c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#fff8f2" font-family="Georgia, serif">
+    <text x="28" y="70" font-size="30" font-family="Arial, sans-serif">Gifts for the ones you love</text>
+    <text x="28" y="132" font-size="52" font-weight="700">Celebrate</text>
+    <text x="28" y="185" font-size="52" font-weight="700">Raksha Bandhan</text>
+  </g>
+  <g transform="translate(650 24)">
+    <path d="M40 42 166 4l204 42-125 47z" fill="#ff5aa7"/>
+    <path d="m40 42 205 51v126L40 164z" fill="url(#box)"/>
+    <path d="m245 93 125-47v126l-125 47z" fill="#a20d5e"/>
+    <path d="M214 23 276 42 213 215l-61-16z" fill="url(#ribbon)"/>
+    <path d="m40 42 205 51-3 35L38 77z" fill="url(#ribbon)"/>
+    <path d="M171 12c-36-33-89-2-66 29 18 25 54 8 67-20 4 34 36 46 56 24 26-29-20-62-57-33z" fill="#ffe2a0" stroke="#d79632" stroke-width="6"/>
+  </g>
+  <g transform="translate(535 38)" fill="none" stroke="#ffd98b" stroke-width="6">
+    <circle cx="30" cy="30" r="19"/><path d="M30 0v60M0 30h60M9 9l42 42M51 9 9 51"/>
+  </g>
+  <g transform="translate(1110 20)" fill="none" stroke="#ffd98b" stroke-width="5">
+    <circle cx="30" cy="30" r="18"/><path d="M30 4v52M4 30h52M11 11l38 38M49 11 11 49"/>
+  </g>
+</svg>

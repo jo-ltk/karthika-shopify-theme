@@ -1,50 +1,145 @@
 {%- comment -%}
-  Karthika Ad Banner — small festive/sale banner, sits below the quick tabs.
+  Karthika Ad Banner — Image carousel, sits below the quick tabs.
 {%- endcomment -%}
 
-<a
-  href="{{ section.settings.link | default: routes.all_products_collection_url }}"
-  class="karthika-ad-banner"
-  style="background-color: {{ section.settings.background_color | default: '#EAF4DE' }};"
->
-  {%- if section.settings.video_url != blank -%}
-    <video
-      class="karthika-ad-banner-video"
-      src="{{ section.settings.video_url }}"
-      autoplay
-      muted
-      loop
-      playsinline
-      aria-hidden="true"
-    ></video>
-    <span class="karthika-ad-banner-video-overlay" aria-hidden="true"></span>
-  {%- endif -%}
-  <div class="karthika-ad-banner-copy">
-    {%- if section.settings.eyebrow != blank -%}
-      <span class="karthika-ad-banner-eyebrow">{{ section.settings.eyebrow }}</span>
+<div class="karthika-ad-banner-carousel" id="AdBannerCarousel-{{ section.id }}">
+  <div class="karthika-ad-carousel-track" id="AdCarouselTrack-{{ section.id }}">
+    {%- assign has_images = false -%}
+    {%- if section.blocks.size > 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.settings.image != blank -%}
+          {%- assign has_images = true -%}
+          <a href="{{ block.settings.link | default: routes.all_products_collection_url }}" class="karthika-ad-carousel-slide" {{ block.shopify_attributes }}>
+            <img
+              src="{{ block.settings.image | image_url: width: 900 }}"
+              alt="{{ block.settings.title | default: 'Banner' | escape }}"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+              class="karthika-ad-banner-img"
+              width="900"
+              height="300"
+            >
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
     {%- endif -%}
-    <h2 class="karthika-ad-banner-title">{{ section.settings.title | default: 'Poli Onam Sale' }}</h2>
-    {%- if section.settings.subtitle != blank -%}
-      <p class="karthika-ad-banner-subtitle">{{ section.settings.subtitle }}</p>
+
+    {%- if has_images == false -%}
+      <!-- Default Banners -->
+      <a href="{{ routes.all_products_collection_url }}" class="karthika-ad-carousel-slide">
+        <img 
+          src="{{ 'banner-1.png' | asset_url }}"
+          alt="Banner 1" 
+          class="karthika-ad-banner-img" 
+          loading="eager" 
+          width="900" 
+          height="300"
+        >
+      </a>
+      <a href="{{ routes.all_products_collection_url }}" class="karthika-ad-carousel-slide">
+        <img 
+          src="{{ 'banner-2.png' | asset_url }}"
+          alt="Banner 2" 
+          class="karthika-ad-banner-img" 
+          loading="lazy" 
+          width="900" 
+          height="300"
+        >
+      </a>
     {%- endif -%}
   </div>
-</a>
+
+  <!-- Pagination Dots -->
+  <div class="karthika-ad-carousel-pagination" id="AdCarouselDots-{{ section.id }}" role="tablist" aria-label="Banner Carousel Dots">
+    {%- assign slide_count = section.blocks.size -%}
+    {%- if slide_count == 0 -%}{%- assign slide_count = 2 -%}{%- endif -%}
+    {%- for i in (1..slide_count) -%}
+      {%- assign idx = forloop.index0 -%}
+      <button
+        type="button"
+        class="karthika-ad-carousel-dot {% if forloop.first %}is-active{% endif %}"
+        aria-label="Slide {{ i }}"
+        data-index="{{ idx }}"
+      ></button>
+    {%- endfor -%}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sectionWrap = document.getElementById('AdBannerCarousel-{{ section.id }}');
+    if (!sectionWrap) return;
+    const track = sectionWrap.querySelector('.karthika-ad-carousel-track');
+    const dots = sectionWrap.querySelectorAll('.karthika-ad-carousel-dot');
+    if (!track || !dots.length) return;
+
+    const slides = track.querySelectorAll('.karthika-ad-carousel-slide');
+    const totalSlides = slides.length;
+    let currentIndex = 0;
+    let autoPlayTimer = null;
+
+    function goToSlide(index) {
+      if (index < 0) {
+        currentIndex = totalSlides - 1;
+      } else if (index >= totalSlides) {
+        currentIndex = 0;
+      } else {
+        currentIndex = index;
+      }
+
+      track.style.transition = 'transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)';
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('is-active', idx === currentIndex);
+      });
+    }
+
+    function startAutoPlay() {
+      autoPlayTimer = setInterval(() => {
+        goToSlide(currentIndex + 1);
+      }, {{ section.settings.autoplay_speed | default: 5 | times: 1000 }});
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+      }
+    }
+
+    dots.forEach((dot) => {
+      dot.addEventListener('click', (e) => {
+        stopAutoPlay();
+        goToSlide(parseInt(e.target.dataset.index));
+        startAutoPlay();
+      });
+    });
+
+    startAutoPlay();
+  });
+</script>
 
 {% schema %}
 {
-  "name": "Karthika Ad Banner",
+  "name": "Banner Carousel",
   "tag": "section",
   "class": "section",
   "settings": [
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow text" },
-    { "type": "text", "id": "title", "label": "Title", "default": "Poli Onam Sale" },
-    { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Festive savings on Sadya essentials" },
-    { "type": "url", "id": "link", "label": "Link" },
-    { "type": "text", "id": "video_url", "label": "Background video URL (dummy/placeholder)", "default": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
-    { "type": "color", "id": "background_color", "label": "Background color (fallback / behind video)", "default": "#EAF4DE" }
+    { "type": "number", "id": "autoplay_speed", "label": "Autoplay speed (seconds)", "default": 5 }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "url", "id": "link", "label": "Link" },
+        { "type": "text", "id": "title", "label": "Title (alt text)" }
+      ]
+    }
   ],
   "presets": [
-    { "name": "Karthika Ad Banner" }
+    { "name": "Banner Carousel" }
   ]
 }
 {% endschema %}

@@ -18,7 +18,7 @@
     </a>
   </div>
 
-  <div class="{% if section.settings.preset_type == 'popular' %}karthika-popular-mini-grid{% elsif section.settings.preset_type == 'deals' or section.settings.preset_type == 'kerala' %}karthika-deals-three-grid{% else %}karthika-two-col-grid{% endif %}">
+  <div class="{% if section.settings.preset_type == 'popular' %}karthika-popular-mini-grid{% elsif section.settings.preset_type == 'deals' or section.settings.preset_type == 'kerala' or section.settings.preset_type == 'new_arrivals' %}karthika-deals-three-grid{% else %}karthika-two-col-grid{% endif %}">
     {%- assign products_to_show = section.settings.products_to_show | default: 4 -%}
     {%- if section.settings.collection != blank and section.settings.collection.products_count > 0 -%}
       {%- for product in section.settings.collection.products limit: products_to_show -%}

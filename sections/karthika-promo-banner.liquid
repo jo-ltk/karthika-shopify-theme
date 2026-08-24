@@ -7,86 +7,37 @@
             {%- if block.settings.image != blank -%}
               <img
                 src="{{ block.settings.image | image_url: width: 900 }}"
-                alt="{{ block.settings.title | default: 'Karthika Promotion' | escape }}"
+                alt="{{ block.settings.title | default: 'Karthika Banner' | escape }}"
                 loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                 class="karthika-promo-bg-img"
                 width="900"
-                height="500"
+                height="400"
               >
-            {%- else -%}
-              {%- assign fallback_idx = forloop.index0 | modulo: 4 -%}
-              {%- case fallback_idx -%}
-                {%- when 0 -%}
-                  <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80" alt="Fresh Kerala favourites" class="karthika-promo-bg-img" loading="eager" width="900" height="500">
-                {%- when 1 -%}
-                  <img src="https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=900&q=80" alt="Farm Fresh Veggies" class="karthika-promo-bg-img" loading="lazy" width="900" height="500">
-                {%- when 2 -%}
-                  <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=900&q=80" alt="Aromatic Kerala Spices" class="karthika-promo-bg-img" loading="lazy" width="900" height="500">
-                {%- else -%}
-                  <img src="https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=900&q=80" alt="Traditional Kerala Snacks" class="karthika-promo-bg-img" loading="lazy" width="900" height="500">
-              {%- endcase -%}
             {%- endif -%}
-
-            <div class="karthika-promo-overlay"></div>
-            <div class="karthika-promo-content">
-              {%- if block.settings.badge != blank -%}
-                <span class="karthika-promo-badge {% if block.settings.badge_color != blank %}{{ block.settings.badge_color }}{% endif %}">{{ block.settings.badge }}</span>
-              {%- endif -%}
-              {%- if block.settings.title != blank -%}
-                <h2 class="karthika-promo-title">{{ block.settings.title }}</h2>
-              {%- endif -%}
-              {%- if block.settings.subtitle != blank -%}
-                <p class="karthika-promo-sub">{{ block.settings.subtitle }}</p>
-              {%- endif -%}
-              {%- if block.settings.button_text != blank -%}
-                <span class="karthika-promo-cta">{{ block.settings.button_text }}</span>
-              {%- endif -%}
-            </div>
           </a>
         {%- endfor -%}
       {%- else -%}
-        <!-- Default Fallback Slides -->
+        <!-- Banner 1 -->
         <a href="{{ routes.all_products_collection_url }}" class="karthika-carousel-slide">
-          <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80" alt="Fresh Kerala favourites" class="karthika-promo-bg-img" loading="eager" width="900" height="500">
-          <div class="karthika-promo-overlay"></div>
-          <div class="karthika-promo-content">
-            <span class="karthika-promo-badge">FRESH PICKS</span>
-            <h2 class="karthika-promo-title">Fresh groceries,
-delivered to you</h2>
-            <p class="karthika-promo-sub">Quality you trust, savings you'll love.</p>
-            <span class="karthika-promo-cta">Shop now</span>
-          </div>
+          <img 
+            src="{{ 'banner-1.png' | asset_url }}"
+            alt="Banner 1" 
+            class="karthika-promo-bg-img" 
+            loading="eager" 
+            width="900" 
+            height="400"
+          >
         </a>
+        <!-- Banner 2 -->
         <a href="{{ routes.all_products_collection_url }}" class="karthika-carousel-slide">
-          <img src="https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=900&q=80" alt="Organic & Fresh Veggies" class="karthika-promo-bg-img" loading="lazy" width="900" height="500">
-          <div class="karthika-promo-overlay"></div>
-          <div class="karthika-promo-content">
-            <span class="karthika-promo-badge badge-green">DAILY HARVEST</span>
-            <h2 class="karthika-promo-title">Organic &amp;
-Fresh Veggies</h2>
-            <p class="karthika-promo-sub">Directly sourced daily</p>
-            <span class="karthika-promo-cta">Explore Fresh</span>
-          </div>
-        </a>
-        <a href="{{ routes.all_products_collection_url }}" class="karthika-carousel-slide">
-          <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=900&q=80" alt="Handpicked Spices & Herbs" class="karthika-promo-bg-img" loading="lazy" width="900" height="500">
-          <div class="karthika-promo-overlay"></div>
-          <div class="karthika-promo-content">
-            <span class="karthika-promo-badge badge-orange">AUTHENTIC TASTE</span>
-            <h2 class="karthika-promo-title">Handpicked Spices &amp; Herbs</h2>
-            <p class="karthika-promo-sub">Pure aroma of Wayanad &amp; Idukki</p>
-            <span class="karthika-promo-cta">Shop Spices</span>
-          </div>
-        </a>
-        <a href="{{ routes.all_products_collection_url }}" class="karthika-carousel-slide">
-          <img src="https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=900&q=80" alt="Hot Banana Chips & Mix" class="karthika-promo-bg-img" loading="lazy" width="900" height="500">
-          <div class="karthika-promo-overlay"></div>
-          <div class="karthika-promo-content">
-            <span class="karthika-promo-badge badge-red">CRUNCHY DELIGHTS</span>
-            <h2 class="karthika-promo-title">Hot Banana Chips &amp; Mix</h2>
-            <p class="karthika-promo-sub">Fried in pure coconut oil</p>
-            <span class="karthika-promo-cta">Order Snacks</span>
-          </div>
+          <img 
+            src="{{ 'banner-2.png' | asset_url }}"
+            alt="Banner 2" 
+            class="karthika-promo-bg-img" 
+            loading="lazy" 
+            width="900" 
+            height="400"
+          >
         </a>
       {%- endif -%}
     </div>
@@ -95,7 +46,7 @@ Fresh Veggies</h2>
   <!-- Pagination Dots -->
   <div class="karthika-carousel-pagination" id="karthikaHeroDots-{{ section.id }}" role="tablist" aria-label="Hero Carousel Dots">
     {%- assign slide_count = section.blocks.size -%}
-    {%- if slide_count == 0 -%}{%- assign slide_count = 4 -%}{%- endif -%}
+    {%- if slide_count == 0 -%}{%- assign slide_count = 2 -%}{%- endif -%}
     {%- for i in (1..slide_count) -%}
       {%- assign idx = forloop.index0 -%}
       <button
