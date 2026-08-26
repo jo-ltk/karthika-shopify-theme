@@ -20,11 +20,11 @@
   <div class="kas-hero">
 
     <!-- Back button -->
-    <button class="kas-back-btn" id="kas-back-btn" aria-label="Go back" type="button">
+    <a class="kas-back-btn" id="kas-back-btn" href="#" aria-label="Go back">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <polyline points="15 18 9 12 15 6"></polyline>
       </svg>
-    </button>
+    </a>
 
     <!-- Decorative grocery elements (CSS-rendered emoji/shapes, no external imgs) -->
     <div class="kas-deco" aria-hidden="true">
@@ -37,8 +37,8 @@
       <span class="kas-deco__item kas-deco__orange">🍊</span>
     </div>
 
-    <!-- Central Karthiga branding -->
-    <div class="kas-brand" aria-label="Karthiga Supermarket">
+    <!-- Central Karthika branding -->
+    <div class="kas-brand" aria-label="Karthika Supermarket">
       {%- if settings.logo != blank -%}
         <img
           class="kas-brand__logo-img"
@@ -50,7 +50,7 @@
         >
       {%- else -%}
         <div class="kas-brand__wordmark">
-          <span class="kas-brand__name">Karthiga</span>
+          <span class="kas-brand__name">Karthika</span>
           <span class="kas-brand__sub">Supermarket</span>
         </div>
       {%- endif -%}

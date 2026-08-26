@@ -27,33 +27,67 @@
     },
 
     async init() {
-      await this.refreshCartState();
+      await this.refreshCartState(true);
       this.bindEvents();
       this.bindCartSummary();
       this.bindScrollNavigation();
       this.syncAllSteppers();
     },
 
-    async refreshCartState() {
+    async refreshCartState(isInit = false) {
       try {
         const response = await fetch(this.getCartEndpoint('cart'));
         if (!response.ok) return;
         const cart = await response.json();
-        this.state.item_count = cart.item_count || 0;
-        this.state.total_price = cart.total_price || 0;
-        this.state.items = cart.items || [];
-
-        this.state.variantMap = {};
-        this.state.items.forEach((item) => {
-          this.state.variantMap[item.variant_id] = item.quantity || 0;
-        });
-
-        this.updateBadges();
-        this.syncAllSteppers();
-        document.dispatchEvent(new CustomEvent('karthika:cart-updated', { detail: cart }));
+        this.processCartData(cart, isInit);
       } catch (err) {
         console.warn('[Karthika Cart] Refresh warning:', err);
       }
+    },
+
+    processCartData(cart, isInit = false) {
+      let recents = [];
+      try {
+        recents = JSON.parse(localStorage.getItem('karthika_recent_variants')) || [];
+      } catch(e) {}
+      
+      if (!isInit) {
+        let updatedIds = [];
+        cart.items.forEach((item) => {
+          if (item.quantity > (this.state.variantMap[item.variant_id] || 0)) {
+            updatedIds.push(item.variant_id);
+          }
+        });
+        recents = recents.filter(id => !updatedIds.includes(id));
+        recents = [...updatedIds, ...recents];
+      }
+      
+      const cartVariantIds = cart.items.map(i => i.variant_id);
+      recents = recents.filter(id => cartVariantIds.includes(id));
+      
+      cartVariantIds.forEach(id => {
+        if (!recents.includes(id)) {
+          recents.push(id);
+        }
+      });
+      
+      try {
+        localStorage.setItem('karthika_recent_variants', JSON.stringify(recents));
+      } catch(e) {}
+      
+      this.state.recentVariantIds = recents;
+      this.state.item_count = cart.item_count || 0;
+      this.state.total_price = cart.total_price || 0;
+      this.state.items = cart.items || [];
+
+      this.state.variantMap = {};
+      this.state.items.forEach((item) => {
+        this.state.variantMap[item.variant_id] = item.quantity || 0;
+      });
+
+      this.updateBadges();
+      this.syncAllSteppers();
+      document.dispatchEvent(new CustomEvent('karthika:cart-updated', { detail: cart }));
     },
 
     updateBadges() {
@@ -161,8 +195,8 @@
       if (window.PUB_SUB_EVENTS && typeof subscribe === 'function') {
         subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
           const cart = event?.cartData;
-          if (cart?.items) this.renderCartSummary(cart, summary);
-          else this.refreshCartState();
+          if (cart?.items) this.processCartData(cart, false);
+          else this.refreshCartState(false);
         });
       }
 
@@ -178,7 +212,16 @@
 
       if (countEl) countEl.textContent = `${count} ITEMS`;
       if (thumbnailsEl) {
-        const images = (cart?.items || []).slice(0, 3).filter((item) => item.image).map((item) => {
+        const recents = this.state.recentVariantIds || [];
+        const sortedItems = [...(cart?.items || [])].sort((a, b) => {
+          const indexA = recents.indexOf(a.variant_id);
+          const indexB = recents.indexOf(b.variant_id);
+          const posA = indexA === -1 ? 999 : indexA;
+          const posB = indexB === -1 ? 999 : indexB;
+          return posB - posA;
+        });
+
+        const images = sortedItems.filter((item) => item.image).slice(0, 3).map((item) => {
           const image = document.createElement('img');
           image.src = item.image;
           image.alt = '';
@@ -537,6 +580,14 @@
       document.addEventListener('click', (e) => {
         const trigger = e.target.closest('.karthika-account-trigger');
         if (!trigger) return;
+
+        // Signed-in customers go straight to Shopify's native account page.
+        // The branded overlay is reserved for the guest sign-in entry point.
+        if (trigger.dataset.customerState === 'signed-in') {
+          const href = trigger.dataset.accountHref;
+          if (href) window.location.href = href;
+          return;
+        }
 
         if (!isMobile()) {
           // On desktop let the browser navigate to the account/login URL

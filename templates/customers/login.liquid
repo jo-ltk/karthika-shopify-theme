@@ -1,0 +1,47 @@
+<div class="karthika-auth-page">
+  <div class="karthika-auth-hero">
+    <a class="karthika-auth-back" href="{{ routes.root_url }}" aria-label="Back to home">&larr;</a>
+    <div class="karthika-auth-decor" aria-hidden="true"><span>Tomato</span><span>Lemon</span><span>Apple</span></div>
+    <div class="karthika-auth-brand">
+      {% if settings.logo != blank %}
+        <img src="{{ settings.logo | image_url: width: 280 }}" alt="{{ shop.name | escape }}" width="140" height="50">
+      {% else %}
+        <strong>Karthika</strong><small>Supermarket</small>
+      {% endif %}
+    </div>
+  </div>
+
+  <section class="karthika-auth-panel" aria-labelledby="KarthikaLoginTitle">
+    <h1 id="KarthikaLoginTitle">Welcome back</h1>
+    <p>Log in to view your orders and saved addresses.</p>
+    {% form 'customer_login', class: 'karthika-auth-form' %}
+      {% if form.errors %}<div class="karthika-form-message" role="alert">{{ form.errors | default_errors }}</div>{% endif %}
+      <label for="CustomerEmail">Email address</label>
+      <input id="CustomerEmail" type="email" name="customer[email]" autocomplete="email" required>
+      <label for="CustomerPassword">Password</label>
+      <input id="CustomerPassword" type="password" name="customer[password]" autocomplete="current-password" required>
+      <button class="karthika-primary-button" type="submit">Login</button>
+    {% endform %}
+    {% if shop.customer_accounts_enabled %}
+      <a class="karthika-auth-text-link" href="{{ routes.account_register_url }}">Create an account</a>
+    {% endif %}
+    <button class="karthika-auth-text-link karthika-recovery-toggle" type="button" aria-expanded="false" aria-controls="KarthikaRecovery">Forgot password?</button>
+    <div id="KarthikaRecovery" class="karthika-recovery" hidden>
+      {% form 'recover_customer_password', class: 'karthika-auth-form' %}
+        {% if form.posted_successfully? %}<p class="karthika-form-success">Check your email for password reset instructions.</p>{% endif %}
+        <label for="RecoverEmail">Email address</label>
+        <input id="RecoverEmail" type="email" name="email" autocomplete="email" required>
+        <button class="karthika-secondary-button" type="submit">Send recovery email</button>
+      {% endform %}
+    </div>
+    <p class="karthika-auth-legal">By continuing, you accept the <a href="/policies/terms-of-service">terms of service</a> and <a href="/policies/privacy-policy">privacy policy</a>.</p>
+  </section>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var toggle = document.querySelector('.karthika-recovery-toggle');
+    var panel = document.getElementById('KarthikaRecovery');
+    if (toggle && panel) toggle.addEventListener('click', function () { var open = panel.hidden; panel.hidden = !open; toggle.setAttribute('aria-expanded', String(open)); });
+  });
+</script>

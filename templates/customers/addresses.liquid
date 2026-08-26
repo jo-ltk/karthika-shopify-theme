@@ -1,0 +1,38 @@
+{{ 'customer.js' | asset_url | script_tag }}
+
+<div class="karthika-account-page karthika-address-page" data-customer-addresses>
+  <header class="karthika-account-page__header">
+    <a class="karthika-account-page__back" href="{{ routes.account_url }}" aria-label="Back to account">&larr;</a>
+    <div><p>My account</p><h1>Saved Addresses</h1></div>
+  </header>
+
+  <section class="karthika-account-section">
+    <button class="karthika-primary-button karthika-address-toggle" type="button" aria-expanded="false" aria-controls="KarthikaNewAddress">Add address</button>
+    <div id="KarthikaNewAddress" class="karthika-address-form" data-address hidden>
+      {% form 'customer_address', customer.new_address %}
+        {% render 'karthika-address-fields', address: customer.new_address, form_id: 'New' %}
+        <div class="karthika-address-form__actions"><button class="karthika-primary-button" type="submit">Save address</button><button class="karthika-secondary-button" type="reset">Cancel</button></div>
+      {% endform %}
+    </div>
+  </section>
+
+  <section class="karthika-account-section">
+    <div class="karthika-address-list">
+      {% for address in customer.addresses %}
+        <article class="karthika-address-card" data-address>
+          <div class="karthika-address-card__summary"><div><strong>{% if address == customer.default_address %}Home{% elsif address.company != blank %}Work{% else %}Other{% endif %}</strong>{% if address == customer.default_address %}<span>Default</span>{% endif %}</div><p>{{ address | format_address }}</p></div>
+          <button class="karthika-address-edit" type="button" aria-expanded="false" aria-controls="KarthikaEditAddress{{ address.id }}">Edit</button>
+          <div id="KarthikaEditAddress{{ address.id }}" class="karthika-address-form" hidden>
+            {% form 'customer_address', address %}
+              {% render 'karthika-address-fields', address: address, form_id: address.id %}
+              <div class="karthika-address-form__actions"><button class="karthika-primary-button" type="submit">Update address</button><button class="karthika-secondary-button" type="reset">Cancel</button></div>
+            {% endform %}
+            <button class="karthika-delete-address" type="button" data-target="{{ address.url }}" data-confirm-message="Delete this address?">Delete address</button>
+          </div>
+        </article>
+      {% else %}
+        <p class="karthika-empty-state">Add an address to make checkout faster.</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>

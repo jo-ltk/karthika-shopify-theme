@@ -1,0 +1,12 @@
+<div class="karthika-address-fields">
+  <label for="AddressFirstName_{{ form_id }}">First name</label><input id="AddressFirstName_{{ form_id }}" type="text" name="address[first_name]" value="{{ address.first_name }}" autocomplete="given-name">
+  <label for="AddressLastName_{{ form_id }}">Last name</label><input id="AddressLastName_{{ form_id }}" type="text" name="address[last_name]" value="{{ address.last_name }}" autocomplete="family-name">
+  <label for="AddressAddress1_{{ form_id }}">Address</label><input id="AddressAddress1_{{ form_id }}" type="text" name="address[address1]" value="{{ address.address1 }}" autocomplete="address-line1" required>
+  <label for="AddressAddress2_{{ form_id }}">Apartment, suite, etc.</label><input id="AddressAddress2_{{ form_id }}" type="text" name="address[address2]" value="{{ address.address2 }}" autocomplete="address-line2">
+  <label for="AddressCity_{{ form_id }}">City</label><input id="AddressCity_{{ form_id }}" type="text" name="address[city]" value="{{ address.city }}" autocomplete="address-level2" required>
+  <label for="AddressCountry_{{ form_id }}">Country</label><select id="AddressCountry_{{ form_id }}" name="address[country]" data-address-country-select data-default="{{ address.country }}" data-form-id="{{ form_id }}" autocomplete="country">{{ all_country_option_tags }}</select>
+  <div id="AddressProvinceContainer_{{ form_id }}"><label for="AddressProvince_{{ form_id }}">State / Province</label><select id="AddressProvince_{{ form_id }}" name="address[province]" data-default="{{ address.province }}" autocomplete="address-level1"></select></div>
+  <label for="AddressZip_{{ form_id }}">Postal code</label><input id="AddressZip_{{ form_id }}" type="text" name="address[zip]" value="{{ address.zip }}" autocomplete="postal-code" required>
+  <label for="AddressPhone_{{ form_id }}">Phone</label><input id="AddressPhone_{{ form_id }}" type="tel" name="address[phone]" value="{{ address.phone }}" autocomplete="tel">
+  <label class="karthika-address-default"><input type="checkbox" name="address[default]"{% if address == customer.default_address %} checked{% endif %}> Set as default address</label>
+</div>

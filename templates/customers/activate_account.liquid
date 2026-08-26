@@ -1,0 +1,14 @@
+<div class="karthika-auth-page">
+  <div class="karthika-auth-hero karthika-auth-hero--compact"><div class="karthika-auth-brand"><strong>Karthika</strong><small>Supermarket</small></div></div>
+  <section class="karthika-auth-panel" aria-labelledby="KarthikaActivateTitle">
+    <h1 id="KarthikaActivateTitle">Activate your account</h1>
+    <p>Create a password to finish setting up your account.</p>
+    {% form 'activate_customer_password', class: 'karthika-auth-form' %}
+      {% if form.errors %}<div class="karthika-form-message" role="alert">{{ form.errors | default_errors }}</div>{% endif %}
+      <label for="ActivatePassword">Password</label><input id="ActivatePassword" type="password" name="customer[password]" autocomplete="new-password" required>
+      <label for="ActivatePasswordConfirmation">Confirm password</label><input id="ActivatePasswordConfirmation" type="password" name="customer[password_confirmation]" autocomplete="new-password" required>
+      <button class="karthika-primary-button" type="submit">Activate account</button>
+      <button class="karthika-secondary-button" type="submit" name="decline" value="decline">Decline invitation</button>
+    {% endform %}
+  </section>
+</div>

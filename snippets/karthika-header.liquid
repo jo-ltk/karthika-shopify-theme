@@ -129,18 +129,20 @@
         <span class="karthika-header-badge karthika-cart-badge" {% if cart.item_count == 0 %}style="display: none;"{% endif %}>{{ cart.item_count }}</span>
       </a>
 
-      <button
-        type="button"
-        class="karthika-header-account karthika-account-trigger"
-        data-account-href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
-        aria-label="Account"
-        aria-haspopup="dialog"
-      >
+      {% if customer %}
+      <a class="karthika-header-account karthika-account-trigger" href="{{ routes.account_url }}" data-account-href="{{ routes.account_url }}" data-customer-state="signed-in" aria-label="Account">
+        {% if customer %}
+          <span class="karthika-customer-avatar" aria-hidden="true">{{ customer.first_name | default: customer.email | slice: 0 }}</span>
+        {% endif %}
+      </a>
+      {% else %}
+      <a class="karthika-header-account karthika-account-trigger" href="#karthika-account-screen" data-account-href="{{ routes.account_login_url }}" data-customer-state="guest" aria-label="Account" aria-haspopup="dialog">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="12" cy="8" r="4"></circle>
           <path d="M4 21a8 8 0 0 1 16 0"></path>
         </svg>
-      </button>
+      </a>
+      {% endif %}
     </div>
   </div>
 

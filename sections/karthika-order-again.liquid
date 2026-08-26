@@ -1,0 +1,921 @@
+{%- comment -%}
+  Karthika Supermarket — "Order Again" Section
+  ─────────────────────────────────────────────
+  Renders a personalized horizontal-scroll row of grocery category cards,
+  each showing up to 4 product images from the customer's previous orders.
+
+  STATE HIERARCHY
+  ───────────────
+  1. Customer logged in + has orders
+       → Group ordered products by category tag → render live cards
+  2. Customer logged in + no orders  OR  customer data unavailable
+       → Fall through to demo blocks (if enable_demo_mode = true)
+  3. Guest (not logged in) + demo enabled
+       → Render demo blocks
+  4. Guest + demo disabled
+       → Render sign-in prompt (if show_guest_prompt = true)
+       → Or hide section entirely
+
+  CATEGORY GROUPING (for real order data)
+  ────────────────────────────────────────
+  Each line-item product is tested against a tag keyword list.
+  If no keyword matches, product falls back to its Shopify product_type.
+  Unmatched products are silently skipped to keep the UI clean.
+
+  DEMO MODE
+  ─────────
+  Uses real Shopify products configured as blocks in the theme editor.
+  Up to 4 products per block are shown in the image grid.
+  No external CDN URLs; no fake customer records.
+
+  LIQUID COMPATIBILITY NOTES
+  ──────────────────────────
+  • Shopify Liquid does NOT support `break` or `continue`/`next` inside
+    {% liquid %} tag blocks in the same way — we use flag variables instead.
+  • `all_products[handle]` requires a string handle; product block settings
+    return the product object directly via block.settings.product_N.
+  • `customer.orders` returns up to 20 orders on the storefront.
+{%- endcomment -%}
+
+{%- liquid
+  assign kor_heading = 'Melbin, order again'
+  if customer and customer.first_name != blank
+    assign kor_heading = customer.first_name | append: ', order again'
+  endif
+-%}
+
+<div class="kor-section" id="kor-section-{{ section.id }}">
+  <div class="kor-head">
+    <h2 class="kor-head__title">{{ kor_heading }}</h2>
+    {%- if section.settings.see_all_url != blank -%}
+      <a href="{{ section.settings.see_all_url }}" class="kor-head__link">See all</a>
+    {%- endif -%}
+  </div>
+
+  <div class="kor-scroll-outer">
+    <div
+      class="kor-scroll-track karthika-hide-scrollbar"
+      id="korScrollTrack-{{ section.id }}"
+      role="list"
+      aria-label="Order again categories"
+    >
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'demo_category' -%}
+            {%- liquid
+              assign demo_cat_name = block.settings.name | default: 'Category'
+              assign demo_bg = block.settings.bg_color | default: '#EBF4FF'
+              assign demo_col = block.settings.collection
+              assign demo_col_url = routes.all_products_collection_url
+              if demo_col != blank and demo_col.url != blank
+                assign demo_col_url = demo_col.url
+              endif
+              if block.settings.custom_link != blank
+                assign demo_col_url = block.settings.custom_link
+              endif
+
+              assign dp1 = block.settings.product_1
+              assign dp2 = block.settings.product_2
+              assign dp3 = block.settings.product_3
+              assign dp4 = block.settings.product_4
+
+              assign demo_extra = block.settings.extra_count | default: 0
+
+              assign fallback_imgs = ''
+              case demo_cat_name
+                when 'Drinks & Beverages'
+                  assign fallback_imgs = 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1560023907-5f339617ea30?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=200&q=80'
+                when 'Dairy, Bread & Eggs'
+                  assign fallback_imgs = 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=200&q=80'
+                when 'Sweet Tooth'
+                  assign fallback_imgs = 'https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&w=200&q=80'
+                when 'Fresh Fruits'
+                  assign fallback_imgs = 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&w=200&q=80'
+                when 'Vegetables'
+                  assign fallback_imgs = 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=200&q=80'
+                when 'Kerala Favourites'
+                  assign fallback_imgs = 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=200&q=80'
+                else
+                  assign fallback_imgs = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=200&q=80'
+              endcase
+              assign fb_arr = fallback_imgs | split: '|'
+            -%}
+
+            <div
+              class="kor-card"
+              style="--kor-card-bg: {{ demo_bg }};"
+              role="listitem"
+              {{ block.shopify_attributes }}
+            >
+              <a href="{{ demo_col_url }}" class="kor-card__header" aria-label="Shop {{ demo_cat_name }}">
+                <span class="kor-card__title">{{ demo_cat_name }}</span>
+              </a>
+
+              <div class="kor-grid">
+                {%- comment -%}── Slot 1 ──────────────────────────────────{%- endcomment -%}
+                {%- if dp1 != blank and dp1.featured_media -%}
+                  <a href="{{ dp1.url }}" class="kor-grid__cell" aria-label="{{ dp1.title | escape }}">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ dp1.featured_media | image_url: width: 200 }}" alt="{{ dp1.title | escape }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </a>
+                {%- elsif block.settings.image_1 != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ block.settings.image_1 | image_url: width: 200 }}" alt="" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- elsif block.settings.demo_img_1 != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ block.settings.demo_img_1 }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- elsif fb_arr[0] != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ fb_arr[0] }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- else -%}
+                  <div class="kor-grid__cell kor-grid__cell--empty" aria-hidden="true">
+                    <div class="kor-grid__img-wrap kor-grid__img-wrap--empty"></div>
+                  </div>
+                {%- endif -%}
+
+                {%- comment -%}── Slot 2 ──────────────────────────────────{%- endcomment -%}
+                {%- if dp2 != blank and dp2.featured_media -%}
+                  <a href="{{ dp2.url }}" class="kor-grid__cell" aria-label="{{ dp2.title | escape }}">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ dp2.featured_media | image_url: width: 200 }}" alt="{{ dp2.title | escape }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </a>
+                {%- elsif block.settings.image_2 != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ block.settings.image_2 | image_url: width: 200 }}" alt="" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- elsif block.settings.demo_img_2 != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ block.settings.demo_img_2 }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- elsif fb_arr[1] != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ fb_arr[1] }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- else -%}
+                  <div class="kor-grid__cell kor-grid__cell--empty" aria-hidden="true">
+                    <div class="kor-grid__img-wrap kor-grid__img-wrap--empty"></div>
+                  </div>
+                {%- endif -%}
+
+                {%- comment -%}── Slot 3 ──────────────────────────────────{%- endcomment -%}
+                {%- if dp3 != blank and dp3.featured_media -%}
+                  <a href="{{ dp3.url }}" class="kor-grid__cell" aria-label="{{ dp3.title | escape }}">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ dp3.featured_media | image_url: width: 200 }}" alt="{{ dp3.title | escape }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </a>
+                {%- elsif block.settings.image_3 != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ block.settings.image_3 | image_url: width: 200 }}" alt="" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- elsif block.settings.demo_img_3 != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ block.settings.demo_img_3 }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- elsif fb_arr[2] != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ fb_arr[2] }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- else -%}
+                  <div class="kor-grid__cell kor-grid__cell--empty" aria-hidden="true">
+                    <div class="kor-grid__img-wrap kor-grid__img-wrap--empty"></div>
+                  </div>
+                {%- endif -%}
+
+                {%- comment -%}── Slot 4 ──────────────────────────────────{%- endcomment -%}
+                {%- if dp4 != blank and dp4.featured_media -%}
+                  <a href="{{ dp4.url }}" class="kor-grid__cell" aria-label="{{ dp4.title | escape }}">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ dp4.featured_media | image_url: width: 200 }}" alt="{{ dp4.title | escape }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </a>
+                {%- elsif block.settings.image_4 != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ block.settings.image_4 | image_url: width: 200 }}" alt="" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- elsif block.settings.demo_img_4 != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ block.settings.demo_img_4 }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- elsif fb_arr[3] != blank -%}
+                  <div class="kor-grid__cell">
+                    <div class="kor-grid__img-wrap">
+                      <img src="{{ fb_arr[3] }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+                    </div>
+                  </div>
+                {%- else -%}
+                  <div class="kor-grid__cell kor-grid__cell--empty" aria-hidden="true">
+                    <div class="kor-grid__img-wrap kor-grid__img-wrap--empty"></div>
+                  </div>
+                {%- endif -%}
+              </div>
+
+              {%- if demo_extra > 0 -%}
+                <a href="{{ demo_col_url }}" class="kor-badge" aria-label="{{ demo_extra }} more products">
+                  +{{ demo_extra }}
+                </a>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+
+      {%- else -%}
+        <!-- Default Fallback Dummy Cards (Reference Design) -->
+        <div class="kor-card" style="--kor-card-bg: #E0F0FF;" role="listitem">
+          <a href="/collections/all" class="kor-card__header">
+            <span class="kor-card__title">Drinks &<br>Beverages</span>
+          </a>
+          <div class="kor-grid">
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1560023907-5f339617ea30?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+          </div>
+          <a href="/collections/all" class="kor-badge">+3</a>
+        </div>
+
+        <div class="kor-card" style="--kor-card-bg: #FFF4E0;" role="listitem">
+          <a href="/collections/all" class="kor-card__header">
+            <span class="kor-card__title">Dairy, Bread &<br>Eggs</span>
+          </a>
+          <div class="kor-grid">
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+          </div>
+          <a href="/collections/all" class="kor-badge">+10</a>
+        </div>
+
+        <div class="kor-card" style="--kor-card-bg: #FFE8F2;" role="listitem">
+          <a href="/collections/all" class="kor-card__header">
+            <span class="kor-card__title">Sweet<br>Tooth</span>
+          </a>
+          <div class="kor-grid">
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+          </div>
+          <a href="/collections/all" class="kor-badge">+4</a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="kor-dots" id="korDots-{{ section.id }}" aria-hidden="true">
+    <span class="kor-dot kor-dot--active"></span>
+    <span class="kor-dot"></span>
+    <span class="kor-dot"></span>
+  </div>
+</div>
+
+{%- comment -%}──────────────────────────────── SCOPED CSS ─────────────────────────────────────{%- endcomment -%}
+<style>
+  /* ═══════════════════════════════════════════════════════════════════
+   Karthika — Order Again Section (kor-*)
+   All rules scoped to .kor-* to prevent global conflicts.
+   ═══════════════════════════════════════════════════════════════════ */
+
+  /* ── Section wrapper ───────────────────────────────────────────── */
+  .kor-section {
+    padding: 20px 0 12px;
+    font-family: var(--karthika-font-sans, 'Gilroy', sans-serif);
+    color: var(--karthika-text-dark, #171717);
+  }
+
+  /* ── Section header ────────────────────────────────────────────── */
+  .kor-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 16px 12px;
+  }
+
+  .kor-head__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.35px;
+    color: var(--karthika-text-dark, #171717);
+  }
+
+  .kor-head__link {
+    flex: 0 0 auto;
+    color: var(--karthika-red, #3f7d2e);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .kor-head__link:hover {
+    text-decoration: underline;
+  }
+
+  /* ── Scroll outer (clips overflow) ────────────────────────────── */
+  .kor-scroll-outer {
+    position: relative;
+  }
+
+  /* ── Horizontal scroll track ───────────────────────────────────── */
+  .kor-scroll-track {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 16px 16px;
+  }
+
+  /* ── Category card ─────────────────────────────────────────────── */
+  .kor-card {
+    position: relative;
+    flex: 0 0 calc(55vw);
+    max-width: 220px;
+    scroll-snap-align: start;
+    border-radius: var(--karthika-radius-md, 20px);
+    background-color: var(--kor-card-bg, #ebf4ff);
+    padding: 12px 10px 16px;
+    box-sizing: border-box;
+    box-shadow: var(--karthika-shadow-subtle, 0 1px 3px rgba(0, 0, 0, 0.05));
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .kor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--karthika-shadow-hover, 0 6px 18px rgba(0, 0, 0, 0.07));
+  }
+
+  /* ── Card header (category title link) ────────────────────────── */
+  .kor-card__header {
+    display: block;
+    text-decoration: none;
+    margin-bottom: 12px;
+  }
+
+  .kor-card__title {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.2px;
+    color: var(--karthika-text-dark, #171717);
+    text-align: center;
+  }
+
+  .kor-card__header:hover .kor-card__title {
+    color: var(--karthika-red, #3f7d2e);
+  }
+
+  /* ── 2×2 product image grid ────────────────────────────────────── */
+  .kor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+
+  .kor-grid__cell {
+    display: block;
+    text-decoration: none;
+  }
+
+  .kor-grid__img-wrap {
+    aspect-ratio: 1 / 1;
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .kor-grid__img-wrap--empty {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .kor-grid__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    padding: 0;
+    box-sizing: border-box;
+    transition: transform 0.15s ease;
+  }
+
+  .kor-grid__cell:hover .kor-grid__img {
+    transform: scale(1.05);
+  }
+
+  .kor-grid__placeholder {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+  }
+
+  /* ── Overflow badge ────────────────────────────────────────────── */
+  .kor-badge {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--karthika-red, #3f7d2e);
+    color: #ffffff;
+    font-family: var(--karthika-font-sans, 'Gilroy', sans-serif);
+    font-size: 10px;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+    z-index: 2;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .kor-badge:hover {
+    background: var(--karthika-red-hover, #336524);
+    transform: scale(1.06);
+  }
+
+  /* ── Scroll progress dots ──────────────────────────────────────── */
+  .kor-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 2px 0 4px;
+  }
+
+  .kor-dot {
+    display: block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--karthika-border, #e1e8d3);
+    transition: width 0.2s ease, background 0.2s ease, border-radius 0.2s ease;
+  }
+
+  .kor-dot--active {
+    width: 16px;
+    border-radius: 3px;
+    background: var(--karthika-red, #3f7d2e);
+  }
+
+  /* ── Guest sign-in prompt ──────────────────────────────────────── */
+  .kor-guest {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 16px;
+    padding: 18px 20px;
+    background: var(--karthika-bg-surface, #eff4e3);
+    border-radius: var(--karthika-radius-md, 20px);
+    border: 1px solid var(--karthika-border-light, #eaf0de);
+  }
+
+  .kor-guest__icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--karthika-bg-white, #fff);
+    color: var(--karthika-red, #3f7d2e);
+    box-shadow: var(--karthika-shadow-subtle, 0 1px 3px rgba(0, 0, 0, 0.05));
+  }
+
+  .kor-guest__copy {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .kor-guest__title {
+    margin: 0 0 3px;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .kor-guest__sub {
+    margin: 0;
+    font-size: 12px;
+    color: var(--karthika-text-muted, #5c6b52);
+    line-height: 1.4;
+  }
+
+  .kor-guest__btn {
+    flex: 0 0 auto;
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: var(--karthika-radius-btn, 9999px);
+    background: var(--karthika-red, #3f7d2e);
+    color: #ffffff;
+    font-family: var(--karthika-font-sans, 'Gilroy', sans-serif);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .kor-guest__btn:hover {
+    background: var(--karthika-red-hover, #336524);
+    transform: translateY(-1px);
+  }
+
+  /* ── Editor hint ───────────────────────────────────────────────── */
+  .kor-empty-hint {
+    margin: 0 16px;
+    padding: 24px;
+    background: var(--karthika-bg-surface, #eff4e3);
+    border-radius: var(--karthika-radius-md, 20px);
+    border: 1.5px dashed var(--karthika-border, #e1e8d3);
+    text-align: center;
+    color: var(--karthika-text-muted, #5c6b52);
+    font-size: 13px;
+  }
+
+  .kor-empty-hint p {
+    margin: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+   TABLET (768px+): ~2 cards visible
+   ═══════════════════════════════════════════════════════════════════ */
+  @media screen and (min-width: 768px) {
+    .kor-section {
+      padding: 28px 0 16px;
+    }
+
+    .kor-head {
+      padding: 0 24px 14px;
+    }
+
+    .kor-head__title {
+      font-size: 22px;
+      letter-spacing: -0.5px;
+    }
+
+    .kor-scroll-track {
+      gap: 14px;
+      padding: 6px 24px 18px;
+    }
+
+    .kor-card {
+      flex: 0 0 calc(31% - 10px);
+      max-width: 260px;
+      padding: 16px 14px 20px;
+    }
+
+    .kor-card__title {
+      font-size: 14px;
+    }
+
+    .kor-guest {
+      margin: 0 24px;
+      padding: 22px 28px;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+   DESKTOP (990px+): ~3 cards visible, generous spacing
+   ═══════════════════════════════════════════════════════════════════ */
+  @media screen and (min-width: 990px) {
+    .kor-section {
+      padding: 36px 0 20px;
+    }
+
+    .kor-head {
+      padding: 0 32px 18px;
+    }
+
+    .kor-head__title {
+      font-size: 26px;
+      letter-spacing: -0.6px;
+    }
+
+    .kor-head__link {
+      font-size: 13px;
+    }
+
+    .kor-scroll-track {
+      gap: 16px;
+      padding: 8px 32px 20px;
+    }
+
+    .kor-card {
+      flex: 0 0 calc(20% - 12px);
+      max-width: 280px;
+      padding: 18px 16px 22px;
+    }
+
+    .kor-card__title {
+      font-size: 15px;
+    }
+
+    .kor-badge {
+      right: 12px;
+      bottom: 12px;
+      min-width: 26px;
+      height: 22px;
+      font-size: 11px;
+    }
+
+    /* Dots not needed for mouse users */
+    .kor-dots {
+      display: none;
+    }
+
+    .kor-guest {
+      margin: 0 32px;
+      padding: 28px 36px;
+    }
+
+    .kor-guest__icon {
+      width: 56px;
+      height: 56px;
+    }
+
+    .kor-guest__title {
+      font-size: 16px;
+    }
+
+    .kor-guest__sub {
+      font-size: 13px;
+    }
+
+    .kor-guest__btn {
+      padding: 12px 24px;
+      font-size: 13px;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+   LARGE DESKTOP (1280px+)
+   ═══════════════════════════════════════════════════════════════════ */
+  @media screen and (min-width: 1280px) {
+    .kor-card {
+      flex: 0 0 calc(18% - 12px);
+    }
+  }
+</style>
+
+{%- comment -%}──────────────────────────────── SCROLL JS ──────────────────────────────────────{%- endcomment -%}
+<script>
+  (function () {
+    'use strict';
+
+    var sectionId = '{{ section.id | escape }}';
+    var trackEl = document.getElementById('korScrollTrack-' + sectionId);
+    var dotsWrap = document.getElementById('korDots-' + sectionId);
+
+    if (!trackEl) return;
+
+    /* Dot progress indicator */
+    if (dotsWrap) {
+      var dots = Array.prototype.slice.call(dotsWrap.querySelectorAll('.kor-dot'));
+
+      function updateDots() {
+        if (!dots.length) return;
+        var maxScroll = trackEl.scrollWidth - trackEl.clientWidth;
+        var ratio = maxScroll > 0 ? trackEl.scrollLeft / maxScroll : 0;
+        var idx = Math.round(ratio * (dots.length - 1));
+        dots.forEach(function (d, i) {
+          d.classList.toggle('kor-dot--active', i === idx);
+        });
+      }
+
+      trackEl.addEventListener('scroll', updateDots, { passive: true });
+      updateDots();
+    }
+
+    /* Keyboard arrow navigation */
+    trackEl.addEventListener('keydown', function (e) {
+      var cards = trackEl.querySelectorAll('.kor-card');
+      if (!cards.length) return;
+      var cardW = cards[0].offsetWidth + 12; /* card width + gap */
+
+      if (e.key === 'ArrowRight') {
+        trackEl.scrollBy({ left: cardW, behavior: 'smooth' });
+        e.preventDefault();
+      } else if (e.key === 'ArrowLeft') {
+        trackEl.scrollBy({ left: -cardW, behavior: 'smooth' });
+        e.preventDefault();
+      }
+    });
+  })();
+</script>
+
+{%- comment -%}──────────────────────────────── SCHEMA ──────────────────────────────────────────{%- endcomment -%}
+{% schema %}
+{
+  "name": "Order Again",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section behaviour"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_demo_mode",
+      "label": "Enable demo mode",
+      "info": "Show configured demo category blocks when no real order history is available. Safe for client demos.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_guest_prompt",
+      "label": "Show sign-in prompt for guests",
+      "info": "When demo mode is off and the customer is not logged in, show a sign-in call-to-action.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Guest prompt copy"
+    },
+    {
+      "type": "text",
+      "id": "guest_heading",
+      "label": "Guest prompt title",
+      "default": "Order again"
+    },
+    {
+      "type": "text",
+      "id": "guest_subtext",
+      "label": "Guest prompt subtitle",
+      "default": "Sign in to quickly reorder your favourites."
+    },
+    {
+      "type": "text",
+      "id": "guest_btn_label",
+      "label": "Sign-in button label",
+      "default": "Sign in"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "url",
+      "id": "see_all_url",
+      "label": "See all link URL",
+      "info": "Leave blank to hide the link."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "demo_category",
+      "name": "Demo Category",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Category info"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Category name",
+          "default": "Drinks & Beverages"
+        },
+        {
+          "type": "select",
+          "id": "bg_color",
+          "label": "Card background colour",
+          "options": [
+            { "value": "#E0F0FF", "label": "Soft Blue — Beverages" },
+            { "value": "#FFF4E0", "label": "Warm Cream — Dairy" },
+            { "value": "#FFE8F2", "label": "Blush Pink — Sweet Tooth" },
+            { "value": "#E8F8E8", "label": "Mint Green — Fresh Fruits" },
+            { "value": "#EDFCE0", "label": "Lime Green — Vegetables" },
+            { "value": "#FEF9E0", "label": "Pale Yellow — Rice & Grains" },
+            { "value": "#FFF0E0", "label": "Peach — Snacks" },
+            { "value": "#F0ECF9", "label": "Lavender — Kerala Favourites" },
+            { "value": "#F5F5F5", "label": "Light Grey — General" }
+          ],
+          "default": "#E0F0FF"
+        },
+        {
+          "type": "header",
+          "content": "Destination"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Link to collection"
+        },
+        {
+          "type": "url",
+          "id": "custom_link",
+          "label": "Custom URL (overrides collection)"
+        },
+        {
+          "type": "header",
+          "content": "Products"
+        },
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "Product 1"
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "Product 2"
+        },
+        {
+          "type": "product",
+          "id": "product_3",
+          "label": "Product 3"
+        },
+        {
+          "type": "product",
+          "id": "product_4",
+          "label": "Product 4"
+        },
+        {
+          "type": "header",
+          "content": "Fallback images"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "Fallback image 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Fallback image 2"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_3",
+          "label": "Fallback image 3"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_4",
+          "label": "Fallback image 4"
+        },
+        {
+          "type": "header",
+          "content": "Overflow badge"
+        },
+        {
+          "type": "range",
+          "id": "extra_count",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "label": "Extra product count",
+          "info": "Shows a badge like +3 over the grid. Set to 0 to hide.",
+          "default": 0
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Order Again"
+    }
+  ]
+}
+{% endschema %}

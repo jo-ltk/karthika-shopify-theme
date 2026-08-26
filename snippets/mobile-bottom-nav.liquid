@@ -47,11 +47,11 @@
   </a>
 
   <!-- 5. Account -->
-  <button type="button" class="karthika-nav-item karthika-account-trigger {% if template.name contains 'customer' %}is-active{% endif %}" data-account-href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" style="background:none;border:none;padding:0;cursor:pointer;" aria-label="Account" aria-haspopup="dialog">
+  <a href="{% if customer %}{{ routes.account_url }}{% else %}#karthika-account-screen{% endif %}" class="karthika-nav-item karthika-account-trigger {% if request.path contains '/account' %}is-active{% endif %}" data-account-href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" data-customer-state="{% if customer %}signed-in{% else %}guest{% endif %}" aria-label="Account" aria-haspopup="dialog">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
       <circle cx="12" cy="7" r="4"></circle>
     </svg>
     <span>Account</span>
-  </button>
+  </a>
 </nav>

@@ -83,3 +83,5 @@ class CustomerAddresses {
     }
   };
 }
+
+document.addEventListener('DOMContentLoaded', () => new CustomerAddresses());
