@@ -55,6 +55,7 @@
   endif
 -%}
 
+{%- unless template.name == 'list-collections' or request.path == '/collections' -%}
 <div class="karthika-desktop-header" role="banner">
   <div class="karthika-desktop-header__utility">
     <div class="karthika-desktop-header__utility-inner">
@@ -80,8 +81,17 @@
       <a href="{{ about_url }}"{% if is_about %} class="is-active" aria-current="page"{% endif %}>About Us</a>
     </nav>
     <div class="karthika-desktop-header__actions">
-      <a class="karthika-desktop-header__search" href="{{ search_url }}" aria-label="Search products">
-        <span>Search for products...</span><span aria-hidden="true">&#9906;</span>
+      <a
+        class="karthika-desktop-header__search{% if is_search %} is-active{% endif %}"
+        href="{{ search_url }}"
+        aria-label="Search products"
+        data-search-terms="Search for milk…|Search for bananas…|Search for basmati rice…|Search for vegetables…|Search for coconut oil…|Search for spices…|Search for snacks…|Search for dal…|Search for rice flour…|Search for Kerala snacks…"
+      >
+        <svg class="karthika-desktop-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <span class="karthika-search-placeholder-text">Search for milk…</span>
       </a>
       <a class="karthika-desktop-header__order" href="{{ routes.all_products_collection_url }}">Order Now</a>
       <a class="karthika-desktop-header__cart" href="{{ routes.cart_url }}" aria-label="Cart ({{ cart_count }} items)">
@@ -151,12 +161,13 @@
     role="search"
     tabindex="0"
     aria-label="Search groceries"
+    data-search-terms="Search for milk…|Search for bananas…|Search for basmati rice…|Search for vegetables…|Search for coconut oil…|Search for spices…|Search for snacks…|Search for dal…|Search for rice flour…|Search for Kerala snacks…"
   >
     <svg class="karthika-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <circle cx="11" cy="11" r="8"></circle>
       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
-    <span class="karthika-search-placeholder">Search for products, brands...</span>
+    <span id="KarthikaSearchPlaceholder" class="karthika-search-placeholder">Search for milk…</span>
     <svg class="karthika-search-barcode" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <rect x="3" y="4" width="18" height="16" rx="2"></rect>
       <line x1="7" y1="7" x2="7" y2="17"></line>
@@ -165,3 +176,4 @@
     </svg>
   </div>
 </header>
+{%- endunless -%}

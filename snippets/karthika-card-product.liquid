@@ -4,9 +4,11 @@
 
 {%- if card_product and card_product != empty -%}
   {%- liquid
-    assign current_variant = card_product.selected_or_first_available_variant
+    assign current_variant = card_product.selected_or_first_available_variant | default: card_product.variants.first
     assign is_available = false
-    if current_variant and current_variant.available
+    if card_product.available
+      assign is_available = true
+    elsif current_variant and current_variant.available
       assign is_available = true
     endif
 
@@ -68,7 +70,7 @@
     <div class="karthika-compact-info">
       <div class="karthika-card-meta-row">
         <span class="karthika-compact-pack">{{ pack_size }}</span>
-        <span class="karthika-stock-badge"><span class="karthika-stock-dot"></span> {{ inventory_label }}</span>
+        <span class="karthika-stock-badge{% unless is_available %} karthika-stock-badge--out{% endunless %}"><span class="karthika-stock-dot"></span> {{ inventory_label }}</span>
       </div>
 
       <a href="{{ card_product.url }}" class="karthika-compact-title" title="{{ card_product.title | escape }}">
@@ -85,22 +87,26 @@
         </div>
       </div>
 
-      <div class="karthika-card-action-bar karthika-stepper" data-variant-id="{{ current_variant.id }}" data-product-available="{{ is_available }}">
-        <button type="button" class="karthika-stepper-add-btn" aria-label="Add {{ card_product.title | escape }} to cart"{% unless is_available %} disabled aria-disabled="true"{% endunless %}>
-          <span class="karthika-add-btn-icon">+</span>
-          <span class="karthika-add-btn-text">{% if is_available %}ADD{% else %}SOLD OUT{% endif %}</span>
-        </button>
+      {%- if is_available -%}
+        <div class="karthika-card-action-bar karthika-stepper" data-variant-id="{{ current_variant.id }}" data-product-available="true">
+          <button type="button" class="karthika-stepper-add-btn" aria-label="Add {{ card_product.title | escape }} to cart">
+            <span class="karthika-add-btn-icon">+</span>
+            <span class="karthika-add-btn-text">ADD</span>
+          </button>
 
-        <div class="karthika-compact-stepper">
-          <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--minus" aria-label="Decrease quantity">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          </button>
-          <span class="karthika-compact-stepper-val karthika-stepper-qty">1</span>
-          <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--plus" aria-label="Increase quantity">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          </button>
+          <div class="karthika-compact-stepper">
+            <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--minus" aria-label="Decrease quantity">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            <span class="karthika-compact-stepper-val karthika-stepper-qty">1</span>
+            <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--plus" aria-label="Increase quantity">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+          </div>
         </div>
-      </div>
+      {%- else -%}
+        <div class="karthika-sold-out-badge" aria-label="Sold out" role="status">SOLD OUT</div>
+      {%- endif -%}
     </div>
   </div>
 {%- endif -%}

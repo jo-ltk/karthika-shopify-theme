@@ -20,8 +20,20 @@
 
   <div class="{% if section.settings.preset_type == 'popular' %}karthika-popular-mini-grid{% elsif section.settings.preset_type == 'deals' or section.settings.preset_type == 'kerala' or section.settings.preset_type == 'new_arrivals' %}karthika-deals-three-grid{% else %}karthika-two-col-grid{% endif %}">
     {%- assign products_to_show = section.settings.products_to_show | default: 4 -%}
-    {%- if section.settings.collection != blank and section.settings.collection.products_count > 0 -%}
-      {%- for product in section.settings.collection.products limit: products_to_show -%}
+    {%- assign product_offset = section.settings.product_offset | default: 0 -%}
+    {%- if product_offset == 0 -%}
+      {%- case section.settings.preset_type -%}
+        {%- when 'deals' -%}
+          {%- assign product_offset = 6 -%}
+        {%- when 'kerala' -%}
+          {%- assign product_offset = 12 -%}
+        {%- when 'new_arrivals' -%}
+          {%- assign product_offset = 18 -%}
+      {%- endcase -%}
+    {%- endif -%}
+    {%- assign target_collection = section.settings.collection | default: collections.all -%}
+    {%- if target_collection != blank and target_collection.products_count > 0 -%}
+      {%- for product in target_collection.products offset: product_offset limit: products_to_show -%}
         {%- if section.settings.preset_type == 'popular' -%}
           {% render 'karthika-card-product-mini', card_product: product %}
         {%- else -%}
@@ -85,6 +97,16 @@
       "step": 2,
       "default": 4,
       "label": "Products to Show"
+    },
+    {
+      "type": "range",
+      "id": "product_offset",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "default": 0,
+      "label": "Product Offset (0 for auto)",
+      "info": "Leave as 0 to automatically use section preset offsets to avoid repeating products across sections."
     },
     {
       "type": "checkbox",

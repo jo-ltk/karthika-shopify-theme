@@ -73,11 +73,12 @@
     {%- assign desktop_sections = 'Popular this week|Fresh picks and customer favourites,Todays deals|Daily fresh savings and discounts,Kerala favourites|Authentic flavours from home' | split: ',' -%}
     {%- for section_data in desktop_sections -%}
       {%- assign section_parts = section_data | split: '|' -%}
+      {%- assign section_offset = forloop.index0 | times: 6 -%}
       <section class="kd-section kd-products-section kd-container" aria-labelledby="kd-products-{{ forloop.index }}">
         <div class="kd-section-heading"><div><h2 id="kd-products-{{ forloop.index }}">{{ section_parts[0] }}</h2><p>{{ section_parts[1] }}</p></div><a href="{{ products_url }}">See all</a></div>
         {%- if products_collection != blank and products_collection.products_count > 0 -%}
           <div class="kd-product-grid">
-            {%- for product in products_collection.products limit: 6 -%}
+            {%- for product in products_collection.products offset: section_offset limit: 6 -%}
               {% render 'karthika-card-product', card_product: product, section_id: section.id %}
             {%- endfor -%}
           </div>
@@ -171,7 +172,7 @@ body:has(.kd-home) .karthika-desktop-home-section ~ .shopify-section{display:non
 .kd-category--masala{background:#fff1c9}.kd-category--dairy{background:#edf5e4}.kd-category--home{background:#eeecfb}
 .kd-category strong{position:relative;z-index:2;display:block;max-width:72%;font-family:'Gilroy',sans-serif;font-size:26px;line-height:1.05}
 .kd-category span{position:relative;z-index:2;display:block;max-width:72%;margin-top:7px;font-size:13px;line-height:1.35;white-space:nowrap;color:#3c3c36}
-.kd-category i{position:absolute;left:20px;bottom:18px;z-index:2;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#c38a13;color:#fff;font-size:27px;font-style:normal;line-height:1}
+.kd-category i{position:absolute;left:20px;bottom:18px;z-index:2;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#c38a13;color:#fff;font-size:18px;font-style:normal;line-height:1}
 .kd-category--dairy i{background:#8bb66f}.kd-category--home i{background:#8b80c5}
 .kd-category img{position:absolute;right:-6%;bottom:-8%;width:64%;height:58%;object-fit:contain;object-position:right bottom;mix-blend-mode:multiply}
 .kd-category--dairy img{right:-2%;bottom:-7%;width:56%;height:72%}.kd-category--home img{right:-4%;bottom:-5%;width:70%;height:62%}

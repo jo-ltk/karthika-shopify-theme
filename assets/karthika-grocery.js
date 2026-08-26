@@ -50,7 +50,7 @@
       try {
         recents = JSON.parse(localStorage.getItem('karthika_recent_variants')) || [];
       } catch(e) {}
-      
+
       if (!isInit) {
         let updatedIds = [];
         cart.items.forEach((item) => {
@@ -61,20 +61,20 @@
         recents = recents.filter(id => !updatedIds.includes(id));
         recents = [...updatedIds, ...recents];
       }
-      
+
       const cartVariantIds = cart.items.map(i => i.variant_id);
       recents = recents.filter(id => cartVariantIds.includes(id));
-      
+
       cartVariantIds.forEach(id => {
         if (!recents.includes(id)) {
           recents.push(id);
         }
       });
-      
+
       try {
         localStorage.setItem('karthika_recent_variants', JSON.stringify(recents));
       } catch(e) {}
-      
+
       this.state.recentVariantIds = recents;
       this.state.item_count = cart.item_count || 0;
       this.state.total_price = cart.total_price || 0;
@@ -467,39 +467,39 @@
       title: "Malabar Chicken Biryani Kit",
       price: "$24.50",
       ingredients: [
-        "✓ Kaima Jeerakasala Biryani Rice (1kg) — $4.80",
-        "✓ Fresh Farm Chicken Curry Cut (1kg) — $9.50",
-        "✓ Eastern Biryani Masala & Pure Ghee — $4.40",
-        "✓ Fresh Mint Leaves, Coriander & Onions — $5.80"
+        "v Kaima Jeerakasala Biryani Rice (1kg) - $4.80",
+        "v Fresh Farm Chicken Curry Cut (1kg) - $9.50",
+        "v Eastern Biryani Masala & Pure Ghee - $4.40",
+        "v Fresh Mint Leaves, Coriander & Onions - $5.80"
       ]
     },
     kerala_breakfast: {
       title: "Kerala Appam & Stew Kit",
       price: "$14.20",
       ingredients: [
-        "✓ Brahmins Easy Appam Mix (1kg) — $3.60",
-        "✓ Pure Coconut Milk Can (400ml) — $2.80",
-        "✓ Fresh Stew Veggies (Potato, Carrot, Beans) — $4.80",
-        "✓ Whole Kerala Spices & Ginger Pack — $3.00"
+        "v Brahmins Easy Appam Mix (1kg) - $3.60",
+        "v Pure Coconut Milk Can (400ml) - $2.80",
+        "v Fresh Stew Veggies (Potato, Carrot, Beans) - $4.80",
+        "v Whole Kerala Spices & Ginger Pack - $3.00"
       ]
     },
     sambar: {
       title: "Authentic Sambar & Rasam Kit",
       price: "$11.80",
       ingredients: [
-        "✓ Karthika Premium Toor Dal (1kg) — $3.50",
-        "✓ MTR Traditional Sambar Powder — $2.40",
-        "✓ Sambar Veggies (Drumstick, Shallots, Tomato) — $4.10",
-        "✓ Natural Tamarind Block (200g) — $1.80"
+        "v Karthika Premium Toor Dal (1kg) - $3.50",
+        "v MTR Traditional Sambar Powder - $2.40",
+        "v Sambar Veggies (Drumstick, Shallots, Tomato) - $4.10",
+        "v Natural Tamarind Block (200g) - $1.80"
       ]
     },
     tea_snacks: {
       title: "Kerala Evening Chai & Snacks Combo",
       price: "$13.90",
       ingredients: [
-        "✓ Crispy Kerala Banana Chips (250g) — $4.50",
-        "✓ Spicy Mixture & Ribbon Pakoda — $3.80",
-        "✓ AVT Premium Kerala Dust Tea (500g) — $5.60"
+        "v Crispy Kerala Banana Chips (250g) - $4.50",
+        "v Spicy Mixture & Ribbon Pakoda - $3.80",
+        "v AVT Premium Kerala Dust Tea (500g) - $5.60"
       ]
     }
   };
@@ -522,7 +522,7 @@
             if (titleEl) titleEl.textContent = data.title;
             if (priceEl) priceEl.textContent = data.price;
             if (listEl) {
-              listEl.innerHTML = data.ingredients.map(ing => `<div>${ing}</div>`).join('');
+              listEl.innerHTML = data.ingredients.map(ing => '<div>' + ing + '</div>').join('');
             }
           }
           return;
@@ -536,11 +536,84 @@
     }
   };
 
+  /* --------------------------------------------------------------------------
+     5. Search Placeholder Rotator
+     Rotates the search bar placeholder text through popular product names.
+     Terms are sourced from data-search-terms on the .karthika-search-bar-trigger
+     element so they can be updated in Liquid without touching JS.
+     -------------------------------------------------------------------------- */
+  const SearchPlaceholderRotator = {
+    _timer: null,
+    _index: 0,
+    _terms: [],
+    _INTERVAL: 3500,
+    _FADE: 380,
+
+    init() {
+      const trigger = document.querySelector('[data-search-terms]');
+      if (!trigger) return;
+
+      const raw = trigger.getAttribute('data-search-terms') || '';
+      this._terms = raw.split('|').map(t => t.trim()).filter(Boolean);
+      if (this._terms.length < 2) return;
+
+      this._index = Math.floor(Math.random() * this._terms.length);
+      this._applyTerm(this._terms[this._index], false);
+      this._schedule();
+    },
+
+    _schedule() {
+      clearTimeout(this._timer);
+      this._timer = setTimeout(() => this._rotate(), this._INTERVAL);
+    },
+
+    _rotate() {
+      const modal = document.querySelector('#KarthikaSearchModal');
+      const input = document.querySelector('.karthika-search-modal-input');
+      const modalOpen = modal && modal.classList.contains('is-open');
+      const hasValue = input && input.value.trim().length > 0;
+
+      if (!modalOpen && !hasValue) {
+        this._index = (this._index + 1) % this._terms.length;
+        this._applyTerm(this._terms[this._index], true);
+      }
+
+      this._schedule();
+    },
+
+    _applyTerm(term, animate) {
+      const spans = document.querySelectorAll('#KarthikaSearchPlaceholder, .karthika-search-placeholder-text');
+      const input = document.querySelector('#KarthikaSearchModalInput');
+
+      if (input) input.placeholder = term;
+
+      if (!spans.length) return;
+
+      if (!animate) {
+        spans.forEach(span => { span.textContent = term; });
+        return;
+      }
+
+      spans.forEach(span => {
+        span.style.transition = 'opacity ' + this._FADE + 'ms ease';
+        span.style.opacity = '0';
+      });
+
+      setTimeout(() => {
+        spans.forEach(span => {
+          span.textContent = term;
+          span.style.opacity = '1';
+        });
+      }, this._FADE);
+    }
+  };
+
   // Expose on global object
   window.Karthika.Cart = CartManager;
   window.Karthika.Location = LocationManager;
   window.Karthika.Search = SearchManager;
   window.Karthika.AI = AIAssistantManager;
+  window.Karthika.SearchPlaceholder = SearchPlaceholderRotator;
 
   // Initialize all managers on DOM ready
   document.addEventListener('DOMContentLoaded', () => {
@@ -548,19 +621,16 @@
     LocationManager.init();
     SearchManager.init();
     AIAssistantManager.init();
+    SearchPlaceholderRotator.init();
   });
 })();
 
 /* ==========================================================================
-   Karthika Account Screen — Mobile overlay open/close
+   Karthika Account Screen - Mobile overlay open/close
    ========================================================================== */
 (function () {
   'use strict';
 
-  // Only activate the overlay on mobile viewports (< 750 px).
-  // On desktop the CSS hides the overlay, but the trigger button is also in
-  // the header — clicking it on desktop should fall back to the direct account
-  // page link instead of opening the (invisible) overlay.
   function isMobile() {
     return window.matchMedia('(max-width: 749px)').matches;
   }
@@ -568,7 +638,7 @@
   const AccountScreen = {
     overlay: null,
     backBtn: null,
-    _openedBy: null, // track which trigger opened the overlay
+    _openedBy: null,
 
     init() {
       this.overlay = document.getElementById('karthika-account-screen');
@@ -576,13 +646,10 @@
 
       if (!this.overlay) return;
 
-      // Bind all triggers that may be added to the page
       document.addEventListener('click', (e) => {
         const trigger = e.target.closest('.karthika-account-trigger');
         if (!trigger) return;
 
-        // Signed-in customers go straight to Shopify's native account page.
-        // The branded overlay is reserved for the guest sign-in entry point.
         if (trigger.dataset.customerState === 'signed-in') {
           const href = trigger.dataset.accountHref;
           if (href) window.location.href = href;
@@ -590,8 +657,6 @@
         }
 
         if (!isMobile()) {
-          // On desktop let the browser navigate to the account/login URL
-          // stored in a data attribute placed by the server-rendered markup.
           const href = trigger.dataset.accountHref;
           if (href) window.location.href = href;
           return;
@@ -606,7 +671,6 @@
         this.backBtn.addEventListener('click', () => this.close());
       }
 
-      // Close on Escape key
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && this.isOpen()) this.close();
       });
@@ -619,7 +683,6 @@
     open() {
       if (!this.overlay) return;
       this.overlay.removeAttribute('hidden');
-      // Force reflow so CSS transition fires correctly
       void this.overlay.offsetWidth;
       this.overlay.classList.add('is-open');
       document.body.style.overflow = 'hidden';
@@ -631,9 +694,6 @@
       this.overlay.classList.remove('is-open');
       document.body.style.overflow = '';
 
-      // After CSS transition ends, hide from accessibility tree.
-      // Fallback timeout guards against cases where transitionend never fires
-      // (e.g. prefers-reduced-motion: reduce, display:none mid-animation).
       let settled = false;
       const finalise = () => {
         if (settled) return;
@@ -642,9 +702,8 @@
         this.overlay.removeEventListener('transitionend', finalise);
       };
       this.overlay.addEventListener('transitionend', finalise);
-      setTimeout(finalise, 400); // max transition duration + buffer
+      setTimeout(finalise, 400);
 
-      // Return focus to the element that originally opened the overlay
       const returnTarget = this._openedBy || document.querySelector('.karthika-account-trigger');
       this._openedBy = null;
       if (returnTarget) returnTarget.focus();
