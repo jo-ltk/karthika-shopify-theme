@@ -161,7 +161,83 @@
     : (window.routes && window.routes.root ? window.routes.root : '/');
   if (!ROOT.endsWith('/')) ROOT += '/';
 
-  /* ── Rich curated dummy product catalog ───────────────────────────────── */
+  /* ── Liquid Store Products Data ── */
+  var LIQUID_STORE_PRODUCTS = [
+    {%- for collection in collections -%}
+      {%- for product in collection.products -%}
+        {
+          id: {{ product.id | json }},
+          title: {{ product.title | json }},
+          handle: {{ product.handle | json }},
+          vendor: {{ product.vendor | json }},
+          product_type: {{ product.type | default: product.product_type | json }},
+          tags: {{ product.tags | json }},
+          collection_handle: {{ collection.handle | json }},
+          collection_title: {{ collection.title | json }},
+          variants: [
+            {%- for variant in product.variants -%}
+              {
+                id: {{ variant.id | json }},
+                title: {{ variant.title | json }},
+                price: {{ variant.price | divided_by: 100.0 | json }},
+                compare_at_price: {% if variant.compare_at_price %}{{ variant.compare_at_price | divided_by: 100.0 | json }}{% else %}null{% endif %},
+                available: {{ variant.available | json }},
+                grams: {{ variant.grams | json }}
+              }{% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+          ],
+          images: [
+            {%- for image in product.images -%}
+              { src: {{ image | image_url: width: 600 | json }} }{% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+          ]
+        },
+      {%- endfor -%}
+    {%- endfor -%}
+    {%- if collections.all and collections.all.products.size > 0 -%}
+      {%- for product in collections.all.products -%}
+        {
+          id: {{ product.id | json }},
+          title: {{ product.title | json }},
+          handle: {{ product.handle | json }},
+          vendor: {{ product.vendor | json }},
+          product_type: {{ product.type | default: product.product_type | json }},
+          tags: {{ product.tags | json }},
+          collection_handle: "all",
+          collection_title: "All Products",
+          variants: [
+            {%- for variant in product.variants -%}
+              {
+                id: {{ variant.id | json }},
+                title: {{ variant.title | json }},
+                price: {{ variant.price | divided_by: 100.0 | json }},
+                compare_at_price: {% if variant.compare_at_price %}{{ variant.compare_at_price | divided_by: 100.0 | json }}{% else %}null{% endif %},
+                available: {{ variant.available | json }},
+                grams: {{ variant.grams | json }}
+              }{% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+          ],
+          images: [
+            {%- for image in product.images -%}
+              { src: {{ image | image_url: width: 600 | json }} }{% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+          ]
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    {%- endif -%}
+  ];
+
+  // Deduplicate products by id
+  var STORE_PRODUCT_MAP = {};
+  var UNIQUE_STORE_PRODUCTS = [];
+  LIQUID_STORE_PRODUCTS.forEach(function(p) {
+    if (p && p.id && !STORE_PRODUCT_MAP[p.id]) {
+      STORE_PRODUCT_MAP[p.id] = true;
+      UNIQUE_STORE_PRODUCTS.push(p);
+    }
+  });
+
+  /* ── Rich fallback dummy catalog if store is brand new/empty ───────────── */
   var DUMMY_PRODUCTS = [
     {
       id: 9001,
@@ -487,26 +563,26 @@
     loading: false
   };
 
-  /* ── Fetch products with instant rich fallback ── */
+  /* ── Fetch products with instant store data integration ── */
   var cachedAllProducts = null;
 
   var HANDLE_KEYWORDS = {
-    'dairy-eggs':    ['milk', 'curd', 'dairy', 'egg', 'paneer', 'butter', 'cheese', 'ghee', 'yogurt', 'bread', 'bun'],
-    'bread-buns':    ['bread', 'bun', 'bakery', 'sliced', 'sandwich'],
+    'dairy-eggs':    ['dairy', 'milk', 'egg', 'paneer', 'butter', 'cheese', 'ghee', 'yogurt', 'bread', 'bun', 'curd'],
+    'bread-buns':    ['bread', 'bun', 'bakery', 'sliced', 'sandwich', 'pav', 'toast'],
     'paneer-tofu':   ['paneer', 'tofu', 'curd', 'soya'],
-    'cheese':        ['cheese', 'slice', 'mozzarella', 'cheddar'],
-    'eggs':          ['egg', 'poultry', 'tray', 'white egg'],
-    'top-deals':     ['bestseller', 'deal', 'special', 'prime', 'chips'],
-    'fresh-fruits':  ['fruit', 'mango', 'orange', 'grape', 'banana', 'apple', 'avocado', 'fresh fruits'],
-    'vegetables':    ['vegetable', 'tomato', 'potato', 'onion', 'pepper', 'broccoli', 'fresh produce'],
-    'rice-grains':   ['rice', 'basmati', 'matta', 'grain', 'staples', 'millet', 'quinoa'],
-    'spices-masala': ['spice', 'pepper', 'turmeric', 'masala', 'chilli', 'powder', 'coriander'],
-    'dals-pulses':   ['dal', 'pulse', 'toor', 'moong', 'chana', 'rajma', 'urad', 'lentil'],
-    'atta-flours':   ['atta', 'flour', 'wheat', 'besan', 'ragi', 'appam'],
-    'indian-snacks': ['snack', 'mixture', 'chips', 'murukku', 'biscuit', 'namkeen', 'kerala'],
-    'frozen-foods':  ['frozen', 'parotta', 'chapati'],
-    'beverages':     ['beverage', 'drink', 'coconut', 'tea', 'coffee', 'juice', 'water'],
-    'household':     ['clean', 'household', 'tissue', 'wash']
+    'cheese':        ['cheese', 'slice', 'mozzarella', 'cheddar', 'spread'],
+    'eggs':          ['egg', 'poultry', 'tray', 'white egg', 'country egg'],
+    'top-deals':     ['deal', 'offer', 'bestseller', 'special', 'prime', 'popular', 'discount'],
+    'fresh-fruits':  ['fruit', 'mango', 'orange', 'grape', 'banana', 'apple', 'avocado', 'fresh fruits', 'berry', 'watermelon', 'papaya'],
+    'vegetables':    ['vegetable', 'tomato', 'potato', 'onion', 'pepper', 'broccoli', 'fresh produce', 'carrot', 'beans', 'spinach', 'ginger', 'garlic'],
+    'rice-grains':   ['rice', 'basmati', 'matta', 'grain', 'staples', 'millet', 'quinoa', 'poha', 'raw rice'],
+    'spices-masala': ['spice', 'pepper', 'turmeric', 'masala', 'chilli', 'powder', 'coriander', 'cardamom', 'clove', 'cinnamon', 'garam masala'],
+    'dals-pulses':   ['dal', 'pulse', 'toor', 'moong', 'chana', 'rajma', 'urad', 'lentil', 'gram'],
+    'atta-flours':   ['atta', 'flour', 'wheat', 'besan', 'ragi', 'appam', 'puttu', 'maida', 'rice powder'],
+    'indian-snacks': ['snack', 'mixture', 'chips', 'murukku', 'biscuit', 'namkeen', 'kerala', 'cookies', 'crackers'],
+    'frozen-foods':  ['frozen', 'parotta', 'chapati', 'ready to eat', 'peas', 'nuggets', 'fries'],
+    'beverages':     ['beverage', 'drink', 'coconut', 'tea', 'coffee', 'juice', 'water', 'soda', 'syrup', 'squash'],
+    'household':     ['clean', 'household', 'tissue', 'wash', 'detergent', 'soap', 'dishwash', 'cleaner']
   };
 
   function fetchProducts(handle, cb) {
@@ -515,31 +591,61 @@
       return;
     }
 
-    /* Show dummy products immediately so there's no blank screen */
-    cachedAllProducts = DUMMY_PRODUCTS;
+    // Combine store products first, falling back to dummy products if store has no products
+    var initialCatalog = UNIQUE_STORE_PRODUCTS.length > 0 ? UNIQUE_STORE_PRODUCTS : DUMMY_PRODUCTS;
+    cachedAllProducts = initialCatalog;
     filterByHandle(cachedAllProducts, handle, cb);
 
-    /* Fetch real products in the background and merge */
+    /* Fetch real products via Shopify /products.json in the background and update cache */
     try {
       fetch(ROOT + 'products.json?limit=250')
         .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
         .then(function(data) {
           var storeProds = data.products || [];
           if (storeProds.length > 0) {
-            cachedAllProducts = DUMMY_PRODUCTS.concat(storeProds);
+            var combinedMap = {};
+            var merged = [];
+            storeProds.forEach(function(p) {
+              if (p && p.id && !combinedMap[p.id]) {
+                combinedMap[p.id] = true;
+                merged.push(p);
+              }
+            });
+            UNIQUE_STORE_PRODUCTS.forEach(function(p) {
+              if (p && p.id && !combinedMap[p.id]) {
+                combinedMap[p.id] = true;
+                merged.push(p);
+              }
+            });
+            cachedAllProducts = merged.length > 0 ? merged : DUMMY_PRODUCTS;
+            filterByHandle(cachedAllProducts, state.handle, function(err, refreshed) {
+              if (refreshed && refreshed.length > 0) {
+                state.products = refreshed;
+                buildDropdownMenus(refreshed);
+                applyFilters();
+              }
+            });
           }
         })
-        .catch(function() { /* keep dummy cache */ });
+        .catch(function() { /* keep existing cache */ });
     } catch(e) { /* fetch not available */ }
   }
 
   function filterByHandle(all, handle, cb) {
     var kwList = HANDLE_KEYWORDS[handle] || [handle.replace(/-/g, ' ')];
     var matched = all.filter(function(p) {
-      var str = ((p.title || '') + ' ' + (p.product_type || '') + ' ' + ((p.tags || []).join(' ')) + ' ' + (p.handle || '')).toLowerCase();
+      var str = ((p.title || '') + ' ' + (p.product_type || '') + ' ' + ((p.tags || []).join(' ')) + ' ' + (p.handle || '') + ' ' + (p.collection_handle || '') + ' ' + (p.collection_title || '')).toLowerCase();
       return kwList.some(function(kw) { return str.indexOf(kw.toLowerCase()) !== -1; });
     });
-    cb(null, matched.length > 0 ? matched : DUMMY_PRODUCTS.slice(0, 6));
+
+    if (matched.length > 0) {
+      cb(null, matched);
+    } else if (all.length > 0) {
+      // If no direct keyword match in this category, show catalog products so user has items to view & purchase
+      cb(null, all.slice(0, 8));
+    } else {
+      cb(null, DUMMY_PRODUCTS.slice(0, 6));
+    }
   }
 
   /* ── Price formatting helper ────────────────────────────────────────────── */
