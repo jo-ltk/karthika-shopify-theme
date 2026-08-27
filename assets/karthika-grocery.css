@@ -2258,170 +2258,6 @@ textarea {
   display: block;
 }
 
-.template-cart .cart-items {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 12px;
-}
-
-.template-cart .cart-item {
-  background: #FFFFFF;
-  border: 1px solid var(--karthika-border);
-  border-radius: 22px;
-  box-shadow: var(--karthika-shadow-card);
-  overflow: hidden;
-}
-
-.template-cart .cart-item__media {
-  width: 90px;
-  padding: 12px 0 12px 12px;
-  vertical-align: top;
-}
-
-.template-cart .cart-item__image-container,
-.template-cart .cart-item__image {
-  width: 90px;
-  height: 90px;
-  border-radius: 18px;
-  object-fit: cover;
-  background: var(--karthika-bg-card-img);
-}
-
-.template-cart .cart-item__details {
-  padding: 12px 12px 10px 10px;
-  min-width: 0;
-}
-
-.template-cart .cart-item__title {
-  margin: 0 0 6px;
-}
-
-.template-cart .cart-item__name {
-  display: block;
-  color: var(--karthika-text-dark);
-  font-size: 15px;
-  line-height: 1.35;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-.template-cart .cart-item__old-price,
-.template-cart .cart-item__final-price,
-.template-cart .price {
-  color: var(--karthika-text-dark);
-  font-size: 14px;
-  line-height: 1.4;
-  font-weight: 700;
-}
-
-.template-cart .product-option,
-.template-cart .cart-item__details dl,
-.template-cart .cart-item__details dd,
-.template-cart .cart-item__details dt {
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--karthika-text-muted);
-}
-
-.template-cart .cart-item__details dl {
-  margin: 8px 0 0;
-}
-
-.template-cart .cart-item__details dd,
-.template-cart .cart-item__details dt {
-  display: inline;
-  margin: 0;
-}
-
-.template-cart .cart-item__details dd {
-  margin-left: 4px;
-}
-
-.template-cart .cart-item__quantity {
-  padding: 0 12px 12px 0;
-  width: 110px;
-  vertical-align: bottom;
-}
-
-.template-cart .quantity-popover-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.template-cart quantity-input {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 999px;
-  background: var(--karthika-bg-surface);
-  border: 1px solid var(--karthika-border);
-}
-
-.template-cart .quantity__button {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  border: none;
-  border-radius: 50%;
-  background: #FFFFFF;
-  color: var(--karthika-text-dark);
-  display: grid;
-  place-items: center;
-  box-shadow: var(--karthika-shadow-subtle);
-}
-
-.template-cart .quantity__input {
-  width: 34px;
-  min-width: 34px;
-  text-align: center;
-  border: none;
-  background: transparent;
-  color: var(--karthika-text-dark);
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.template-cart .quantity__input::-webkit-outer-spin-button,
-.template-cart .quantity__input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.template-cart .cart-remove-button {
-  margin-top: 8px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.template-cart .button--tertiary {
-  border: none;
-  background: transparent;
-  color: var(--karthika-red);
-  font-weight: 700;
-  padding: 0;
-}
-
-.template-cart .cart-item__totals {
-  padding: 0 12px 12px 0;
-  text-align: right;
-  vertical-align: bottom;
-}
-
-.template-cart .cart-item__price-wrapper {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.template-cart .cart-item__error {
-  margin-top: 8px;
-  color: var(--karthika-red);
-}
 
 .template-cart .cart__footer {
   background: #FFFFFF;
@@ -4204,4 +4040,100 @@ textarea {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
+
+/* ==========================================================================
+   Free Delivery Progress Banner — Cart Page
+   ========================================================================== */
+.kcb-free-delivery-bar {
+  margin: 0 0 1.6rem;
+  padding: 1.2rem 1.6rem 1rem;
+  background: #ffffff;
+  border: 1.5px solid #e2ead6;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(63, 125, 46, 0.07);
+}
+
+.kcb-fdb__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+/* --- Message row --- */
+.kcb-fdb__message {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.4rem;
+  color: #333;
+  line-height: 1.4;
+}
+
+.kcb-fdb__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: #3F7D2E;
+}
+
+.kcb-fdb__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.kcb-fdb__icon--done {
+  color: #3F7D2E;
+}
+
+.kcb-fdb__amount {
+  color: #3F7D2E;
+  font-weight: 700;
+}
+
+/* --- Progress track --- */
+.kcb-fdb__track {
+  width: 100%;
+  height: 9px;
+  background: #e2ead6;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.kcb-fdb__fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #4a9235 0%, #3F7D2E 100%);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kcb-fdb__fill--complete {
+  background: linear-gradient(90deg, #3F7D2E 0%, #2f6120 100%);
+}
+
+/* --- Labels row --- */
+.kcb-fdb__labels {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 1.25rem;
+  color: #5C6B52;
+}
+
+.kcb-fdb__totals {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.kcb-fdb__current {
+  font-weight: 600;
+  color: #3F7D2E;
+}
+
+.kcb-fdb__sep,
+.kcb-fdb__goal {
+  color: #7a8c6f;
+}
+
+
+
 
