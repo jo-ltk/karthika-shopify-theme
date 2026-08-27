@@ -208,9 +208,11 @@
     renderCartSummary(cart, summary) {
       const count = cart?.item_count || 0;
       const countEl = summary.querySelector('.karthika-floating-cart-count');
+      const badgeEl = summary.querySelector('.karthika-floating-cart-badge');
       const thumbnailsEl = summary.querySelector('.karthika-floating-cart-thumbnails');
 
       if (countEl) countEl.textContent = `${count} ITEMS`;
+      if (badgeEl) badgeEl.textContent = count;
       if (thumbnailsEl) {
         const recents = this.state.recentVariantIds || [];
         const sortedItems = [...(cart?.items || [])].sort((a, b) => {
@@ -221,12 +223,12 @@
           return posB - posA;
         });
 
-        const images = sortedItems.filter((item) => item.image).slice(0, 3).map((item) => {
+        const images = sortedItems.filter((item) => item.image).slice(0, 2).map((item) => {
           const image = document.createElement('img');
           image.src = item.image;
           image.alt = '';
-          image.width = 36;
-          image.height = 36;
+          image.width = 38;
+          image.height = 38;
           image.loading = 'lazy';
           return image;
         });

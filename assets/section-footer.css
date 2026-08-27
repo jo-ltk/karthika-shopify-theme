@@ -506,3 +506,405 @@
     }
   }
 }
+
+/* ==========================================================================
+   KARTHIKA FOOTER REDESIGN (MATCH TARGET MOCKUP)
+   ========================================================================== */
+.footer {
+  background-color: #FFFFFF !important;
+  color: #171717 !important;
+  border-top: none !important;
+}
+
+.footer__content-top {
+  padding-top: 0;
+  padding-bottom: 2.5rem;
+}
+
+/* Newsletter Light-Green Card */
+.footer-newsletter-card {
+  background: #F4F8F0;
+  border: 1px solid #E6EFE0;
+  border-radius: 28px;
+  padding: 4.2rem 2.4rem 3.4rem;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(63, 125, 46, 0.04);
+}
+
+.footer-block__newsletter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Centered Envelope Icon */
+.footer-newsletter__icon-badge {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #E3EDE0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.8rem;
+  color: #3F7D2E;
+  transition: transform 0.25s ease;
+}
+
+.footer-newsletter__icon-badge:hover {
+  transform: translateY(-2px);
+}
+
+.footer-envelope-icon {
+  width: 28px;
+  height: 28px;
+}
+
+/* Typography */
+.footer-newsletter__heading {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #1F4514;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.8rem;
+  line-height: 1.25;
+}
+
+.footer-newsletter__subtext {
+  font-size: 1.45rem;
+  color: #5F6B56;
+  margin: 0 0 2.4rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Rounded Input + Attached Submit Button */
+.footer__newsletter.newsletter-form {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto 2.2rem;
+}
+
+.footer-newsletter__field {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 1.5px solid #D5E1CE;
+  border-radius: 9999px;
+  padding: 5px 6px 5px 22px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.footer-newsletter__field:focus-within {
+  border-color: #3F7D2E;
+  box-shadow: 0 0 0 3px rgba(63, 125, 46, 0.15);
+}
+
+.footer-newsletter__field .footer-newsletter__input {
+  flex: 1 1 auto;
+  border: none;
+  background: transparent;
+  padding: 1rem 0.5rem 1rem 0;
+  font-size: 1.45rem;
+  color: #171717;
+  outline: none;
+  box-shadow: none !important;
+  font-family: inherit;
+}
+
+.footer-newsletter__field .footer-newsletter__input::placeholder {
+  color: #8C9985;
+  font-size: 1.45rem;
+}
+
+.footer-newsletter__field .field__label {
+  display: none;
+}
+
+.footer-newsletter__field::after,
+.footer-newsletter__field::before {
+  display: none !important;
+}
+
+.footer-newsletter__submit-btn {
+  position: static !important;
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px;
+  border-radius: 50% !important;
+  background: #3F7D2E !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease;
+  box-shadow: 0 4px 12px rgba(63, 125, 46, 0.25);
+}
+
+.footer-newsletter__submit-btn:hover {
+  background: #336624 !important;
+  transform: scale(1.05);
+}
+
+.footer-newsletter__submit-btn:active {
+  transform: scale(0.96);
+}
+
+.footer-arrow-icon {
+  width: 20px;
+  height: 20px;
+  color: #FFFFFF;
+}
+
+/* Social Media Circles (Facebook, Instagram) */
+.footer-social-circles {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.4rem;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-social-circles .list-social__item {
+  margin: 0;
+}
+
+.footer-social-circles .list-social__link {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #E3EDE0;
+  color: #3F7D2E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  text-decoration: none;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease, color 0.15s ease;
+}
+
+.footer-social-circles .list-social__link:hover {
+  background: #3F7D2E;
+  color: #FFFFFF;
+  transform: translateY(-2px) scale(1.06);
+}
+
+.footer-social-circles .list-social__link .icon {
+  width: 19px;
+  height: 19px;
+  fill: currentColor;
+}
+
+/* Payment Icons Row */
+.footer__content-bottom {
+  border-top: none;
+  background: #FFFFFF;
+  padding-top: 2.8rem;
+  padding-bottom: 2rem;
+}
+
+.footer__column--info {
+  padding: 0;
+  width: 100%;
+}
+
+.footer__payment {
+  width: 100%;
+  margin-top: 0;
+  margin-bottom: 2.4rem;
+}
+
+.footer__payment .list-payment {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.footer__payment .list-payment__item {
+  padding: 0;
+  margin: 0;
+}
+
+.footer__payment .list-payment__item .icon {
+  height: 32px;
+  width: auto;
+  min-width: 48px;
+  border: 1px solid #E8ECE5;
+  border-radius: 6px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Card badges fallback matching design */
+.karthika-pay-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 36px;
+  border: 1px solid #E2E6DE;
+  border-radius: 7px;
+  background: #FFFFFF;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.karthika-pay-card--visa { color: #1434CB; font-family: sans-serif; font-style: italic; font-weight: 900; }
+.karthika-pay-card--mc { display: inline-flex; position: relative; width: 58px; height: 36px; }
+.karthika-pay-dot { width: 18px; height: 18px; border-radius: 50%; display: inline-block; }
+.karthika-pay-dot.red { background: #EB001B; margin-right: -6px; z-index: 1; }
+.karthika-pay-dot.yellow { background: #F79E1B; opacity: 0.95; }
+.karthika-pay-card--amex { color: #006FCF; font-weight: 900; font-size: 10px; }
+.karthika-pay-card--paypal { color: #003087; font-weight: 800; font-style: italic; font-size: 11px; }
+.karthika-pay-card--diners { color: #004B87; font-size: 18px; line-height: 1; }
+.karthika-pay-card--discover { color: #FF6000; font-weight: 800; font-size: 9px; }
+
+/* Thin divider line */
+.footer-divider-container {
+  max-width: 640px;
+  margin: 0 auto 2.2rem;
+  padding: 0 2rem;
+}
+
+.footer-divider-line {
+  height: 1px;
+  background: #E8ECE3;
+  width: 100%;
+}
+
+/* Centered Copyright & Policies */
+.footer__content-bottom-copyright {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+
+.footer__copyright {
+  text-align: center !important;
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer__copyright-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  color: #6C7A65;
+  font-size: 1.35rem;
+  font-weight: 400;
+}
+
+.footer__copyright-text .copyright__content {
+  color: #6C7A65;
+  font-size: 1.35rem;
+}
+
+.footer__copyright-text a {
+  color: #6C7A65;
+  text-decoration: none;
+}
+
+.footer__copyright-text a:hover {
+  text-decoration: underline;
+  color: #3F7D2E;
+}
+
+.footer .policies {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem 1.6rem;
+  margin: 0;
+  padding: 0;
+}
+
+.footer .policies li {
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.footer .policies li::before {
+  display: none !important;
+}
+
+.footer .policies li:not(:last-child)::after {
+  content: '•';
+  color: #3F7D2E;
+  margin-left: 1.6rem;
+  font-size: 1.2rem;
+}
+
+.footer .policies li a {
+  color: #3F7D2E;
+  font-size: 1.35rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0;
+}
+
+.footer .policies li a:hover {
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 749px) {
+  .footer-newsletter-card {
+    padding: 3.4rem 1.8rem 2.8rem;
+    border-radius: 22px;
+    margin: 0 1rem;
+  }
+
+  .footer-newsletter__heading {
+    font-size: 2.1rem;
+  }
+
+  .footer-newsletter__subtext {
+    font-size: 1.35rem;
+    margin-bottom: 2rem;
+  }
+
+  .footer-newsletter__field {
+    padding: 4px 5px 4px 18px;
+  }
+
+  .footer-newsletter__submit-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px;
+  }
+
+  .footer__payment .list-payment {
+    gap: 0.8rem;
+  }
+}
