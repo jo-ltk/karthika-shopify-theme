@@ -1,0 +1,16 @@
+{
+  "name": "karthika",
+  "module": "index.ts",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "6",
+    "prisma": "6"
+  }
+}

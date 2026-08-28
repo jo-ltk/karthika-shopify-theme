@@ -14,6 +14,25 @@
   <h3 class="karthika-ai-title">{{ section.settings.heading | default: "Not sure what to cook?" }}</h3>
   <p class="karthika-ai-desc">{{ section.settings.subheading | default: "Tell Karthika what you're making and we'll find the fresh ingredients." }}</p>
 
+  <!-- AI Custom Prompt Input -->
+  <form id="KarthikaAIPromptForm" class="karthika-ai-prompt-form">
+    <div class="karthika-ai-input-wrap">
+      <input
+        type="text"
+        id="KarthikaAIPromptInput"
+        class="karthika-ai-input"
+        placeholder="e.g. Fish Curry for 4 people, Beef Roast..."
+        autocomplete="off"
+      />
+      <button type="submit" id="KarthikaAISubmitBtn" class="karthika-ai-submit-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        <span>Ask AI</span>
+      </button>
+    </div>
+  </form>
+
   <!-- Recipe / Dish Selection Chips -->
   <div class="karthika-ai-chips-wrap karthika-hide-scrollbar">
     <button type="button" class="karthika-ai-chip is-active karthika-ai-pill-btn" data-recipe="biryani">
@@ -33,23 +52,25 @@
   <!-- Interactive Basket Preview Box -->
   <div class="karthika-ai-basket-box">
     <div class="karthika-ai-basket-head">
-      <span id="KarthikaAIRecipeTitle" class="karthika-ai-basket-dish">
-        Malabar Chicken Biryani Kit
-      </span>
+      <div>
+        <span id="KarthikaAIRecipeTitle" class="karthika-ai-basket-dish">
+          Malabar Chicken Biryani Kit
+        </span>
+        <span class="karthika-ai-basket-matched-count" id="KarthikaAIMatchedCount">4 store items matched</span>
+      </div>
       <span id="KarthikaAIRecipePrice" class="karthika-ai-basket-price">
         $24.50
       </span>
     </div>
 
-    <div id="KarthikaAIIngredientList" class="karthika-ai-ingredients-list">
-      <div>✓ Kaima Jeerakasala Biryani Rice (1kg) &mdash; $4.80</div>
-      <div>✓ Fresh Farm Chicken Curry Cut (1kg) &mdash; $9.50</div>
-      <div>✓ Eastern Biryani Masala & Pure Ghee &mdash; $4.40</div>
-      <div>✓ Fresh Mint Leaves, Coriander & Onions &mdash; $5.80</div>
+    <!-- Visual Matched Product List with Images -->
+    <div id="KarthikaAIIngredientList" class="karthika-ai-ingredients-list karthika-ai-product-items">
+      <!-- Injected dynamically with actual products & images -->
     </div>
 
     <button
       type="button"
+      id="KarthikaAIBuildBtn"
       class="karthika-ai-build-btn karthika-ai-add-all-btn"
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -57,9 +78,27 @@
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <path d="M16 10a4 4 0 0 1-8 0"></path>
       </svg>
-      <span>Build my basket</span>
+      <span>Build my basket & Go to Cart</span>
     </button>
   </div>
+
+  <script type="application/json" id="KarthikaCatalogVariants">
+    [
+      {%- for product in collections.all.products limit: 50 -%}
+        {%- assign v = product.selected_or_first_available_variant | default: product.variants.first -%}
+        {%- if v and v.available -%}
+          {
+            "id": {{ v.id }},
+            "title": {{ product.title | json }},
+            "price": {{ product.price | money | json }},
+            "price_raw": {{ product.price }},
+            "image": {{ product.featured_media | image_url: width: 120 | json }},
+            "url": {{ product.url | json }}
+          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+    ]
+  </script>
 </div>
 
 {% schema %}

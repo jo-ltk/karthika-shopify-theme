@@ -1835,8 +1835,69 @@ textarea {
 .karthika-ai-desc {
   font-size: 13px;
   color: var(--karthika-text-muted);
-  margin: 0 0 14px 0;
+  margin: 0 0 12px 0;
   line-height: 1.35;
+}
+
+.karthika-ai-prompt-form {
+  margin-bottom: 12px;
+}
+
+.karthika-ai-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--karthika-bg-surface);
+  border: 1px solid var(--karthika-border);
+  border-radius: var(--karthika-radius-pill);
+  padding: 4px 6px 4px 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.karthika-ai-input-wrap:focus-within {
+  border-color: var(--karthika-red);
+  box-shadow: 0 0 0 2px var(--karthika-red-subtle);
+  background: #FFFFFF;
+}
+
+.karthika-ai-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--karthika-text-dark);
+  outline: none;
+  font-family: inherit;
+}
+
+.karthika-ai-input::placeholder {
+  color: var(--karthika-text-muted);
+  opacity: 0.8;
+  font-size: 12px;
+}
+
+.karthika-ai-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--karthika-red);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--karthika-radius-pill);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.karthika-ai-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.karthika-ai-submit-btn:active:not(:disabled) {
+  transform: scale(0.96);
 }
 
 .karthika-ai-chips-wrap {
@@ -1871,7 +1932,7 @@ textarea {
 }
 
 .karthika-ai-basket-box {
-  background: var(--karthika-bg-body);
+  background: #FAFAFA;
   border-radius: var(--karthika-radius-md);
   padding: 14px;
   border: 1px solid var(--karthika-border);
@@ -1880,29 +1941,90 @@ textarea {
 .karthika-ai-basket-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--karthika-border);
 }
 
 .karthika-ai-basket-dish {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
   color: var(--karthika-text-dark);
+  display: block;
+}
+
+.karthika-ai-basket-matched-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--karthika-green, #16A34A);
+  display: block;
+  margin-top: 2px;
 }
 
 .karthika-ai-basket-price {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--karthika-red);
 }
 
-.karthika-ai-ingredients-list {
+.karthika-ai-product-items {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.karthika-ai-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFFFFF;
+  border: 1px solid var(--karthika-border);
+  border-radius: 10px;
+  padding: 6px 10px;
+  transition: transform 0.15s ease;
+}
+
+.karthika-ai-item-row:hover {
+  transform: translateX(2px);
+  border-color: #CBD5E1;
+}
+
+.karthika-ai-item-thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #F1F5F9;
+  flex-shrink: 0;
+}
+
+.karthika-ai-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.karthika-ai-item-name {
   font-size: 12px;
+  font-weight: 600;
+  color: var(--karthika-text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.karthika-ai-item-tag {
+  font-size: 10px;
   color: var(--karthika-text-muted);
-  margin-bottom: 12px;
+}
+
+.karthika-ai-item-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--karthika-text-dark);
+  flex-shrink: 0;
 }
 
 .karthika-ai-build-btn {
