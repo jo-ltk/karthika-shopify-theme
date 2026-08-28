@@ -664,6 +664,55 @@
       }, 500);
     },
 
+    init() {
+      // Show default recipe (biryani) immediately on page load
+      const defaultRecipe = recipes['biryani'];
+      if (defaultRecipe) {
+        this.matchAndRenderStoreProducts(
+          defaultRecipe.title,
+          defaultRecipe.price,
+          defaultRecipe.ingredients
+        );
+      }
+
+      // Chip buttons → load preset recipe
+      document.addEventListener('click', (e) => {
+        const chip = e.target.closest('.karthika-ai-chip[data-recipe]');
+        if (!chip) return;
+        e.preventDefault();
+
+        // Toggle active chip style
+        document.querySelectorAll('.karthika-ai-chip').forEach(c => c.classList.remove('is-active'));
+        chip.classList.add('is-active');
+
+        const key = chip.dataset.recipe;
+        const recipe = recipes[key];
+        if (recipe) {
+          this.matchAndRenderStoreProducts(recipe.title, recipe.price, recipe.ingredients);
+        }
+      });
+
+      // Form submit → Ask AI with free text
+      const form = document.getElementById('KarthikaAIPromptForm');
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const input = document.getElementById('KarthikaAIPromptInput');
+          const query = input ? input.value.trim() : '';
+          if (query) {
+            this.generateRecipeWithAI(query);
+          }
+        });
+      }
+
+      // Build basket button
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('#KarthikaAIBuildBtn');
+        if (!btn) return;
+        this.buildAndAddBasket(btn);
+      });
+    },
+
     async generateRecipeWithAI(dishQuery) {
       this._isLoading = true;
       const submitBtn = document.getElementById('KarthikaAISubmitBtn');
