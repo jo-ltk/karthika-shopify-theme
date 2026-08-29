@@ -3,11 +3,11 @@
     <div class="karthika-carousel-track" id="karthikaHeroTrack-{{ section.id }}">
       {%- if section.blocks.size > 0 -%}
         {%- for block in section.blocks -%}
-          <a href="{{ block.settings.link | default: routes.all_products_collection_url }}" class="karthika-carousel-slide" {{ block.shopify_attributes }}>
+          <a href="{{ block.settings.button_link | default: block.settings.link | default: routes.collections_url }}" class="karthika-carousel-slide" {{ block.shopify_attributes }}>
             {%- if block.settings.image != blank -%}
               <img
                 src="{{ block.settings.image | image_url: width: 900 }}"
-                alt="{{ block.settings.title | default: 'Karthika Banner' | escape }}"
+                alt="{{ block.settings.heading | default: block.settings.title | default: 'Karthika Banner' | escape }}"
                 loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                 class="karthika-promo-bg-img"
                 width="900"
@@ -18,10 +18,10 @@
         {%- endfor -%}
       {%- else -%}
         <!-- Banner 1 -->
-        <a href="{{ routes.all_products_collection_url }}" class="karthika-carousel-slide">
+        <a href="{{ routes.collections_url }}" class="karthika-carousel-slide">
           <img 
             src="{{ 'banner-1.png' | asset_url }}"
-            alt="Banner 1" 
+            alt="Freshness You Can Trust - Fresh Picks" 
             class="karthika-promo-bg-img" 
             loading="eager" 
             width="900" 
@@ -29,10 +29,21 @@
           >
         </a>
         <!-- Banner 2 -->
-        <a href="{{ routes.all_products_collection_url }}" class="karthika-carousel-slide">
+        <a href="{{ routes.collections_url }}" class="karthika-carousel-slide">
           <img 
             src="{{ 'banner-2.png' | asset_url }}"
-            alt="Banner 2" 
+            alt="Poli Onam Sale - Festive Sale" 
+            class="karthika-promo-bg-img" 
+            loading="lazy" 
+            width="900" 
+            height="400"
+          >
+        </a>
+        <!-- Banner 3 -->
+        <a href="{{ routes.collections_url }}" class="karthika-carousel-slide">
+          <img 
+            src="{{ 'banner-3.png' | asset_url }}"
+            alt="New Season Arrivals - Fresh Picks" 
             class="karthika-promo-bg-img" 
             loading="lazy" 
             width="900" 
@@ -46,7 +57,7 @@
   <!-- Pagination Dots -->
   <div class="karthika-carousel-pagination" id="karthikaHeroDots-{{ section.id }}" role="tablist" aria-label="Hero Carousel Dots">
     {%- assign slide_count = section.blocks.size -%}
-    {%- if slide_count == 0 -%}{%- assign slide_count = 2 -%}{%- endif -%}
+    {%- if slide_count == 0 -%}{%- assign slide_count = 3 -%}{%- endif -%}
     {%- for i in (1..slide_count) -%}
       {%- assign idx = forloop.index0 -%}
       <button
@@ -74,6 +85,7 @@
     let autoPlayTimer = null;
     let startX = 0;
     let isDragging = false;
+    let hasMoved = false;
 
     function goToSlide(index) {
       if (index < 0) {
@@ -109,22 +121,26 @@
     dots.forEach(dot => {
       dot.addEventListener('click', (e) => {
         e.stopPropagation();
+        stopAutoPlay();
         const targetIndex = parseInt(dot.getAttribute('data-index'), 10);
         goToSlide(targetIndex);
         startAutoPlay();
       });
     });
 
+    // Touch Swipe with active finger tracking
     carousel.addEventListener('touchstart', (e) => {
       stopAutoPlay();
       startX = e.touches[0].clientX;
       isDragging = true;
+      hasMoved = false;
     }, { passive: true });
 
     carousel.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
       const currentX = e.touches[0].clientX;
       const diff = currentX - startX;
+      if (Math.abs(diff) > 5) hasMoved = true;
       track.style.transition = 'none';
       track.style.transform = `translateX(calc(-${currentIndex * 100}% + ${diff}px))`;
     }, { passive: true });
@@ -135,14 +151,57 @@
       const endX = e.changedTouches[0].clientX;
       const diff = endX - startX;
 
-      if (diff < -40) {
+      // Minimum 50px swipe threshold
+      if (diff < -50) {
         goToSlide(currentIndex + 1);
-      } else if (diff > 40) {
+      } else if (diff > 50) {
         goToSlide(currentIndex - 1);
       } else {
         goToSlide(currentIndex);
       }
       startAutoPlay();
+    });
+
+    // Mouse Drag Support for Desktop testing
+    carousel.addEventListener('mousedown', (e) => {
+      stopAutoPlay();
+      startX = e.clientX;
+      isDragging = true;
+      hasMoved = false;
+      carousel.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const diff = e.clientX - startX;
+      if (Math.abs(diff) > 5) hasMoved = true;
+      track.style.transition = 'none';
+      track.style.transform = `translateX(calc(-${currentIndex * 100}% + ${diff}px))`;
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      carousel.style.cursor = 'grab';
+      const diff = e.clientX - startX;
+      if (diff < -50) {
+        goToSlide(currentIndex + 1);
+      } else if (diff > 50) {
+        goToSlide(currentIndex - 1);
+      } else {
+        goToSlide(currentIndex);
+      }
+      startAutoPlay();
+    });
+
+    // Prevent accidental click during drag
+    carousel.querySelectorAll('.karthika-carousel-slide').forEach(slide => {
+      slide.addEventListener('click', (e) => {
+        if (hasMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      });
     });
 
     carousel.addEventListener('mouseenter', stopAutoPlay);
@@ -184,49 +243,53 @@
       "settings": [
         {
           "type": "text",
-          "id": "badge",
-          "label": "Promotion Badge",
-          "default": "20% OFF FIRST ORDER"
-        },
-        {
-          "type": "select",
-          "id": "badge_color",
-          "label": "Badge Color Style",
-          "options": [
-            { "value": "", "label": "Yellow" },
-            { "value": "badge-green", "label": "Green" },
-            { "value": "badge-orange", "label": "Orange" },
-            { "value": "badge-red", "label": "Red" }
-          ],
-          "default": ""
-        },
-        {
-          "type": "text",
-          "id": "title",
+          "id": "heading",
           "label": "Heading",
-          "default": "Fresh Kerala favourites"
+          "default": "Freshness You Can Trust"
         },
         {
           "type": "text",
-          "id": "subtitle",
-          "label": "Subtitle",
-          "default": "Delivered across Singapore"
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Fresh Picks"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description",
+          "default": "Handpicked fruits & veggies for a healthier you"
+        },
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Badge Text (e.g. 40% OFF)",
+          "default": "40% OFF"
         },
         {
           "type": "text",
           "id": "button_text",
           "label": "Button Label",
-          "default": "Shop now"
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
         },
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Banner Background Image"
+          "label": "Banner Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title (alt text)"
         },
         {
           "type": "url",
           "id": "link",
-          "label": "Banner Link"
+          "label": "Banner Link (fallback)"
         }
       ]
     }
@@ -238,40 +301,31 @@
         {
           "type": "slide",
           "settings": {
-            "badge": "20% OFF FIRST ORDER",
-            "title": "Fresh Kerala favourites",
-            "subtitle": "Delivered across Singapore",
-            "button_text": "Shop now"
+            "heading": "Freshness You Can Trust",
+            "subheading": "Fresh Picks",
+            "description": "Handpicked fruits & veggies for a healthier you",
+            "badge_text": "40% OFF",
+            "button_text": "Shop Now"
           }
         },
         {
           "type": "slide",
           "settings": {
-            "badge": "DAILY HARVEST",
-            "badge_color": "badge-green",
-            "title": "Organic & Fresh Veggies",
-            "subtitle": "Directly sourced daily",
-            "button_text": "Explore Fresh"
+            "heading": "Poli Onam Sale",
+            "subheading": "Festive Sale",
+            "description": "Onam specials, Sadya essentials & festive picks",
+            "badge_text": "50% OFF",
+            "button_text": "Shop Now"
           }
         },
         {
           "type": "slide",
           "settings": {
-            "badge": "AUTHENTIC TASTE",
-            "badge_color": "badge-orange",
-            "title": "Handpicked Spices & Herbs",
-            "subtitle": "Pure aroma of Wayanad & Idukki",
-            "button_text": "Shop Spices"
-          }
-        },
-        {
-          "type": "slide",
-          "settings": {
-            "badge": "CRUNCHY DELIGHTS",
-            "badge_color": "badge-red",
-            "title": "Hot Banana Chips & Mix",
-            "subtitle": "Fried in pure coconut oil",
-            "button_text": "Order Snacks"
+            "heading": "New Season Arrivals",
+            "subheading": "Fresh Picks",
+            "description": "Discover what's in season now",
+            "badge_text": "NEW",
+            "button_text": "Shop Now"
           }
         }
       ]

@@ -9,10 +9,10 @@
       {%- for block in section.blocks -%}
         {%- if block.settings.image != blank -%}
           {%- assign has_images = true -%}
-          <a href="{{ block.settings.link | default: routes.all_products_collection_url }}" class="karthika-ad-carousel-slide" {{ block.shopify_attributes }}>
+          <a href="{{ block.settings.link | default: routes.collections_url }}" class="karthika-ad-carousel-slide" {{ block.shopify_attributes }}>
             <img
               src="{{ block.settings.image | image_url: width: 900 }}"
-              alt="{{ block.settings.title | default: 'Banner' | escape }}"
+              alt="{{ block.settings.heading | default: block.settings.title | default: 'Banner' | escape }}"
               loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
               class="karthika-ad-banner-img"
               width="900"
@@ -24,21 +24,31 @@
     {%- endif -%}
 
     {%- if has_images == false -%}
-      <!-- Default Banners -->
-      <a href="{{ routes.all_products_collection_url }}" class="karthika-ad-carousel-slide">
+      <!-- Default Banners (3 Slides) -->
+      <a href="{{ routes.collections_url }}" class="karthika-ad-carousel-slide">
         <img 
           src="{{ 'banner-1.png' | asset_url }}"
-          alt="Banner 1" 
+          alt="Freshness You Can Trust - Fresh Picks" 
           class="karthika-ad-banner-img" 
           loading="eager" 
           width="900" 
           height="300"
         >
       </a>
-      <a href="{{ routes.all_products_collection_url }}" class="karthika-ad-carousel-slide">
+      <a href="{{ routes.collections_url }}" class="karthika-ad-carousel-slide">
         <img 
           src="{{ 'banner-2.png' | asset_url }}"
-          alt="Banner 2" 
+          alt="Poli Onam Sale - Festive Sale" 
+          class="karthika-ad-banner-img" 
+          loading="lazy" 
+          width="900" 
+          height="300"
+        >
+      </a>
+      <a href="{{ routes.collections_url }}" class="karthika-ad-carousel-slide">
+        <img 
+          src="{{ 'banner-3.png' | asset_url }}"
+          alt="New Season Arrivals - Fresh Picks" 
           class="karthika-ad-banner-img" 
           loading="lazy" 
           width="900" 
@@ -51,7 +61,7 @@
   <!-- Pagination Dots -->
   <div class="karthika-ad-carousel-pagination" id="AdCarouselDots-{{ section.id }}" role="tablist" aria-label="Banner Carousel Dots">
     {%- assign slide_count = section.blocks.size -%}
-    {%- if slide_count == 0 -%}{%- assign slide_count = 2 -%}{%- endif -%}
+    {%- if slide_count == 0 -%}{%- assign slide_count = 3 -%}{%- endif -%}
     {%- for i in (1..slide_count) -%}
       {%- assign idx = forloop.index0 -%}
       <button
@@ -76,6 +86,9 @@
     const totalSlides = slides.length;
     let currentIndex = 0;
     let autoPlayTimer = null;
+    let startX = 0;
+    let isDragging = false;
+    let hasMoved = false;
 
     function goToSlide(index) {
       if (index < 0) {
@@ -95,6 +108,7 @@
     }
 
     function startAutoPlay() {
+      stopAutoPlay();
       autoPlayTimer = setInterval(() => {
         goToSlide(currentIndex + 1);
       }, {{ section.settings.autoplay_speed | default: 5 | times: 1000 }});
@@ -107,14 +121,100 @@
       }
     }
 
+    // Dot click handling
     dots.forEach((dot) => {
       dot.addEventListener('click', (e) => {
+        e.stopPropagation();
         stopAutoPlay();
-        goToSlide(parseInt(e.target.dataset.index));
+        const targetIndex = parseInt(dot.getAttribute('data-index'), 10);
+        goToSlide(targetIndex);
         startAutoPlay();
       });
     });
 
+    // Touch Swipe with active finger tracking
+    sectionWrap.addEventListener('touchstart', (e) => {
+      stopAutoPlay();
+      startX = e.touches[0].clientX;
+      isDragging = true;
+      hasMoved = false;
+    }, { passive: true });
+
+    sectionWrap.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const currentX = e.touches[0].clientX;
+      const diff = currentX - startX;
+      if (Math.abs(diff) > 5) hasMoved = true;
+      track.style.transition = 'none';
+      track.style.transform = `translateX(calc(-${currentIndex * 100}% + ${diff}px))`;
+    }, { passive: true });
+
+    sectionWrap.addEventListener('touchend', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      const endX = e.changedTouches[0].clientX;
+      const diff = endX - startX;
+
+      // Swipe threshold of 50px
+      if (diff < -50) {
+        goToSlide(currentIndex + 1);
+      } else if (diff > 50) {
+        goToSlide(currentIndex - 1);
+      } else {
+        goToSlide(currentIndex);
+      }
+      startAutoPlay();
+    });
+
+    // Mouse Drag Support for Desktop testing
+    sectionWrap.addEventListener('mousedown', (e) => {
+      stopAutoPlay();
+      startX = e.clientX;
+      isDragging = true;
+      hasMoved = false;
+      sectionWrap.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const diff = e.clientX - startX;
+      if (Math.abs(diff) > 5) hasMoved = true;
+      track.style.transition = 'none';
+      track.style.transform = `translateX(calc(-${currentIndex * 100}% + ${diff}px))`;
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      sectionWrap.style.cursor = 'grab';
+      const diff = e.clientX - startX;
+
+      // Minimum 50px drag distance
+      if (diff < -50) {
+        goToSlide(currentIndex + 1);
+      } else if (diff > 50) {
+        goToSlide(currentIndex - 1);
+      } else {
+        goToSlide(currentIndex);
+      }
+      startAutoPlay();
+    });
+
+    // Prevent accidental click/nav when user was dragging
+    sectionWrap.querySelectorAll('.karthika-ad-carousel-slide').forEach(slide => {
+      slide.addEventListener('click', (e) => {
+        if (hasMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      });
+    });
+
+    // Pause on hover
+    sectionWrap.addEventListener('mouseenter', stopAutoPlay);
+    sectionWrap.addEventListener('mouseleave', startAutoPlay);
+
+    // Initial start
     startAutoPlay();
   });
 </script>
@@ -132,14 +232,55 @@
       "type": "slide",
       "name": "Slide",
       "settings": [
-        { "type": "image_picker", "id": "image", "label": "Image" },
-        { "type": "url", "id": "link", "label": "Link" },
-        { "type": "text", "id": "title", "label": "Title (alt text)" }
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Freshness You Can Trust" },
+        { "type": "text", "id": "subheading", "label": "Subheading", "default": "Fresh Picks" },
+        { "type": "text", "id": "description", "label": "Description", "default": "Handpicked fruits & veggies for a healthier you" },
+        { "type": "text", "id": "badge_text", "label": "Badge Text (e.g. 40% OFF)", "default": "40% OFF" },
+        { "type": "text", "id": "button_text", "label": "Button Text", "default": "Shop Now" },
+        { "type": "url", "id": "button_link", "label": "Button Link" },
+        { "type": "image_picker", "id": "image", "label": "Banner Image" },
+        { "type": "text", "id": "title", "label": "Title (alt text)" },
+        { "type": "url", "id": "link", "label": "Link" }
       ]
     }
   ],
   "presets": [
-    { "name": "Banner Carousel" }
+    {
+      "name": "Banner Carousel",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "Freshness You Can Trust",
+            "subheading": "Fresh Picks",
+            "description": "Handpicked fruits & veggies for a healthier you",
+            "badge_text": "40% OFF",
+            "button_text": "Shop Now"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "Poli Onam Sale",
+            "subheading": "Festive Sale",
+            "description": "Onam specials, Sadya essentials & festive picks",
+            "badge_text": "50% OFF",
+            "button_text": "Shop Now"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "New Season Arrivals",
+            "subheading": "Fresh Picks",
+            "description": "Discover what's in season now",
+            "badge_text": "NEW",
+            "button_text": "Shop Now"
+          }
+        }
+      ]
+    }
   ]
 }
 {% endschema %}
+

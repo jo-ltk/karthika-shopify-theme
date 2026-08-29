@@ -77,10 +77,11 @@
     "festive_ad_banner": {
       "type": "karthika-ad-banner",
       "blocks": {
-        "banner_1": { "type": "slide", "settings": { "image": "", "link": "", "title": "Banner 1" } },
-        "banner_2": { "type": "slide", "settings": { "image": "", "link": "", "title": "Banner 2" } }
+        "banner_1": { "type": "slide", "settings": { "heading": "Freshness You Can Trust", "subheading": "Fresh Picks", "description": "Handpicked fruits & veggies for a healthier you", "badge_text": "40% OFF", "button_text": "Shop Now", "image": "", "link": "", "title": "Banner 1" } },
+        "banner_2": { "type": "slide", "settings": { "heading": "Poli Onam Sale", "subheading": "Festive Sale", "description": "Onam specials, Sadya essentials & festive picks", "badge_text": "50% OFF", "button_text": "Shop Now", "image": "", "link": "", "title": "Banner 2" } },
+        "banner_3": { "type": "slide", "settings": { "heading": "New Season Arrivals", "subheading": "Fresh Picks", "description": "Discover what's in season now", "badge_text": "NEW", "button_text": "Shop Now", "image": "", "link": "", "title": "Banner 3" } }
       },
-      "block_order": ["banner_1", "banner_2"],
+      "block_order": ["banner_1", "banner_2", "banner_3"],
       "settings": {
         "autoplay_speed": 5
       }

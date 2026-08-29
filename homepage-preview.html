@@ -316,11 +316,15 @@
           <div class="karthika-carousel-container" id="karthikaHeroCarousel">
             <div class="karthika-carousel-track" id="karthikaHeroTrack">
               <a href="#" class="karthika-carousel-slide">
-                <img src="assets/banner-1.png" alt="Karthika banner 1" class="karthika-promo-bg-img" loading="eager" width="900" height="400">
+                <img src="assets/banner-1.png" alt="Freshness You Can Trust - Fresh Picks" class="karthika-promo-bg-img" loading="eager" width="900" height="400">
               </a>
 
               <a href="#" class="karthika-carousel-slide">
-                <img src="assets/banner-2.png" alt="Karthika banner 2" class="karthika-promo-bg-img" loading="lazy" width="900" height="400">
+                <img src="assets/banner-2.png" alt="Poli Onam Sale - Festive Sale" class="karthika-promo-bg-img" loading="lazy" width="900" height="400">
+              </a>
+
+              <a href="#" class="karthika-carousel-slide">
+                <img src="assets/banner-3.png" alt="New Season Arrivals - Fresh Picks" class="karthika-promo-bg-img" loading="lazy" width="900" height="400">
               </a>
             </div>
           </div>
@@ -328,6 +332,7 @@
           <div class="karthika-carousel-pagination" id="karthikaHeroDots" role="tablist" aria-label="Hero Carousel Dots">
             <button type="button" class="karthika-carousel-dot is-active" aria-label="Slide 1" data-index="0"></button>
             <button type="button" class="karthika-carousel-dot" aria-label="Slide 2" data-index="1"></button>
+            <button type="button" class="karthika-carousel-dot" aria-label="Slide 3" data-index="2"></button>
           </div>
         </div>
 
@@ -1557,19 +1562,21 @@
         });
       });
 
+      let hasMoved = false;
+
       // Swipe / Touch Events
       carousel.addEventListener('touchstart', (e) => {
         stopAutoPlay();
         startX = e.touches[0].clientX;
         isDragging = true;
+        hasMoved = false;
       }, { passive: true });
 
       carousel.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
         const currentX = e.touches[0].clientX;
         const diff = currentX - startX;
-        // subtle resistance
-        const offsetPercent = (diff / carousel.offsetWidth) * 100;
+        if (Math.abs(diff) > 5) hasMoved = true;
         track.style.transition = 'none';
         track.style.transform = `translateX(calc(-${currentIndex * 100}% + ${diff}px))`;
       }, { passive: true });
@@ -1580,10 +1587,10 @@
         const endX = e.changedTouches[0].clientX;
         const diff = endX - startX;
 
-        // Threshold for slide trigger: 40px
-        if (diff < -40) {
+        // Threshold for slide trigger: 50px
+        if (diff < -50) {
           goToSlide(currentIndex + 1);
-        } else if (diff > 40) {
+        } else if (diff > 50) {
           goToSlide(currentIndex - 1);
         } else {
           goToSlide(currentIndex);
@@ -1596,12 +1603,14 @@
         stopAutoPlay();
         startX = e.clientX;
         isDragging = true;
+        hasMoved = false;
         carousel.style.cursor = 'grabbing';
       });
 
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const diff = e.clientX - startX;
+        if (Math.abs(diff) > 5) hasMoved = true;
         track.style.transition = 'none';
         track.style.transform = `translateX(calc(-${currentIndex * 100}% + ${diff}px))`;
       });
@@ -1611,14 +1620,24 @@
         isDragging = false;
         carousel.style.cursor = 'grab';
         const diff = e.clientX - startX;
-        if (diff < -40) {
+        if (diff < -50) {
           goToSlide(currentIndex + 1);
-        } else if (diff > 40) {
+        } else if (diff > 50) {
           goToSlide(currentIndex - 1);
         } else {
           goToSlide(currentIndex);
         }
         startAutoPlay();
+      });
+
+      // Prevent accidental link click when dragging
+      carousel.querySelectorAll('.karthika-carousel-slide').forEach(slide => {
+        slide.addEventListener('click', (e) => {
+          if (hasMoved) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        });
       });
 
       // Pause on hover

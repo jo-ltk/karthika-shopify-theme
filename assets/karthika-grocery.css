@@ -934,13 +934,13 @@ textarea {
 
 /* Minimalist Pagination Pill */
 .karthika-carousel-pagination {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 6px;
   position: absolute;
   right: 0;
-  bottom: 6px;
+  bottom: 8px;
   left: 0;
   z-index: 4;
   padding: 0;
@@ -954,8 +954,9 @@ textarea {
 .karthika-carousel-dot {
   width: 6px;
   height: 6px;
-  border-radius: var(--karthika-radius-pill);
-  background-color: #D6D6D2;
+  border-radius: var(--karthika-radius-pill, 999px);
+  background-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   border: none;
   padding: 0;
   cursor: pointer;
@@ -3157,6 +3158,13 @@ textarea {
   flex-direction: column;
   background: white;
   width: 100%;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y pinch-zoom;
+}
+
+.karthika-ad-banner-carousel:active {
+  cursor: grabbing;
 }
 
 .karthika-ad-carousel-track {
@@ -3197,6 +3205,7 @@ textarea {
   background-color: #FFFFFF;
   z-index: 1;
   transition: transform 0.6s ease;
+  pointer-events: none;
 }
 
 .karthika-ad-carousel-slide:hover .karthika-ad-banner-img {
@@ -3205,21 +3214,29 @@ textarea {
 
 /* Pagination Dots for Ad Banner */
 .karthika-ad-carousel-pagination {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 0 0 0;
+  position: absolute;
+  right: 0;
+  bottom: 8px;
+  left: 0;
+  z-index: 4;
+  padding: 0;
+  pointer-events: none;
 }
 
 .karthika-ad-carousel-dot {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
-  background-color: #D6D6D2;
+  border-radius: var(--karthika-radius-pill, 999px);
+  background-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   border: none;
   padding: 0;
   cursor: pointer;
+  pointer-events: auto;
   transition: all 0.28s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
