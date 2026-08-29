@@ -775,41 +775,79 @@
       const originalText = btn.innerHTML;
       btn.disabled = true;
 
-      // Only add items that have a real variant ID (not display-only)
-      let itemsToAdd = this._matchedProducts
-        .filter(p => p.id && !p._displayOnly)
-        .map(p => ({ id: p.id, quantity: 1 }));
+      // Separate already-matched items (real IDs) from display-only items
+      const catalogMatched = this._matchedProducts.filter(p => p.id && !p._displayOnly);
+      const displayOnly   = this._matchedProducts.filter(p => p._displayOnly || !p.id);
 
-      console.log('[Karthika AI] Build basket — items about to be sent to /cart/add.js:', JSON.stringify(itemsToAdd, null, 2));
-
-      if (!itemsToAdd.length) {
-        console.warn('[Karthika AI] No real catalog matches to add to cart.');
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-        return;
-      }
+      console.log('[Karthika AI] Catalog-matched items (have real variant ID):', catalogMatched.map(p => ({ id: p.id, title: p.title })));
+      console.log('[Karthika AI] Display-only items (need Shopify search fallback):', displayOnly.map(p => p.title));
 
       btn.innerHTML = `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-spin">
           <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle>
         </svg>
-        <span>Adding ${itemsToAdd.length} items to cart...</span>
+        <span>Finding products...</span>
       `;
 
-      try {
-        const root = window.Shopify?.routes?.root || window.routes?.root || '/';
-        const base = root.endsWith('/') ? root : `${root}/`;
-        
-        await fetch(`${base}cart/add.js`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: itemsToAdd })
-        });
-      } catch (err) {
-        console.warn('[Karthika AI] Add to cart warning:', err);
+      // For display-only items, try Shopify's search suggest to get a real variant ID
+      const searchResolved = [];
+      for (const item of displayOnly) {
+        try {
+          const q = encodeURIComponent(item.title.split(' ').slice(0, 3).join(' '));
+          const res = await fetch(`/search/suggest.json?q=${q}&resources[type]=product&resources[limit]=1`);
+          const data = await res.json();
+          const product = data?.resources?.results?.products?.[0];
+          if (product) {
+            const variantId = product.variants?.[0]?.id || null;
+            if (variantId) {
+              console.log(`[Karthika AI] Search resolved "${item.title}" -> "${product.title}" (variant ${variantId})`);
+              searchResolved.push({ id: variantId, quantity: 1 });
+            }
+          }
+        } catch (e) {
+          console.warn(`[Karthika AI] Search failed for "${item.title}":`, e);
+        }
       }
 
-      // Visual feedback & Instant Redirect to /cart page
+      // Build final items list: catalog matches + search-resolved items
+      const itemsToAdd = [
+        ...catalogMatched.map(p => ({ id: p.id, quantity: 1 })),
+        ...searchResolved
+      ];
+
+      console.log('[Karthika AI] Final items being sent to /cart/add.js:', JSON.stringify(itemsToAdd, null, 2));
+
+      if (!itemsToAdd.length) {
+        console.warn('[Karthika AI] Could not resolve any items to cart-addable variants.');
+      } else {
+        btn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-spin">
+            <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle>
+          </svg>
+          <span>Adding ${itemsToAdd.length} items to cart...</span>
+        `;
+
+        try {
+          const root = window.Shopify?.routes?.root || window.routes?.root || '/';
+          const base = root.endsWith('/') ? root : `${root}/`;
+          const addRes = await fetch(`${base}cart/add.js`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: itemsToAdd })
+          });
+          if (!addRes.ok) {
+            const errBody = await addRes.text().catch(() => '');
+            console.warn('[Karthika AI] /cart/add.js error', addRes.status, errBody);
+          } else {
+            const cartData = await addRes.json().catch(() => ({}));
+            console.log('[Karthika AI] /cart/add.js success:', JSON.stringify(cartData));
+          }
+        } catch (err) {
+          console.warn('[Karthika AI] Add to cart fetch error:', err);
+        }
+      }
+
+      // Always show success feedback and redirect to cart
       btn.innerHTML = `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="20 6 9 17 4 12"></polyline>
