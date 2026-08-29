@@ -657,6 +657,8 @@
       const catalog = this.getCatalog();
       let matched = [];
 
+      console.log('[Karthika AI] Catalog size:', catalog.length, '| Sample titles:', catalog.slice(0, 5).map(p => p.title));
+
       // Default grocery image dictionary for authentic Indian / Kerala ingredients
       const fallbackImages = {
         rice: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=120&q=80",
@@ -682,7 +684,7 @@
         return "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=120&q=80";
       };
 
-      // Stopwords: too generic to use for product matching
+      // Stopwords: too generic to use alone for product matching
       const stopWords = new Set([
         'fresh', 'pure', 'organic', 'raw', 'natural', 'premium', 'best',
         'quality', 'homemade', 'authentic', 'traditional', 'special',
@@ -691,24 +693,22 @@
         'for', 'and', 'the', 'with', 'from'
       ]);
 
-      // 1. Try matching against catalog
+      // Match ingredients against catalog
       ingredientNames.forEach(ing => {
-        const cleanName = ing.replace(/^v\s*|✓\s*/, '').trim();
-        const parts = cleanName.split(/—|-/);
+        const cleanName = ing.replace(/^v\s*|\u2713\s*/, '').trim();
+        const parts = cleanName.split(/\u2014|-/);
         const itemName = (parts[0] || cleanName).trim();
         const itemPrice = (parts[1] || '').trim();
 
-        const allKeywords = itemName.toLowerCase().replace(/[(),&—\-$0-9.]/g, ' ').split(' ').filter(w => w.length > 2);
-        // Filter out stopwords for matching — only use meaningful words
+        const allKeywords = itemName.toLowerCase().replace(/[(),&\u2014\-$0-9.]/g, ' ').split(' ').filter(w => w.length > 2);
         const keywords = allKeywords.filter(w => !stopWords.has(w));
 
         let found = null;
         if (keywords.length > 0) {
-          // Score each catalog product: count how many keywords match
           let bestMatch = null;
           let bestScore = 0;
           catalog.forEach(p => {
-            if (matched.some(m => m.id === p.id)) return; // skip already matched
+            if (matched.some(m => m.id === p.id)) return;
             const pTitle = p.title.toLowerCase();
             const score = keywords.filter(kw => pTitle.includes(kw)).length;
             if (score > bestScore) {
@@ -716,15 +716,14 @@
               bestMatch = p;
             }
           });
-          if (bestMatch && bestScore > 0) {
-            found = bestMatch;
-          }
+          if (bestMatch && bestScore > 0) found = bestMatch;
         }
 
         if (found && !matched.some(m => m.id === found.id)) {
+          console.log('[Karthika AI] Matched "' + itemName + '" -> catalog product "' + found.title + '" (id:' + found.id + ')');
           matched.push(found);
         } else {
-          // Display-only item (no real variant ID) — will NOT be added to cart
+          console.log('[Karthika AI] No catalog match for "' + itemName + '" (keywords: ' + keywords.join(',') + ') -> display-only');
           matched.push({
             id: null,
             title: itemName,
@@ -737,7 +736,7 @@
       });
 
       this._matchedProducts = matched;
-      console.log('[Karthika AI] Final matched products for kit:', JSON.stringify(matched.map(m => ({ id: m.id, title: m.title, displayOnly: !!m._displayOnly })), null, 2));
+      console.log('[Karthika AI] _matchedProducts set:', JSON.stringify(matched.map(m => ({ id: m.id, title: m.title, displayOnly: !!m._displayOnly }))));
 
       this.renderBasketUI(title, targetPrice, matched);
     },
@@ -775,91 +774,99 @@
       const originalText = btn.innerHTML;
       btn.disabled = true;
 
-      // Separate already-matched items (real IDs) from display-only items
+      // DEBUG: log exactly what _matchedProducts contains right now
+      console.log('[Karthika AI] buildAndAddBasket triggered. _matchedProducts:', JSON.stringify(this._matchedProducts.map(p => ({ id: p.id, title: p.title, displayOnly: !!p._displayOnly }))));
+
       const catalogMatched = this._matchedProducts.filter(p => p.id && !p._displayOnly);
       const displayOnly   = this._matchedProducts.filter(p => p._displayOnly || !p.id);
 
-      console.log('[Karthika AI] Catalog-matched items (have real variant ID):', catalogMatched.map(p => ({ id: p.id, title: p.title })));
-      console.log('[Karthika AI] Display-only items (need Shopify search fallback):', displayOnly.map(p => p.title));
+      console.log('[Karthika AI] catalogMatched count:', catalogMatched.length, '| displayOnly count:', displayOnly.length);
 
-      btn.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-spin">
-          <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle>
-        </svg>
-        <span>Finding products...</span>
-      `;
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-spin"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle></svg><span>Resolving products...</span>`;
 
-      // For display-only items, try Shopify's search suggest to get a real variant ID
+      // --- Fallback for display-only: use /products/HANDLE.json (more reliable than search suggest) ---
       const searchResolved = [];
       for (const item of displayOnly) {
         try {
-          const q = encodeURIComponent(item.title.split(' ').slice(0, 3).join(' '));
-          const res = await fetch(`/search/suggest.json?q=${q}&resources[type]=product&resources[limit]=1`);
-          const data = await res.json();
-          const product = data?.resources?.results?.products?.[0];
-          if (product) {
-            const variantId = product.variants?.[0]?.id || null;
-            if (variantId) {
-              console.log(`[Karthika AI] Search resolved "${item.title}" -> "${product.title}" (variant ${variantId})`);
-              searchResolved.push({ id: variantId, quantity: 1 });
-            }
+          // Step 1: find handle via search suggest
+          const q = encodeURIComponent(item.title.replace(/[()&]/g, '').split(' ').slice(0, 3).join(' '));
+          const suggestRes = await fetch('/search/suggest.json?q=' + q + '&resources[type]=product&resources[limit]=1');
+          const suggestData = await suggestRes.json();
+          console.log('[Karthika AI] Search suggest for "' + item.title + '":', JSON.stringify(suggestData?.resources?.results?.products?.[0] || 'none'));
+
+          const product = suggestData?.resources?.results?.products?.[0];
+          if (!product) { console.warn('[Karthika AI] No search result for:', item.title); continue; }
+
+          // Step 2: check if variants came back directly
+          let variantId = product.variants?.[0]?.id || null;
+
+          // Step 3: if no variant ID in suggest result, fetch full product by handle
+          if (!variantId && product.handle) {
+            console.log('[Karthika AI] No variant in suggest, fetching /products/' + product.handle + '.json');
+            const pRes = await fetch('/products/' + product.handle + '.json');
+            const pData = await pRes.json();
+            console.log('[Karthika AI] Product JSON for handle "' + product.handle + '":', JSON.stringify({ title: pData.product?.title, variants: pData.product?.variants?.map(v => ({ id: v.id, available: v.available })) }));
+            const v = (pData.product?.variants || []).find(v => v.available) || pData.product?.variants?.[0];
+            variantId = v?.id || null;
+          }
+
+          if (variantId) {
+            console.log('[Karthika AI] Resolved "' + item.title + '" -> variant', variantId);
+            searchResolved.push({ id: variantId, quantity: 1 });
+          } else {
+            console.warn('[Karthika AI] Could not resolve variant ID for:', item.title);
           }
         } catch (e) {
-          console.warn(`[Karthika AI] Search failed for "${item.title}":`, e);
+          console.warn('[Karthika AI] Error resolving "' + item.title + '":', e);
         }
       }
 
-      // Build final items list: catalog matches + search-resolved items
       const itemsToAdd = [
         ...catalogMatched.map(p => ({ id: p.id, quantity: 1 })),
         ...searchResolved
       ];
 
-      console.log('[Karthika AI] Final items being sent to /cart/add.js:', JSON.stringify(itemsToAdd, null, 2));
+      console.log('[Karthika AI] Final itemsToAdd:', JSON.stringify(itemsToAdd));
 
       if (!itemsToAdd.length) {
-        console.warn('[Karthika AI] Could not resolve any items to cart-addable variants.');
-      } else {
-        btn.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-spin">
-            <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle>
-          </svg>
-          <span>Adding ${itemsToAdd.length} items to cart...</span>
-        `;
-
-        try {
-          const root = window.Shopify?.routes?.root || window.routes?.root || '/';
-          const base = root.endsWith('/') ? root : `${root}/`;
-          const addRes = await fetch(`${base}cart/add.js`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: itemsToAdd })
-          });
-          if (!addRes.ok) {
-            const errBody = await addRes.text().catch(() => '');
-            console.warn('[Karthika AI] /cart/add.js error', addRes.status, errBody);
-          } else {
-            const cartData = await addRes.json().catch(() => ({}));
-            console.log('[Karthika AI] /cart/add.js success:', JSON.stringify(cartData));
-          }
-        } catch (err) {
-          console.warn('[Karthika AI] Add to cart fetch error:', err);
-        }
+        console.error('[Karthika AI] itemsToAdd is EMPTY — nothing to add to cart!');
+        // Show on-screen message so user can see without devtools
+        btn.innerHTML = `<span style="font-size:12px;color:red">No products resolved. Check console.</span>`;
+        btn.disabled = false;
+        setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
+        return;
       }
 
-      // Always show success feedback and redirect to cart
-      btn.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        <span>Added! Redirecting to Cart...</span>
-      `;
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-spin"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle></svg><span>Adding ${itemsToAdd.length} items...</span>`;
+
+      try {
+        const root = window.Shopify?.routes?.root || window.routes?.root || '/';
+        const base = root.endsWith('/') ? root : root + '/';
+        const addRes = await fetch(base + 'cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: itemsToAdd })
+        });
+        const responseText = await addRes.text();
+        console.log('[Karthika AI] /cart/add.js status:', addRes.status, '| body:', responseText);
+        if (!addRes.ok) {
+          console.error('[Karthika AI] /cart/add.js FAILED:', addRes.status, responseText);
+          btn.innerHTML = `<span style="font-size:12px;color:red">Cart error ${addRes.status}. See console.</span>`;
+          btn.disabled = false;
+          setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; btn.style.background = ''; }, 3000);
+          return;
+        }
+      } catch (err) {
+        console.error('[Karthika AI] fetch /cart/add.js threw:', err);
+      }
+
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>Added! Going to Cart...</span>`;
       btn.style.background = 'var(--karthika-green, #16A34A)';
 
       setTimeout(() => {
         const cartUrl = window.routes?.cart_url || '/cart';
         window.location.href = cartUrl;
-      }, 500);
+      }, 600);
     },
 
     init() {
