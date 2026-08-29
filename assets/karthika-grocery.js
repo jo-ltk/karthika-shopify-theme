@@ -682,6 +682,15 @@
         return "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=120&q=80";
       };
 
+      // Stopwords: too generic to use for product matching
+      const stopWords = new Set([
+        'fresh', 'pure', 'organic', 'raw', 'natural', 'premium', 'best',
+        'quality', 'homemade', 'authentic', 'traditional', 'special',
+        'large', 'small', 'medium', 'whole', 'cut', 'sliced', 'pieces',
+        'pack', 'packet', 'bag', 'box', 'bottle', 'jar', 'can',
+        'for', 'and', 'the', 'with', 'from'
+      ]);
+
       // 1. Try matching against catalog
       ingredientNames.forEach(ing => {
         const cleanName = ing.replace(/^v\s*|✓\s*/, '').trim();
@@ -689,28 +698,46 @@
         const itemName = (parts[0] || cleanName).trim();
         const itemPrice = (parts[1] || '').trim();
 
-        const keywords = itemName.toLowerCase().replace(/[(),&—\-$0-9.]/g, ' ').split(' ').filter(w => w.length > 2);
-        
-        let found = catalog.find(p => {
-          const pTitle = p.title.toLowerCase();
-          return keywords.some(kw => pTitle.includes(kw));
-        });
+        const allKeywords = itemName.toLowerCase().replace(/[(),&—\-$0-9.]/g, ' ').split(' ').filter(w => w.length > 2);
+        // Filter out stopwords for matching — only use meaningful words
+        const keywords = allKeywords.filter(w => !stopWords.has(w));
+
+        let found = null;
+        if (keywords.length > 0) {
+          // Score each catalog product: count how many keywords match
+          let bestMatch = null;
+          let bestScore = 0;
+          catalog.forEach(p => {
+            if (matched.some(m => m.id === p.id)) return; // skip already matched
+            const pTitle = p.title.toLowerCase();
+            const score = keywords.filter(kw => pTitle.includes(kw)).length;
+            if (score > bestScore) {
+              bestScore = score;
+              bestMatch = p;
+            }
+          });
+          if (bestMatch && bestScore > 0) {
+            found = bestMatch;
+          }
+        }
 
         if (found && !matched.some(m => m.id === found.id)) {
           matched.push(found);
         } else {
-          // Create product item with proper image
+          // Display-only item (no real variant ID) — will NOT be added to cart
           matched.push({
-            id: catalog[matched.length % (catalog.length || 1)]?.id || 1,
+            id: null,
             title: itemName,
             price: itemPrice || '$3.80',
             image: getFallbackImg(itemName),
-            price_raw: 380
+            price_raw: 380,
+            _displayOnly: true
           });
         }
       });
 
       this._matchedProducts = matched;
+      console.log('[Karthika AI] Final matched products for kit:', JSON.stringify(matched.map(m => ({ id: m.id, title: m.title, displayOnly: !!m._displayOnly })), null, 2));
 
       this.renderBasketUI(title, targetPrice, matched);
     },
@@ -747,23 +774,27 @@
     async buildAndAddBasket(btn) {
       const originalText = btn.innerHTML;
       btn.disabled = true;
+
+      // Only add items that have a real variant ID (not display-only)
+      let itemsToAdd = this._matchedProducts
+        .filter(p => p.id && !p._displayOnly)
+        .map(p => ({ id: p.id, quantity: 1 }));
+
+      console.log('[Karthika AI] Build basket — items about to be sent to /cart/add.js:', JSON.stringify(itemsToAdd, null, 2));
+
+      if (!itemsToAdd.length) {
+        console.warn('[Karthika AI] No real catalog matches to add to cart.');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        return;
+      }
+
       btn.innerHTML = `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-spin">
           <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle>
         </svg>
-        <span>Adding ${this._matchedProducts.length} items to cart...</span>
+        <span>Adding ${itemsToAdd.length} items to cart...</span>
       `;
-
-      let itemsToAdd = this._matchedProducts.map(p => ({
-        id: p.id,
-        quantity: 1
-      }));
-
-      // Fallback if no matched items
-      if (!itemsToAdd.length) {
-        const catalog = this.getCatalog();
-        itemsToAdd = catalog.slice(0, 3).map(p => ({ id: p.id, quantity: 1 }));
-      }
 
       try {
         const root = window.Shopify?.routes?.root || window.routes?.root || '/';

@@ -74,9 +74,16 @@ const server = http.createServer(async (req, res) => {
       }
 
       const systemMessage = `You are the Karthika Supermarket AI Cooking & Shopping Assistant for an authentic South Indian and Kerala grocery store.
-When a user specifies a dish they want to cook, provide a shopping basket in STRICT JSON format with NO markdown codeblock, NO backticks, and NO conversational explanation.
+When a user specifies a dish they want to cook, return a shopping basket in STRICT JSON format with NO markdown codeblock, NO backticks, and NO conversational explanation.
 
-JSON schema required:
+CRITICAL RULES:
+- ONLY list ingredients that are genuinely required for the named dish.
+- Ingredients must be cuisine-appropriate and realistic for how the dish is actually cooked.
+- NEVER include ingredients that do not belong in the dish (e.g. avocado does not belong in fish curry).
+- Use authentic South Indian / Kerala ingredient names where applicable.
+- Aim for 4-6 ingredients that represent the most important items to buy.
+
+FEW-SHOT EXAMPLE — for dish "fish curry":
 {
   "title": "Kerala Fish Curry Meal Kit",
   "price": "$19.80",
@@ -86,7 +93,9 @@ JSON schema required:
     "✓ Kudampuli (Malabar Tamarind) & Curry Leaves — $2.60",
     "✓ Karthika Fish Curry Masala & Fenugreek — $3.50"
   ]
-}`;
+}
+
+Return ONLY the JSON object. No extra text, no markdown fences.`;
 
       // Helper to call OpenAI-compatible endpoints (NVIDIA, OpenRouter)
       async function callProvider(baseUrl: string, apiKey: string, model: string, extraHeaders: Record<string, string> = {}) {
@@ -166,6 +175,7 @@ JSON schema required:
 
           const aiData: any = await response.json();
           const rawContent = aiData.choices?.[0]?.message?.content?.trim() || "";
+          console.log(`[AI Proxy] RAW response from ${candidate.name}:`, rawContent);
 
           // Clean markdown code fence if present
           const cleanContent = rawContent.replace(/```json/gi, "").replace(/```/g, "").trim();
@@ -179,6 +189,7 @@ JSON schema required:
 
           if (parsedResult && parsedResult.title && Array.isArray(parsedResult.ingredients) && parsedResult.ingredients.length > 0) {
             console.log(`[AI Proxy] Successfully generated with ${candidate.name}`);
+            console.log(`[AI Proxy] Final ingredient list being sent to frontend:`, JSON.stringify(parsedResult.ingredients, null, 2));
             break;
           }
         } catch (err: any) {
