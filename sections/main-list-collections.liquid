@@ -46,12 +46,7 @@
       {%- comment -%} ── TOP NAVIGATION BAR (Matching reference header) ── {%- endcomment -%}
       <div class="kcb2-top-bar">
         <div class="kcb2-top-bar__left">
-          <a href="{{ routes.root_url }}" class="kcb2-back-btn" aria-label="Go back to home">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-          </a>
+          {% render 'karthika-back-button' %}
           <h1 class="kcb2-page-title" id="KCB2Title">Dairy, Bread and Eggs</h1>
         </div>
         <a href="{{ routes.search_url }}" class="kcb2-search-btn karthika-search-bar-trigger" aria-label="Search">
@@ -1049,8 +1044,29 @@
     if (e.key === 'Escape') closeAllDropdowns();
   });
 
-  /* ── Initial load ─────────────────────────────────────────────────────── */
-  loadCategory('dairy-eggs', 'Dairy, Bread and Eggs');
+  /* ── Initial load (optional deep-link ?cat=handle) ───────────────────── */
+  var initialHandle = 'dairy-eggs';
+  var initialLabel = 'Milk';
+  var defaultBtn = page.querySelector('.kcb2-cat-item[data-handle="dairy-eggs"]');
+  if (defaultBtn && defaultBtn.dataset.label) {
+    initialLabel = defaultBtn.dataset.label;
+  }
+
+  try {
+    var catParam = new URLSearchParams(window.location.search).get('cat');
+    if (catParam) {
+      var matchedBtn = null;
+      page.querySelectorAll('.kcb2-cat-item').forEach(function (btn) {
+        if (btn.dataset.handle === catParam) matchedBtn = btn;
+      });
+      if (matchedBtn) {
+        initialHandle = matchedBtn.dataset.handle;
+        initialLabel = matchedBtn.dataset.label || initialHandle;
+      }
+    }
+  } catch (e) { /* URLSearchParams unavailable */ }
+
+  loadCategory(initialHandle, initialLabel);
 
 })();
 </script>

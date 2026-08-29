@@ -71,7 +71,7 @@
         "group_grocery": {
           "type": "group",
           "settings": {
-            "title": "Grocery & Kitchen Essentials"
+            "title": "Grocery & Kitchen"
           }
         },
         "tile_rice_grains": {
@@ -174,39 +174,9 @@
         "tile_beverages",
         "tile_top_deals"
       ]
-    },
-    "main-collection-banner": {
-      "type": "main-collection-banner",
-      "settings": {
-        "show_collection_description": true,
-        "show_collection_image": false,
-        "color_scheme": "scheme-1"
-      }
-    },
-    "main-product-grid": {
-      "type": "main-collection-product-grid",
-      "settings": {
-        "products_per_page": 20,
-        "columns_desktop": 4,
-        "color_scheme": "scheme-1",
-        "image_ratio": "adapt",
-        "image_shape": "default",
-        "show_secondary_image": true,
-        "show_vendor": false,
-        "show_rating": false,
-        "quick_add": "none",
-        "enable_filtering": true,
-        "filter_type": "horizontal",
-        "enable_sorting": true,
-        "columns_mobile": "2",
-        "padding_top": 0,
-        "padding_bottom": 64
-      }
     }
   },
   "order": [
-    "main",
-    "main-collection-banner",
-    "main-product-grid"
+    "main"
   ]
 }
