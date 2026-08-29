@@ -16,6 +16,10 @@
       variantMap: {}
     },
 
+    // Per-variant debounce timers and pending network promise chains
+    _pendingTimers: {},
+    _activeRequests: {},
+
     getRoot() {
       return window.Shopify?.routes?.root || window.routes?.root || '/';
     },
@@ -53,7 +57,7 @@
 
       if (!isInit) {
         let updatedIds = [];
-        cart.items.forEach((item) => {
+        (cart.items || []).forEach((item) => {
           if (item.quantity > (this.state.variantMap[item.variant_id] || 0)) {
             updatedIds.push(item.variant_id);
           }
@@ -62,7 +66,7 @@
         recents = [...updatedIds, ...recents];
       }
 
-      const cartVariantIds = cart.items.map(i => i.variant_id);
+      const cartVariantIds = (cart.items || []).map(i => i.variant_id);
       recents = recents.filter(id => cartVariantIds.includes(id));
 
       cartVariantIds.forEach(id => {
@@ -121,53 +125,156 @@
       });
     },
 
-    async add(variantId, quantity = 1, openDrawer = false) {
+    // Immediately sync all stepper UI elements for a specific variant
+    syncVariantSteppers(variantId, qty) {
+      const idStr = String(variantId);
+      document.querySelectorAll(`.karthika-stepper[data-variant-id="${idStr}"]`).forEach((stepper) => {
+        const qtyDisplay = stepper.querySelector('.karthika-stepper-qty');
+        if (qty > 0) {
+          stepper.classList.add('is-added');
+          if (qtyDisplay) qtyDisplay.textContent = String(qty);
+        } else {
+          stepper.classList.remove('is-added');
+          if (qtyDisplay) qtyDisplay.textContent = '1';
+        }
+      });
+    },
+
+    /**
+     * Optimistically update local quantity and dispatch a debounced network sync.
+     * Prevents race conditions by batching rapid clicks per-variant into a single /cart/change.js call.
+     */
+    setQuantityOptimistic(variantId, targetQty) {
+      const vId = Number(variantId);
+      if (!vId) return;
+
+      const currentQty = this.state.variantMap[vId] || 0;
+      const nextQty = Math.max(0, Number(targetQty));
+      if (currentQty === nextQty && this._pendingTimers[vId] == null) return;
+
+      // 1. Optimistic memory state update
+      const diff = nextQty - currentQty;
+      this.state.variantMap[vId] = nextQty;
+      this.state.item_count = Math.max(0, (this.state.item_count || 0) + diff);
+
+      // 2. Instant zero-latency UI update across all matching steppers & badges
+      this.syncVariantSteppers(vId, nextQty);
+      this.updateBadges();
+
+      // Dispatch optimistic cart updated event for summary/floating cart
+      document.dispatchEvent(new CustomEvent('karthika:cart-updated', {
+        detail: {
+          item_count: this.state.item_count,
+          total_price: this.state.total_price,
+          items: this.state.items
+        }
+      }));
+
+      // 3. Clear existing debounce timer for this variant
+      if (this._pendingTimers[vId]) {
+        clearTimeout(this._pendingTimers[vId]);
+      }
+
+      // 4. Set debounce delay (~350ms) to coalesce rapid multi-clicks into 1 network call
+      this._pendingTimers[vId] = setTimeout(() => {
+        delete this._pendingTimers[vId];
+        this._dispatchQueuedChange(vId, nextQty);
+      }, 350);
+    },
+
+    /**
+     * Dispatches the final coalesced quantity to /cart/change.js or /cart/add.js
+     * and updates Cart state directly from the response.
+     */
+    async _dispatchQueuedChange(variantId, finalQty) {
+      const vId = Number(variantId);
+      // Chain onto existing active request for this variant if one is currently in-flight
+      const previousPromise = this._activeRequests[vId] || Promise.resolve();
+
+      const currentRequest = (async () => {
+        try {
+          await previousPromise;
+        } catch (e) {}
+
+        // If another debounce was queued while waiting, let that newer one handle it
+        if (this._pendingTimers[vId]) return;
+
+        // Check if item is already in Shopify server cart
+        const isCurrentlyInCart = (this.state.items || []).some(item => Number(item.variant_id) === vId || Number(item.id) === vId);
+
+        console.log(`[Karthika Cart] Syncing variant ${vId} -> finalQty: ${finalQty} (inCartOnServer: ${isCurrentlyInCart})`);
+
+        try {
+          let response;
+          if (finalQty > 0 && !isCurrentlyInCart) {
+            // New item being added to cart for the first time -> use /cart/add.js
+            const formData = new FormData();
+            formData.append('id', String(vId));
+            formData.append('quantity', String(finalQty));
+            response = await fetch(this.getCartEndpoint('cart/add'), {
+              method: 'POST',
+              body: formData
+            });
+          } else {
+            // Existing item being updated (or reduced to 0) -> use /cart/change.js
+            response = await fetch(this.getCartEndpoint('cart/change'), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: String(vId), quantity: finalQty })
+            });
+          }
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            console.warn('[Karthika Cart] Request rejected by Shopify:', response.status, errData);
+            // If another change was queued in the meantime, don't rollback
+            if (!this._pendingTimers[vId]) {
+              await this.refreshCartState();
+            }
+            return;
+          }
+
+          const responseData = await response.json();
+          console.log('[Karthika Cart] Shopify response:', responseData);
+
+          // If another debounce was queued while request was in-flight, let that newer one proceed
+          if (this._pendingTimers[vId]) return;
+
+          // /cart/change returns full cart (with .items array).
+          // /cart/add returns the added item object (without .items array), so we fetch fresh cart state.
+          if (responseData && Array.isArray(responseData.items)) {
+            this.processCartData(responseData, false);
+          } else {
+            await this.refreshCartState(false);
+          }
+        } catch (err) {
+          console.error('[Karthika Cart] Network error during cart sync, rolling back:', err);
+          if (!this._pendingTimers[vId]) {
+            await this.refreshCartState();
+          }
+        }
+      })();
+
+      this._activeRequests[vId] = currentRequest;
       try {
-        const formData = new FormData();
-        formData.append('id', Number(variantId));
-        formData.append('quantity', Number(quantity));
-
-        const response = await fetch(this.getCartEndpoint('cart/add'), {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          alert(errData?.description || 'Could not add item to cart.');
-          return;
+        await currentRequest;
+      } finally {
+        if (this._activeRequests[vId] === currentRequest) {
+          delete this._activeRequests[vId];
         }
+      }
+    },
 
-        await this.refreshCartState();
-
-        if (openDrawer) {
-          this.openCartDrawer();
-        }
-      } catch (err) {
-        console.error('[Karthika Cart] Add error:', err);
-        alert('Unable to add this product to the cart right now. Please try again.');
+    async add(variantId, quantity = 1, openDrawer = false) {
+      const currentQty = this.state.variantMap[Number(variantId)] || 0;
+      this.setQuantityOptimistic(variantId, currentQty + Number(quantity));
+      if (openDrawer) {
+        this.openCartDrawer();
       }
     },
 
     async change(variantId, quantity) {
-      try {
-        const nextQty = Number(quantity);
-        const response = await fetch(this.getCartEndpoint('cart/change'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: String(variantId), quantity: nextQty })
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          console.warn('[Karthika Cart] Change rejected:', errData);
-          return;
-        }
-
-        await this.refreshCartState();
-      } catch (err) {
-        console.error('[Karthika Cart] Change error:', err);
-      }
+      this.setQuantityOptimistic(variantId, quantity);
     },
 
     openCartDrawer() {
@@ -253,13 +360,13 @@
     },
 
     bindEvents() {
-      document.addEventListener('click', async (e) => {
+      document.addEventListener('click', (e) => {
         const addBtn = e.target.closest('.karthika-stepper-add-btn');
         if (addBtn) {
           const stepper = addBtn.closest('.karthika-stepper');
           const variantId = stepper?.dataset?.variantId;
           if (variantId) {
-            await this.add(variantId, 1, false);
+            this.setQuantityOptimistic(variantId, (this.state.variantMap[Number(variantId)] || 0) + 1);
           }
           return;
         }
@@ -268,16 +375,13 @@
         if (minusBtn) {
           const stepper = minusBtn.closest('.karthika-stepper');
           const variantId = stepper?.dataset?.variantId;
-          const qtyEl = stepper.querySelector('.karthika-stepper-qty');
-          const currentQty = parseInt(qtyEl?.textContent || '1', 10);
-
           if (variantId) {
+            const vId = Number(variantId);
+            const currentQty = this.state.variantMap[vId] != null
+              ? this.state.variantMap[vId]
+              : parseInt(stepper.querySelector('.karthika-stepper-qty')?.textContent || '1', 10);
             const nextQty = Math.max(0, currentQty - 1);
-            if (nextQty === 0) {
-              await this.change(variantId, 0);
-            } else {
-              await this.change(variantId, nextQty);
-            }
+            this.setQuantityOptimistic(vId, nextQty);
           }
           return;
         }
@@ -286,17 +390,13 @@
         if (plusBtn) {
           const stepper = plusBtn.closest('.karthika-stepper');
           const variantId = stepper?.dataset?.variantId;
-          const qtyEl = stepper.querySelector('.karthika-stepper-qty');
-          const currentQty = parseInt(qtyEl?.textContent || '1', 10);
-
           if (variantId) {
+            const vId = Number(variantId);
+            const currentQty = this.state.variantMap[vId] != null
+              ? this.state.variantMap[vId]
+              : parseInt(stepper.querySelector('.karthika-stepper-qty')?.textContent || '1', 10);
             const nextQty = currentQty + 1;
-            const cartQty = this.state.variantMap[variantId] || 0;
-            if (cartQty > 0) {
-              await this.change(variantId, nextQty);
-            } else {
-              await this.add(variantId, nextQty, false);
-            }
+            this.setQuantityOptimistic(vId, nextQty);
           }
           return;
         }
