@@ -864,64 +864,71 @@
       const originalText = btn.innerHTML;
       btn.disabled = true;
 
-      console.log('[Karthika AI] buildAndAddBasket. _matchedProducts:', JSON.stringify(this._matchedProducts.map(p => ({ id: p.id, title: p.title, available: p.available, displayOnly: !!p._displayOnly }))));
+      console.log('[Karthika AI] buildAndAddBasket. _matchedProducts:', JSON.stringify(this._matchedProducts));
 
-      // Only use real catalog-matched items — no search-suggest fallback (too unreliable for South Indian terms)
-      // Deduplicate variant IDs to avoid sending the same item twice
+      // Filter only products that have a valid variant id and are NOT marked unavailable
       const seenIds = new Set();
       const itemsToAdd = this._matchedProducts
-        .filter(p => p.id && !p._displayOnly)
+        .filter(p => p.id && !p._isUnavailable && p._displayOnly !== true)
         .filter(p => { if (seenIds.has(p.id)) return false; seenIds.add(p.id); return true; })
-        .map(p => ({ id: p.id, quantity: 1 }));
+        .map(p => ({ id: p.id, quantity: 1, title: p.title }));
 
-      const skipped = this._matchedProducts.filter(p => p._displayOnly || !p.id).map(p => p.title);
       console.log('[Karthika AI] Items to add:', JSON.stringify(itemsToAdd));
-      console.log('[Karthika AI] Skipped (no catalog match):', skipped);
 
       if (!itemsToAdd.length) {
-        console.error('[Karthika AI] No catalog-matched items to add!');
-        btn.innerHTML = '<span style="font-size:12px;color:#c00">No available products matched. Redirecting...</span>';
+        console.warn('[Karthika AI] No in-stock store items to add.');
         btn.disabled = false;
-        setTimeout(() => { window.location.href = window.routes?.cart_url || '/cart'; }, 1500);
+        btn.innerHTML = '<span style="font-size:12px;color:#c00">No items available in store</span>';
+        setTimeout(() => { btn.innerHTML = originalText; }, 2000);
         return;
       }
 
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-spin"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle></svg><span>Adding to cart...</span>`;
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-spin"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle></svg><span>Adding ${itemsToAdd.length} items to cart...</span>`;
 
-      // Add items ONE BY ONE so a single sold-out item does not block the others
       const root = window.Shopify?.routes?.root || window.routes?.root || '/';
       const base = root.endsWith('/') ? root : root + '/';
       let successCount = 0;
-      let lastError = '';
 
+      // Add each item using standard Shopify Cart form-data format
       for (const item of itemsToAdd) {
         try {
-          const res = await fetch(base + 'cart/add.js', {
+          const formData = new FormData();
+          formData.append('id', String(item.id));
+          formData.append('quantity', '1');
+
+          const res = await fetch(`${base}cart/add.js`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: [item] })
+            body: formData
           });
-          const body = await res.text();
+
           if (res.ok) {
             successCount++;
-            console.log('[Karthika AI] Added variant', item.id, '-> OK');
+            console.log(`[Karthika AI] Successfully added "${item.title}" (id: ${item.id}) to cart.`);
           } else {
-            lastError = body;
-            console.warn('[Karthika AI] Skipped variant', item.id, '-> status', res.status, body);
+            const errJson = await res.json().catch(() => ({}));
+            console.warn(`[Karthika AI] Could not add "${item.title}" (id: ${item.id}):`, res.status, errJson);
           }
         } catch (e) {
-          console.warn('[Karthika AI] Error adding variant', item.id, ':', e);
+          console.warn(`[Karthika AI] Network error adding "${item.title}":`, e);
         }
       }
 
-      console.log('[Karthika AI] Done. ' + successCount + '/' + itemsToAdd.length + ' added successfully.');
+      console.log(`[Karthika AI] Add to basket complete: ${successCount}/${itemsToAdd.length} items added.`);
 
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>${successCount} item${successCount !== 1 ? 's' : ''} added! Going to Cart...</span>`;
+      // Sync CartManager state if available
+      if (window.Karthika?.Cart?.refreshCartState) {
+        try {
+          await window.Karthika.Cart.refreshCartState(false);
+        } catch(e) {}
+      }
+
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>${successCount} item${successCount !== 1 ? 's' : ''} added! Redirecting...</span>`;
       btn.style.background = 'var(--karthika-green, #16A34A)';
 
       setTimeout(() => {
-        window.location.href = window.routes?.cart_url || '/cart';
-      }, 600);
+        const cartUrl = window.routes?.cart_url || '/cart';
+        window.location.href = cartUrl;
+      }, 700);
     },
 
     init() {
