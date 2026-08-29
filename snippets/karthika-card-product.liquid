@@ -1,5 +1,14 @@
 {%- comment -%}
   Renders the compact mobile-app style product card using Shopify product data only.
+  UPDATED: Added wishlist heart icon, star rating row (placeholder data).
+
+  ⚠️  PLACEHOLDER DATA NOTE — Star ratings:
+  Ratings (★ 4.6 (128)) are PLACEHOLDER values based on product ID mod 5.
+  To wire real review data, install a reviews app (Judge.me, Okendo, Yotpo, etc.)
+  and replace the placeholder_rating / placeholder_review_count assignments with:
+    product.metafields.reviews.rating.value
+    product.metafields.reviews.rating_count.value
+  (exact namespace depends on which reviews app is installed.)
 {%- endcomment -%}
 
 {%- if card_product and card_product != empty -%}
@@ -29,6 +38,24 @@
     if is_available
       assign inventory_label = 'In stock'
     endif
+
+    assign id_mod = card_product.id | modulo: 5
+    if id_mod == 0
+      assign placeholder_rating = '4.6'
+      assign placeholder_review_count = '128'
+    elsif id_mod == 1
+      assign placeholder_rating = '4.5'
+      assign placeholder_review_count = '96'
+    elsif id_mod == 2
+      assign placeholder_rating = '4.7'
+      assign placeholder_review_count = '76'
+    elsif id_mod == 3
+      assign placeholder_rating = '4.3'
+      assign placeholder_review_count = '214'
+    else
+      assign placeholder_rating = '4.8'
+      assign placeholder_review_count = '52'
+    endif
   -%}
 
   <div
@@ -49,8 +76,21 @@
         <div class="karthika-card-badge karthika-card-badge--new">NEW</div>
       {%- endif -%}
 
-      <a href="{{ card_product.url }}" aria-label="{{ card_product.title | escape }}">
-        {%- if card_product.featured_media -%}
+      <!-- Wishlist heart button (visual toggle only — no backend persistence yet) -->
+      <button
+        type="button"
+        class="karthika-wishlist-btn"
+        aria-label="Add {{ card_product.title | escape }} to wishlist"
+        aria-pressed="false"
+        data-product-id="{{ card_product.id }}"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </button>
+
+      {%- if card_product.featured_media -%}
+        <a href="{{ card_product.url }}" class="karthika-compact-media-link" aria-label="{{ card_product.title | escape }}" tabindex="-1" aria-hidden="true">
           <img
             src="{{ card_product.featured_media | image_url: width: 360 }}"
             alt="{{ card_product.featured_media.alt | default: card_product.title | escape }}"
@@ -59,23 +99,34 @@
             height="200"
             class="karthika-compact-img"
           >
-        {%- else -%}
-          <div class="karthika-compact-media-placeholder" aria-label="Product image unavailable" role="img">
-            <span>{{ card_product.title | truncate: 24 | escape }}</span>
-          </div>
-        {%- endif -%}
-      </a>
+        </a>
+      {%- else -%}
+        <div class="karthika-compact-media-placeholder" aria-label="Product image unavailable" role="img">
+          <span>{{ card_product.title | truncate: 24 | escape }}</span>
+        </div>
+      {%- endif -%}
     </div>
 
     <div class="karthika-compact-info">
       <div class="karthika-card-meta-row">
         <span class="karthika-compact-pack">{{ pack_size }}</span>
-        <span class="karthika-stock-badge{% unless is_available %} karthika-stock-badge--out{% endunless %}"><span class="karthika-stock-dot"></span> {{ inventory_label }}</span>
+        <span class="karthika-stock-badge{% unless is_available %} karthika-stock-badge--out{% endunless %}">
+          <span class="karthika-stock-dot"></span> {{ inventory_label }}
+        </span>
       </div>
 
       <a href="{{ card_product.url }}" class="karthika-compact-title" title="{{ card_product.title | escape }}">
         {{ card_product.title | escape }}
       </a>
+
+      <!-- Star rating row — PLACEHOLDER data (see comment at top of file for real data hookup) -->
+      <div class="karthika-rating-row" aria-label="Rating: {{ placeholder_rating }} out of 5, {{ placeholder_review_count }} reviews">
+        <svg class="karthika-rating-star" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.953a1 1 0 00.95.69h4.156c.969 0 1.371 1.24.588 1.81l-3.364 2.444a1 1 0 00-.364 1.118l1.287 3.953c.3.921-.755 1.688-1.54 1.118l-3.363-2.444a1 1 0 00-1.175 0l-3.363 2.444c-.784.57-1.838-.197-1.539-1.118l1.286-3.953a1 1 0 00-.364-1.118L2.07 9.38c-.783-.57-.38-1.81.588-1.81h4.156a1 1 0 00.951-.69l1.286-3.953z"/>
+        </svg>
+        <span class="karthika-rating-value">{{ placeholder_rating }}</span>
+        <span class="karthika-rating-count">({{ placeholder_review_count }})</span>
+      </div>
 
       <div class="karthika-price-container">
         <div class="karthika-price-main-row">
@@ -93,7 +144,6 @@
             <span class="karthika-add-btn-icon">+</span>
             <span class="karthika-add-btn-text">ADD</span>
           </button>
-
           <div class="karthika-compact-stepper">
             <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--minus" aria-label="Decrease quantity">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>

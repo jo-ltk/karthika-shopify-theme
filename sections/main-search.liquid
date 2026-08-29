@@ -15,41 +15,459 @@
 <script src="{{ 'main-search.js' | asset_url }}" defer="defer"></script>
 
 <style>
-  .template-search__header {
-    margin-bottom: 3rem;
+  /* =========================================================
+     SEARCH PAGE — Karthika Redesign
+     Tokens from karthika-grocery.css are used throughout
+     ========================================================= */
+
+  /* --- Override generic Dawn layout on this page --- */
+  .template-search .template-search__header {
+    margin-bottom: 0;
+    padding: 16px 16px 0;
   }
 
-  .template-search__search {
-    margin: 0 auto 3.5rem;
-    max-width: 74.1rem;
+  .template-search .template-search__search {
+    margin: 0 0 0;
+    max-width: none;
   }
 
-  .template-search__search .search {
-    margin-top: 3rem;
+  /* --- Page heading block --- */
+  .ks-page-heading {
+    padding: 12px 16px 4px;
   }
 
-  .template-search--empty {
-    padding-bottom: 18rem;
+  .ks-page-heading h1 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: var(--karthika-weight-bold, 700);
+    color: var(--karthika-text-dark, #171717);
+    line-height: 1.2;
+    letter-spacing: -0.4px;
+    text-align: left;
   }
 
-  @media screen and (min-width: 750px) {
-    .template-search__header {
-      margin-bottom: 5rem;
+  .ks-subheading {
+    margin: 0;
+    font-size: 13px;
+    color: var(--karthika-text-muted, #5C6B52);
+  }
+
+  .ks-subheading strong {
+    color: var(--karthika-red, #3F7D2E);
+    font-weight: var(--karthika-weight-semibold, 600);
+  }
+
+  /* --- Search input row (pill style) --- */
+  .ks-search-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .ks-search-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #fff;
+    border: 1.5px solid var(--karthika-border, #E1E8D3);
+    border-radius: var(--karthika-radius-pill, 9999px);
+    padding: 0 6px 0 14px;
+    overflow: hidden;
+    box-shadow: var(--karthika-shadow-subtle);
+  }
+
+  .ks-search-pill-label {
+    font-size: 11px;
+    color: var(--karthika-text-muted);
+    padding-right: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .ks-search-pill input[type="search"],
+  .ks-search-pill input[type="text"] {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font: var(--karthika-weight-medium, 500) 14px/1.4 var(--karthika-font-sans);
+    color: var(--karthika-text-dark);
+    padding: 11px 0;
+    min-width: 0;
+  }
+
+  .ks-search-pill input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+
+  .ks-pill-clear-btn {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--karthika-bg-surface, #EFF4E3);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--karthika-text-muted);
+    font-size: 16px;
+    line-height: 1;
+    margin: 0 2px;
+  }
+
+  .ks-search-submit-btn {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--karthika-red, #3F7D2E);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(63, 125, 46, 0.25);
+    transition: background 0.18s;
+  }
+
+  .ks-search-submit-btn:hover {
+    background: var(--karthika-red-hover, #336524);
+  }
+
+  .ks-search-submit-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* --- Filter/sort pill row --- */
+  .ks-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 16px 12px;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--karthika-border-light, #EAF0DE);
+  }
+
+  .ks-filter-row::-webkit-scrollbar { display: none; }
+
+  .ks-filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 13px;
+    border-radius: var(--karthika-radius-pill, 9999px);
+    font-size: 12.5px;
+    font-weight: var(--karthika-weight-semibold, 600);
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1.5px solid var(--karthika-border, #E1E8D3);
+    background: #fff;
+    color: var(--karthika-text-dark);
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .ks-filter-pill svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  .ks-filter-pill--active {
+    background: var(--karthika-red-subtle, #EAF4DE);
+    border-color: var(--karthika-red, #3F7D2E);
+    color: var(--karthika-red, #3F7D2E);
+  }
+
+  .ks-filter-pill--chevron::after {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235C6B52' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin-left: 2px;
+  }
+
+  .ks-result-count {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--karthika-text-muted);
+    white-space: nowrap;
+    padding-left: 8px;
+  }
+
+  /* --- Product Grid Container --- */
+  .ks-product-grid-wrap {
+    padding: 14px 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* 3-column grid */
+  .ks-product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  .ks-product-grid > .grid__item {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  @media screen and (max-width: 479px) {
+    .ks-product-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
     }
   }
 
-  .search__button .icon {
-    height: 1.8rem;
+  @media screen and (min-width: 900px) {
+    .ks-product-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
   }
-</style>
 
-{%- liquid
-  assign sort_by = search.sort_by | default: search.default_sort_by
-  assign terms = search.terms | escape
-  assign search_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
--%}
+  /* --- Special Offer Banner --- */
+  .ks-offer-banner {
+    margin: 4px 12px 12px;
+    background: #E8F5E0;
+    border-radius: var(--karthika-radius-lg, 24px);
+    overflow: hidden;
+    display: flex;
+    align-items: stretch;
+    min-height: 180px;
+    position: relative;
+  }
 
-{%- style -%}
+  .ks-offer-banner-left {
+    flex: 1;
+    padding: 20px 16px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 1;
+  }
+
+  .ks-offer-tag-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: var(--karthika-weight-bold, 700);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--karthika-red, #3F7D2E);
+  }
+
+  .ks-offer-tag-row svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .ks-offer-headline {
+    margin: 0;
+    font-size: 22px;
+    font-weight: var(--karthika-weight-heavy, 800);
+    color: var(--karthika-text-dark, #171717);
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+  }
+
+  .ks-offer-subtext {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--karthika-text-muted, #5C6B52);
+    line-height: 1.4;
+  }
+
+  .ks-offer-subtext strong {
+    color: var(--karthika-red, #3F7D2E);
+    font-weight: var(--karthika-weight-bold, 700);
+  }
+
+  .ks-offer-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 9px 18px;
+    background: #264D1A;
+    color: #fff;
+    border-radius: var(--karthika-radius-pill, 9999px);
+    font-size: 13px;
+    font-weight: var(--karthika-weight-bold, 700);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    width: fit-content;
+    transition: background 0.18s;
+  }
+
+  .ks-offer-cta:hover {
+    background: #1a3811;
+  }
+
+  .ks-offer-banner-right {
+    flex: 0 0 140px;
+    position: relative;
+    overflow: visible;
+  }
+
+  .ks-offer-product-img {
+    position: absolute;
+    bottom: -10px;
+    right: -5px;
+    width: 155px;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 18px rgba(0,0,0,0.12));
+  }
+
+  /* Leaf decoration */
+  .ks-offer-leaf {
+    position: absolute;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .ks-offer-leaf--1 {
+    top: 12px;
+    right: 130px;
+    width: 22px;
+    height: 22px;
+    transform: rotate(-20deg);
+  }
+
+  .ks-offer-leaf--2 {
+    top: 35px;
+    right: 60px;
+    width: 16px;
+    height: 16px;
+    transform: rotate(30deg);
+  }
+
+  .ks-offer-leaf--3 {
+    bottom: 30px;
+    right: 145px;
+    width: 18px;
+    height: 18px;
+    transform: rotate(-40deg);
+  }
+
+  /* --- Cart Summary Bar --- */
+  .ks-cart-bar {
+    margin: 8px 12px 14px;
+    padding: 12px 16px;
+    background: #fff;
+    border: 1.5px solid var(--karthika-border, #E1E8D3);
+    border-radius: var(--karthika-radius-pill, 9999px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--karthika-shadow-card);
+    text-decoration: none;
+  }
+
+  .ks-cart-bar:hover {
+    border-color: var(--karthika-red, #3F7D2E);
+  }
+
+  .ks-cart-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+  }
+
+  .ks-cart-bar-left svg {
+    width: 20px;
+    height: 20px;
+    color: var(--karthika-red, #3F7D2E);
+  }
+
+  .ks-cart-bar-label {
+    font-size: 13px;
+    font-weight: var(--karthika-weight-bold, 700);
+    color: var(--karthika-red, #3F7D2E);
+    white-space: nowrap;
+  }
+
+  .ks-cart-bar-thumbs {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+    gap: -6px;
+  }
+
+  .ks-cart-thumb {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    object-fit: cover;
+    margin-left: -6px;
+    background: var(--karthika-bg-surface);
+  }
+
+  .ks-cart-thumb:first-child {
+    margin-left: 0;
+  }
+
+  .ks-cart-more {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: var(--karthika-red-subtle, #EAF4DE);
+    color: var(--karthika-red, #3F7D2E);
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -6px;
+    flex-shrink: 0;
+  }
+
+  .ks-cart-bar-right {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: var(--karthika-weight-semibold, 600);
+    color: var(--karthika-red, #3F7D2E);
+    white-space: nowrap;
+  }
+
+  /* --- Empty / no-results state --- */
+  .ks-no-results {
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--karthika-text-muted);
+    font-size: 14px;
+  }
+
+  /* --- Section padding override --- */
   .section-{{ section.id }}-padding {
     padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
     padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
@@ -61,278 +479,299 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
-{%- endstyle -%}
+</style>
+
+{%- liquid
+  assign sort_by = search.sort_by | default: search.default_sort_by
+  assign terms = search.terms | escape
+  assign search_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
+  assign results_count = search.results_count | default: search.products_count | default: 0
+-%}
 
 {% paginate search.results by 24 %}
-  <div class="template-search{% unless search.performed and search.results_count > 0 %} template-search--empty{% endunless %} section-{{ section.id }}-padding">
-    <div class="template-search__header page-width{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-      <h1 class="h2 center">
-        {%- if search.performed -%}
-          {{- 'templates.search.title' | t -}}
-        {%- else -%}
-          {{- 'general.search.search' | t -}}
-        {%- endif -%}
-      </h1>
-      <div class="template-search__search">
-        {%- if settings.predictive_search_enabled -%}
-          <predictive-search data-loading-text="{{ 'accessibility.loading' | t }}">
-        {%- endif -%}
-        <main-search>
-          <form action="{{ routes.search_url }}" method="get" role="search" class="search">
-            <div class="field">
-              <input
-                class="search__input field__input"
-                id="Search-In-Template"
-                type="search"
-                name="q"
-                value="{{ search.terms | escape }}"
-                placeholder="{{ 'general.search.search' | t }}"
-                {%- if settings.predictive_search_enabled -%}
-                  role="combobox"
-                  aria-expanded="false"
-                  aria-owns="predictive-search-results"
-                  aria-controls="predictive-search-results"
-                  aria-haspopup="listbox"
-                  aria-autocomplete="list"
-                  autocorrect="off"
-                  autocomplete="off"
-                  autocapitalize="off"
-                  spellcheck="false"
-                {%- endif -%}
-              >
-              <label class="field__label" for="Search-In-Template">{{ 'general.search.search' | t }}</label>
-              <input name="options[prefix]" type="hidden" value="last">
+<div class="template-search{% unless search.performed and search.results_count > 0 %} template-search--empty{% endunless %} section-{{ section.id }}-padding">
 
-              {%- if settings.predictive_search_enabled -%}
-                <div class="predictive-search predictive-search--search-template" tabindex="-1" data-predictive-search>
-                  {%- render 'loading-spinner', class: 'predictive-search__loading-state' -%}
-                </div>
-
-                <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
-              {%- endif -%}
-
-              <button
-                type="reset"
-                class="reset__button field__button{% if search.terms == blank %} hidden{% endif %}"
-                aria-label="{{ 'general.search.reset' | t }}"
-              >
-                <span class="svg-wrapper">
-                  {{- 'icon-reset.svg' | inline_asset_content -}}
-                </span>
-              </button>
-              <button type="submit" class="search__button field__button" aria-label="{{ 'general.search.search' | t }}">
-                <span class="svg-wrapper">
-                  {{- 'icon-search.svg' | inline_asset_content -}}
-                </span>
-              </button>
-            </div>
-          </form>
-        </main-search>
-        {%- if settings.predictive_search_enabled -%}
-          </predictive-search>
-        {%- endif -%}
-      </div>
-      {%- if search.performed -%}
-        {%- unless section.settings.enable_filtering or section.settings.enable_sorting -%}
-          {%- if search.results_count > 0 -%}
-            <p role="status">
-              {{ 'templates.search.results_with_count_and_term' | t: terms: search.terms, count: search.results_count }}
-            </p>
-          {%- endif -%}
-        {%- endunless -%}
-        {%- if search.results_count == 0 and search.filters == empty -%}
-          <p role="status">{{ 'templates.search.no_results' | t: terms: search.terms }}</p>
-        {%- endif -%}
-      {%- endif -%}
-    </div>
-    {%- if search.performed -%}
-      {%- if section.settings.enable_sorting
-        and section.settings.filter_type == 'vertical'
-        and search.filters != empty
-      -%}
-        <facet-filters-form class="facets facets-vertical-sort page-width small-hide">
-          <form class="facets-vertical-form" id="FacetSortForm">
-            <div class="facet-filters sorting caption">
-              <div class="facet-filters__field">
-                <h2 class="facet-filters__label caption-large text-body">
-                  <label for="SortBy">{{ 'products.facets.sort_by_label' | t }}</label>
-                </h2>
-                <div class="select">
-                  {%- assign sort_by = search.sort_by | default: search.default_sort_by -%}
-                  <select
-                    name="sort_by"
-                    class="facet-filters__sort select__select caption-large"
-                    id="SortBy"
-                    aria-describedby="a11y-refresh-page-message"
-                  >
-                    {%- for option in search.sort_options -%}
-                      <option
-                        value="{{ option.value | escape }}"
-                        {% if option.value == sort_by %}
-                          selected="selected"
-                        {% endif %}
-                      >
-                        {{ option.name | escape }}
-                      </option>
-                    {%- endfor -%}
-                  </select>
-                  <span class="svg-wrapper">
-                    {{- 'icon-caret.svg' | inline_asset_content -}}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div class="product-count-vertical light" role="status">
-              <h2 class="product-count__text text-body">
-                <span id="ProductCountDesktop">
-                  {%- if search.results_count -%}
-                    {{ 'templates.search.results_with_count' | t: terms: search.terms, count: search.results_count }}
-                  {%- elsif search.products_count == search.all_products_count -%}
-                    {{ 'products.facets.product_count_simple' | t: count: search.products_count }}
-                  {%- else -%}
-                    {{
-                      'products.facets.product_count'
-                      | t: product_count: search.products_count, count: search.all_products_count
-                    }}
-                  {%- endif -%}
-                </span>
-              </h2>
-              {%- render 'loading-spinner' -%}
-            </div>
-          </form>
-        </facet-filters-form>
-      {%- endif -%}
-      <div
-        {% if section.settings.filter_type == 'vertical' %}
-          class="facets-vertical page-width"
-        {% endif %}
-      >
-        {%- if search.filters != empty -%}
-          {%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
-            <aside
-              aria-labelledby="verticalTitle"
-              class="facets-wrapper{% unless section.settings.enable_filtering %} facets-wrapper--no-filters{% endunless %}{% if section.settings.filter_type != 'vertical' %} page-width{% endif %}"
-              id="main-search-filters"
-              data-id="{{ section.id }}"
-            >
-              {% render 'facets',
-                results: search,
-                enable_filtering: section.settings.enable_filtering,
-                enable_sorting: section.settings.enable_sorting,
-                filter_type: section.settings.filter_type,
-                paginate: paginate
-              %}
-            </aside>
-          {%- endif -%}
-        {%- endif -%}
-        <div class="product-grid-container" id="ProductGridContainer">
-          {%- if search.results.size == 0 and search.filters != empty -%}
-            <div
-              class="template-search__results collection collection--empty{% if section.settings.filter_type != 'vertical' %} page-width{% endif %}"
-              id="product-grid"
-              data-id="{{ section.id }}"
-            >
-              <div class="loading-overlay gradient"></div>
-              <div class="title-wrapper center">
-                <h2 class="title title--primary">
-                  {{ 'sections.collection_template.empty' | t -}}
-                  <br>
-                  {{
-                    'sections.collection_template.use_fewer_filters_html'
-                    | t: link: search_url, class: 'underlined-link link'
-                  }}
-                </h2>
-              </div>
-            </div>
-          {%- else -%}
-            <div
-              class="template-search__results collection{% if section.settings.filter_type != 'vertical' %} page-width{% endif %}"
-              id="product-grid"
-              data-id="{{ section.id }}"
-            >
-              <div class="loading-overlay gradient"></div>
-              <ul
-                class="grid product-grid  grid--{{ section.settings.columns_mobile }}-col-tablet-down grid--{{ section.settings.columns_desktop }}-col-desktop"
-                role="list"
-              >
-                {%- assign skip_card_product_styles = false -%}
-                {%- for item in search.results -%}
-                  {% assign lazy_load = false %}
-                  {%- if forloop.index > 2 -%}
-                    {%- assign lazy_load = true -%}
-                  {%- endif -%}
-
-                  <li
-                    class="grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-                    {% if settings.animations_reveal_on_scroll %}
-                      data-cascade
-                    {% endif %}
-                  >
-                    {%- case item.object_type -%}
-                      {%- when 'product' -%}
-                        {%- capture product_settings -%}{%- if section.settings.product_show_vendor -%}vendor,{%- endif -%}title,price{%- endcapture -%}
-                        {% render 'card-product',
-                          card_product: item,
-                          media_aspect_ratio: section.settings.image_ratio,
-                          image_shape: section.settings.image_shape,
-                          show_secondary_image: section.settings.show_secondary_image,
-                          show_vendor: section.settings.show_vendor,
-                          show_rating: section.settings.show_rating,
-                          lazy_load: lazy_load,
-                          skip_styles: skip_card_product_styles,
-                          product_view_context: 'search'
-                        %}
-                        {%- assign skip_card_product_styles = true -%}
-                      {%- when 'article' -%}
-                        {% render 'article-card',
-                          article: item,
-                          show_image: true,
-                          show_date: section.settings.article_show_date,
-                          show_author: section.settings.article_show_author,
-                          show_badge: true,
-                          media_aspect_ratio: 1,
-                          lazy_load: lazy_load
-                        %}
-                      {%- when 'page' -%}
-                        <div class="article-card-wrapper card-wrapper underline-links-hover">
-                          <div
-                            class="card card--card card--text ratio color-{{ settings.blog_card_color_scheme }}"
-                            style="--ratio-percent: 100%;"
-                          >
-                            <div class="card__content">
-                              <div class="card__information">
-                                <h3 class="card__heading">
-                                  <a href="{{ item.url }}" class="full-unstyled-link">
-                                    {{ item.title | truncate: 50 | escape }}
-                                  </a>
-                                </h3>
-                              </div>
-                              <div class="card__badge {{ settings.badge_position }}">
-                                <span class="badge color-{{ settings.color_schemes | first }}">
-                                  {{- 'templates.search.page' | t -}}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                    {%- endcase -%}
-                  </li>
-                {%- endfor -%}
-              </ul>
-              {%- if paginate.pages > 1 -%}
-                {% render 'pagination', paginate: paginate %}
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-        </div>
-      </div>
+  <!-- ── Page heading ──────────────────────────────────────── -->
+  <div class="ks-page-heading">
+    <h1>
+      {%- if search.performed -%}Search results{%- else -%}Search{%- endif -%}
+    </h1>
+    {%- if search.performed and search.terms != blank -%}
+      <p class="ks-subheading">
+        Showing results for <strong>"{{ search.terms | escape }}"</strong>
+      </p>
     {%- endif -%}
   </div>
+
+  <!-- ── Pill-style search input ───────────────────────────── -->
+  <div class="ks-search-row">
+    {%- if settings.predictive_search_enabled -%}
+      <predictive-search data-loading-text="{{ 'accessibility.loading' | t }}" style="flex:1;display:flex;align-items:center;gap:8px;">
+    {%- endif -%}
+    <main-search style="flex:1;">
+      <form action="{{ routes.search_url }}" method="get" role="search" style="display:flex;align-items:center;gap:8px;width:100%;">
+        <div class="ks-search-pill">
+          <span class="ks-search-pill-label">Search</span>
+          <input
+            class="search__input"
+            id="Search-In-Template"
+            type="search"
+            name="q"
+            value="{{ search.terms | escape }}"
+            placeholder="Banana Chips"
+            {%- if settings.predictive_search_enabled -%}
+              role="combobox"
+              aria-expanded="false"
+              aria-owns="predictive-search-results"
+              aria-controls="predictive-search-results"
+              aria-haspopup="listbox"
+              aria-autocomplete="list"
+              autocorrect="off"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+            {%- endif -%}
+          >
+          <input name="options[prefix]" type="hidden" value="last">
+          <input name="type" type="hidden" value="product">
+          <button type="reset" class="ks-pill-clear-btn{% if search.terms == blank %} hidden{% endif %}" aria-label="{{ 'general.search.reset' | t }}">
+            &times;
+          </button>
+        </div>
+
+        {%- if settings.predictive_search_enabled -%}
+          <div class="predictive-search predictive-search--search-template" tabindex="-1" data-predictive-search>
+            {%- render 'loading-spinner', class: 'predictive-search__loading-state' -%}
+          </div>
+          <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
+        {%- endif -%}
+
+        <button type="submit" class="ks-search-submit-btn" aria-label="{{ 'general.search.search' | t }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+          </svg>
+        </button>
+      </form>
+    </main-search>
+    {%- if settings.predictive_search_enabled -%}
+      </predictive-search>
+    {%- endif -%}
+  </div>
+
+  <!-- ── Filter / sort pill row ────────────────────────────── -->
+  {%- if search.performed -%}
+  <div class="ks-filter-row" role="toolbar" aria-label="Filter and sort options">
+    <!-- Filters pill (active / decorative placeholder — no live filter panel attached yet) -->
+    <button type="button" class="ks-filter-pill ks-filter-pill--active" id="ks-filters-btn" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="4" y1="6" x2="20" y2="6"></line>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+        <line x1="11" y1="18" x2="13" y2="18"></line>
+      </svg>
+      Filters
+    </button>
+
+    <!-- Sort by (decorative placeholder — wraps existing sort_by param) -->
+    <button type="button" class="ks-filter-pill ks-filter-pill--chevron" id="ks-sortby-btn">
+      Sort by: Relevance
+    </button>
+
+    <!-- Price pill (decorative placeholder) -->
+    <button type="button" class="ks-filter-pill" id="ks-price-btn">
+      Price
+    </button>
+
+    <!-- Brand pill (decorative placeholder) -->
+    <button type="button" class="ks-filter-pill" id="ks-brand-btn">
+      Brand
+    </button>
+
+    <!-- Dietary pill (decorative placeholder) -->
+    <button type="button" class="ks-filter-pill" id="ks-dietary-btn">
+      Dietary
+    </button>
+
+    <!-- Results count -->
+    <span class="ks-result-count" role="status">
+      {%- if results_count > 0 -%}
+        {{ results_count }} result{% if results_count != 1 %}s{% endif %}
+      {%- endif -%}
+    </span>
+  </div>
+  {%- endif -%}
+
+  <!-- ── Product Grid ───────────────────────────────────────── -->
+  {%- if search.performed -%}
+    {%- if search.results_count == 0 and search.filters == empty -%}
+      <div class="ks-no-results" role="status">
+        <p>No results found for <strong>"{{ search.terms | escape }}"</strong>.</p>
+        <p>Try a different search term or browse our categories.</p>
+      </div>
+    {%- else -%}
+      <div class="ks-product-grid-wrap" id="ProductGridContainer">
+        <div class="loading-overlay gradient"></div>
+        <ul
+          class="ks-product-grid"
+          id="product-grid"
+          data-id="{{ section.id }}"
+          role="list"
+        >
+          {%- assign skip_card_product_styles = false -%}
+          {%- for item in search.results -%}
+            {% assign lazy_load = false %}
+            {%- if forloop.index > 4 -%}
+              {%- assign lazy_load = true -%}
+            {%- endif -%}
+
+            <li class="grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+              {% if settings.animations_reveal_on_scroll %}data-cascade{% endif %}
+            >
+              {%- case item.object_type -%}
+                {%- when 'product' -%}
+                  {% render 'card-product',
+                    card_product: item,
+                    media_aspect_ratio: section.settings.image_ratio,
+                    image_shape: section.settings.image_shape,
+                    show_secondary_image: section.settings.show_secondary_image,
+                    show_vendor: section.settings.show_vendor,
+                    show_rating: section.settings.show_rating,
+                    lazy_load: lazy_load,
+                    skip_styles: skip_card_product_styles,
+                    product_view_context: 'search'
+                  %}
+                  {%- assign skip_card_product_styles = true -%}
+                {%- when 'article' -%}
+                  {% render 'article-card',
+                    article: item,
+                    show_image: true,
+                    show_date: section.settings.article_show_date,
+                    show_author: section.settings.article_show_author,
+                    show_badge: true,
+                    media_aspect_ratio: 1,
+                    lazy_load: lazy_load
+                  %}
+                {%- when 'page' -%}
+                  <div class="article-card-wrapper card-wrapper underline-links-hover">
+                    <div class="card card--card card--text ratio color-{{ settings.blog_card_color_scheme }}" style="--ratio-percent: 100%;">
+                      <div class="card__content">
+                        <div class="card__information">
+                          <h3 class="card__heading">
+                            <a href="{{ item.url }}" class="full-unstyled-link">
+                              {{ item.title | truncate: 50 | escape }}
+                            </a>
+                          </h3>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              {%- endcase -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- if paginate.pages > 1 -%}
+          {% render 'pagination', paginate: paginate %}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <!-- ── Special Offer Banner ───────────────────────────── -->
+    <div class="ks-offer-banner" aria-label="Special offer promotion">
+      <div class="ks-offer-banner-left">
+        <div class="ks-offer-tag-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          Special Offer
+        </div>
+        <p class="ks-offer-headline">Crispy snacks<br>you'll love!</p>
+        <p class="ks-offer-subtext">Up to <strong>25% off</strong> on select snacks</p>
+        <a href="{{ routes.collections_url }}/snacks" class="ks-offer-cta">
+          Shop Now →
+        </a>
+      </div>
+
+      <!-- Leaf SVG decorations -->
+      <svg class="ks-offer-leaf ks-offer-leaf--1" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <ellipse cx="20" cy="20" rx="8" ry="18" fill="#6EBE52" transform="rotate(-20 20 20)"/>
+      </svg>
+      <svg class="ks-offer-leaf ks-offer-leaf--2" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <ellipse cx="20" cy="20" rx="6" ry="14" fill="#4CAF35" transform="rotate(30 20 20)"/>
+      </svg>
+      <svg class="ks-offer-leaf ks-offer-leaf--3" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <ellipse cx="20" cy="20" rx="7" ry="16" fill="#7DCB5E" transform="rotate(-40 20 20)"/>
+      </svg>
+
+      <div class="ks-offer-banner-right">
+        <img
+          src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=320&q=80"
+          alt="Banana Chips snack packaging"
+          class="ks-offer-product-img"
+          loading="lazy"
+          width="155"
+          height="160"
+        >
+      </div>
+    </div>
+
+    <!-- ── Cart Summary Bar ───────────────────────────────── -->
+    {%- if cart.item_count > 0 -%}
+    <a href="{{ routes.cart_url }}" class="ks-cart-bar" aria-label="View cart — {{ cart.item_count }} items">
+      <div class="ks-cart-bar-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        <span class="ks-cart-bar-label">CART {{ cart.item_count }} ITEM{% if cart.item_count != 1 %}S{% endif %}</span>
+      </div>
+
+      <div class="ks-cart-bar-thumbs" aria-hidden="true">
+        {%- assign shown = 0 -%}
+        {%- for item in cart.items limit: 3 -%}
+          {%- if item.image -%}
+            <img
+              src="{{ item.image | image_url: width: 64 }}"
+              alt="{{ item.title | escape }}"
+              class="ks-cart-thumb"
+              loading="lazy"
+              width="32"
+              height="32"
+            >
+            {%- assign shown = shown | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if cart.item_count > shown -%}
+          <span class="ks-cart-more">+{{ cart.item_count | minus: shown }}</span>
+        {%- endif -%}
+      </div>
+
+      <span class="ks-cart-bar-right">View cart →</span>
+    </a>
+    {%- endif -%}
+
+  {%- endif -%}
+</div>
 {% endpaginate %}
+
 {% if section.settings.image_shape == 'arch' %}
   {{ 'mask-arch.svg' | inline_asset_content }}
 {%- endif -%}
+
+<script>
+  // Toggle filter pills between active/inactive (visual-only — no live filtering yet)
+  document.querySelectorAll('.ks-filter-pill[id]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var isFilters = btn.id === 'ks-filters-btn';
+      if (isFilters) {
+        btn.classList.toggle('ks-filter-pill--active');
+      }
+    });
+  });
+</script>
 
 {% schema %}
 {
@@ -364,7 +803,7 @@
           "label": "t:sections.main-search.settings.columns_mobile.options__2.label"
         }
       ]
-    },    
+    },
     {
       "type": "header",
       "content": "t:sections.main-search.settings.header__1.content"
@@ -513,7 +952,7 @@
       "step": 4,
       "unit": "px",
       "label": "t:sections.all.padding.padding_top",
-      "default": 36
+      "default": 0
     },
     {
       "type": "range",
@@ -523,7 +962,7 @@
       "step": 4,
       "unit": "px",
       "label": "t:sections.all.padding.padding_bottom",
-      "default": 36
+      "default": 0
     }
   ]
 }

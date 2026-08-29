@@ -2199,6 +2199,7 @@ textarea {
   transition: bottom 0.25s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
 }
 
 .karthika-floating-cart.is-empty {
@@ -2319,10 +2320,28 @@ textarea {
    CART PAGE â€” Mobile-first real Shopify cart experience
    ========================================================================== */
 .template-cart #MainContent {
-  max-width: 480px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 16px 16px calc(var(--karthika-bottom-nav-height) + 22px + env(safe-area-inset-bottom, 0px)) !important;
+  padding: 6px 0 calc(var(--karthika-bottom-nav-height) + 24px + env(safe-area-inset-bottom, 0px)) !important;
   box-sizing: border-box;
+}
+
+.template-cart .page-width {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  box-sizing: border-box !important;
+}
+
+.template-cart cart-items {
+  padding-top: 0 !important;
+}
+
+.template-cart .karthika-floating-cart {
+  display: none !important;
 }
 
 .template-cart .cart__warnings {
@@ -2381,13 +2400,12 @@ textarea {
   display: block;
 }
 
-
 .template-cart .cart__footer {
   background: #FFFFFF;
   border: 1px solid var(--karthika-border);
   border-radius: 28px;
   box-shadow: var(--karthika-shadow-card);
-  padding: 18px 16px 16px;
+  padding: 18px 16px 16px !important;
   margin-top: 20px;
 }
 
@@ -2465,10 +2483,10 @@ textarea {
 }
 
 @media screen and (min-width: 750px) {
-  .template-cart #MainContent {
-    max-width: 540px;
-    padding-left: 20px;
-    padding-right: 20px;
+  .template-cart .page-width {
+    max-width: 860px !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
   }
 }
 
@@ -4704,4 +4722,245 @@ textarea {
 
 
 
+
+/* ==========================================================================
+   Search Page Redesign — Product Card Additions
+   (wishlist heart, star rating row)
+   ========================================================================== */
+
+/* ── Wishlist heart button ─────────────────────────────────────────────── */
+.karthika-compact-media {
+  position: relative; /* ensure positioning context */
+}
+
+.karthika-wishlist-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  transition: transform 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+
+.karthika-wishlist-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+.karthika-wishlist-btn svg {
+  width: 15px;
+  height: 15px;
+  color: #aaa;
+  transition: color 0.18s, fill 0.18s;
+  pointer-events: none;
+}
+
+.karthika-wishlist-btn.is-wishlisted svg {
+  color: #e5534b;
+  fill: #e5534b;
+}
+
+/* ── Star rating row ───────────────────────────────────────────────────── */
+.karthika-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin: 2px 0 3px;
+}
+
+.karthika-rating-star {
+  width: 12px;
+  height: 12px;
+  color: #FFC933;
+  flex-shrink: 0;
+}
+
+.karthika-rating-value {
+  font-size: 11.5px;
+  font-weight: var(--karthika-weight-semibold, 600);
+  color: var(--karthika-text-dark, #171717);
+  line-height: 1;
+}
+
+.karthika-rating-count {
+  font-size: 11px;
+  color: var(--karthika-text-muted, #5C6B52);
+  line-height: 1;
+}
+
+
+/* ==========================================================================
+   Search page — compact card adjustments for 3-col grid
+   Makes text/buttons scale correctly at smaller card widths
+   ========================================================================== */
+.ks-product-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.ks-product-grid > .grid__item {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex: none !important;
+}
+
+.ks-product-grid .karthika-compact-card {
+  padding: 8px 8px 10px 8px;
+  border-radius: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ks-product-grid .karthika-compact-media {
+  border-radius: 12px;
+  margin-bottom: 6px;
+  aspect-ratio: 1 / 1;
+}
+
+.ks-product-grid .karthika-compact-media a,
+.ks-product-grid .karthika-compact-media-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.ks-product-grid .karthika-compact-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ks-product-grid .karthika-card-meta-row {
+  margin-bottom: 2px;
+  gap: 4px;
+}
+
+.ks-product-grid .karthika-compact-pack {
+  font-size: 10px;
+}
+
+.ks-product-grid .karthika-stock-badge {
+  font-size: 9.5px;
+}
+
+.ks-product-grid .karthika-compact-title {
+  font-size: 11.5px;
+  line-height: 1.2;
+  min-height: 28px;
+  margin-bottom: 4px;
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ks-product-grid .karthika-rating-row {
+  margin: 1px 0 4px;
+}
+
+.ks-product-grid .karthika-rating-star {
+  width: 11px;
+  height: 11px;
+}
+
+.ks-product-grid .karthika-rating-value {
+  font-size: 10.5px;
+}
+
+.ks-product-grid .karthika-rating-count {
+  font-size: 10px;
+}
+
+.ks-product-grid .karthika-price-container {
+  margin-bottom: 6px;
+}
+
+.ks-product-grid .karthika-price-main-row {
+  gap: 4px;
+}
+
+.ks-product-grid .karthika-price-current {
+  font-size: 13.5px;
+}
+
+.ks-product-grid .karthika-price-original {
+  font-size: 10px;
+}
+
+.ks-product-grid .karthika-price-discount-tag {
+  font-size: 9px;
+  padding: 1px 4px;
+}
+
+.ks-product-grid .karthika-card-action-bar,
+.ks-product-grid .karthika-compact-add-wrap {
+  height: 32px;
+  border-radius: 9999px;
+}
+
+.ks-product-grid .karthika-stepper-add-btn {
+  font-size: 11px;
+  height: 32px;
+  border-radius: 9999px;
+  gap: 4px;
+}
+
+.ks-product-grid .karthika-add-btn-icon {
+  font-size: 14px;
+}
+
+.ks-product-grid .karthika-add-btn-text {
+  font-size: 11px;
+}
+
+.ks-product-grid .karthika-sold-out-badge {
+  font-size: 10px;
+  height: 32px;
+  line-height: 32px;
+  border-radius: 9999px;
+  text-align: center;
+  background: #f1f1f1;
+  color: #888;
+  font-weight: 700;
+  width: 100%;
+}
+
+.ks-product-grid .karthika-card-badge {
+  font-size: 8.5px;
+  padding: 2px 6px;
+  top: 6px;
+  left: 6px;
+}
+
+.ks-product-grid .karthika-wishlist-btn {
+  width: 26px;
+  height: 26px;
+  top: 6px;
+  right: 6px;
+}
+
+.ks-product-grid .karthika-wishlist-btn svg {
+  width: 13px;
+  height: 13px;
+}
 

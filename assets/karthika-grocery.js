@@ -171,8 +171,7 @@
     },
 
     openCartDrawer() {
-      // Cart drawer completely disabled. State is synced to /cart page directly.
-      return;
+      window.location.href = window.routes?.cart_url || '/cart';
     },
 
     bindCartSummary() {
@@ -304,6 +303,10 @@
 
         const cartTrigger = e.target.closest('.karthika-cart-trigger');
         if (cartTrigger) {
+          const href = cartTrigger.getAttribute('href');
+          if (href && href !== '#' && !href.startsWith('javascript:')) {
+            return;
+          }
           e.preventDefault();
           this.openCartDrawer();
         }

@@ -1,5 +1,5 @@
-<button
-  type="button"
+<a
+  href="{{ routes.cart_url }}"
   class="karthika-floating-cart{% if cart.item_count == 0 %} is-empty{% endif %}"
   aria-label="View cart ({{ cart.item_count }} items)"
   aria-hidden="{% if cart.item_count == 0 %}true{% else %}false{% endif %}"
@@ -18,4 +18,4 @@
   </span>
   <span class="karthika-floating-cart-arrow" aria-hidden="true">&#8250;</span>
   <span class="karthika-floating-cart-progress" aria-hidden="true"><span></span></span>
-</button>
+</a>
