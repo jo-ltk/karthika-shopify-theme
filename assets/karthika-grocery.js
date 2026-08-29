@@ -870,7 +870,10 @@
       }
 
       try {
-        const res = await fetch('http://localhost:3001/api/ai-assistant', {
+        const cardEl = document.querySelector('.karthika-ai-assistant-card');
+        const endpoint = cardEl?.getAttribute('data-ai-endpoint') || 'https://karthika-shopify-theme.onrender.com/api/ai-assistant';
+
+        const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: dishQuery })

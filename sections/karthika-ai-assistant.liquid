@@ -3,7 +3,10 @@
   "Not sure what to cook? Tell Karthika what you're making and we'll find the ingredients."
 {%- endcomment -%}
 
-<div class="karthika-ai-assistant-card">
+<div 
+  class="karthika-ai-assistant-card"
+  data-ai-endpoint="{{ section.settings.ai_endpoint | default: 'https://karthika-shopify-theme.onrender.com/api/ai-assistant' }}"
+>
   <div class="karthika-ai-badge">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -118,6 +121,13 @@
       "id": "subheading",
       "label": "Subheading",
       "default": "Tell Karthika what you're making and we'll find the fresh ingredients."
+    },
+    {
+      "type": "text",
+      "id": "ai_endpoint",
+      "label": "AI API Endpoint URL (Production)",
+      "default": "https://karthika-shopify-theme.onrender.com/api/ai-assistant",
+      "info": "URL of your deployed server.ts (e.g., https://karthika-shopify-theme.onrender.com/api/ai-assistant)"
     }
   ],
   "presets": [
