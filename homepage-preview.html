@@ -1262,7 +1262,7 @@
 
       <!-- 10. Polished 5-Tab Mobile Bottom Navigation -->
       <nav class="karthika-bottom-nav" aria-label="Mobile Navigation">
-        <a href="#" class="karthika-nav-item is-active">
+        <a href="#" class="karthika-nav-item is-active" onclick="closeSearchModalPreview(event)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"></path></svg>
           <span>Home</span>
         </a>
@@ -1275,10 +1275,10 @@
           </svg>
           <span>Categories</span>
         </a>
-        <a href="#" class="karthika-nav-item">
+        <button type="button" class="karthika-nav-item" onclick="openSearchModalPreview(event)" style="background: none; border: none; padding: 0; cursor: pointer;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <span>Search</span>
-        </a>
+        </button>
         <a href="#" class="karthika-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M2 3h3l2.5 13h12l3-9H6"></path></svg>
           <span>Cart</span>
@@ -1289,6 +1289,395 @@
           <span>Account</span>
         </a>
       </nav>
+
+      <!-- Search Modal Component Inside Preview Device Shell -->
+      <div id="KarthikaSearchModal" class="karthika-search-modal is-open" role="dialog" aria-modal="true" style="position: absolute; inset: 0; z-index: 50; display: flex;">
+        <div class="karthika-search-modal-content">
+          
+          <!-- Top Search Header -->
+          <div class="karthika-search-modal-header">
+            <button type="button" class="karthika-search-modal-back" aria-label="Back to previous screen" onclick="closeSearchModalPreview(event)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+
+            <form action="#" method="get" role="search" class="karthika-search-modal-form" onsubmit="event.preventDefault();">
+              <div class="karthika-search-modal-input-shell">
+                <svg class="karthika-search-modal-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                </svg>
+                <input
+                  id="KarthikaSearchModalInput"
+                  type="search"
+                  name="q"
+                  class="karthika-search-modal-input"
+                  placeholder="Search for groceries, spices, snacks..."
+                  autocomplete="off"
+                >
+                <button type="reset" class="karthika-search-modal-reset" aria-label="Clear search">&times;</button>
+                <button type="submit" class="karthika-search-modal-submit" aria-label="Search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                  </svg>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="karthika-search-modal-body">
+            <div class="karthika-search-empty-state">
+              
+              <!-- 1. Recent Searches -->
+              <div class="karthika-search-group karthika-search-group--recent" id="karthikaRecentSearchesGroup">
+                <div class="karthika-search-section-header">
+                  <h2 class="karthika-search-section-title">Recent searches</h2>
+                  <button type="button" class="karthika-search-clear-btn" id="karthikaClearRecentBtn" onclick="document.getElementById('karthikaRecentSearchesGroup').style.display='none'">Clear all</button>
+                </div>
+                
+                <div class="karthika-recent-cards-row" id="karthikaRecentCardsRow">
+                  <!-- Basmati Rice -->
+                  <div class="karthika-recent-card">
+                    <button type="button" class="karthika-recent-remove-btn" aria-label="Remove Basmati Rice" onclick="this.closest('.karthika-recent-card').remove()">&times;</button>
+                    <button type="button" class="karthika-recent-card-btn" onclick="document.getElementById('KarthikaSearchModalInput').value='Basmati Rice'">
+                      <div class="karthika-recent-card-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=160&q=80" alt="Basmati Rice" width="60" height="60">
+                      </div>
+                      <span class="karthika-recent-card-name">Basmati Rice</span>
+                    </button>
+                  </div>
+
+                  <!-- Banana Chips -->
+                  <div class="karthika-recent-card">
+                    <button type="button" class="karthika-recent-remove-btn" aria-label="Remove Banana Chips" onclick="this.closest('.karthika-recent-card').remove()">&times;</button>
+                    <button type="button" class="karthika-recent-card-btn" onclick="document.getElementById('KarthikaSearchModalInput').value='Banana Chips'">
+                      <div class="karthika-recent-card-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=160&q=80" alt="Banana Chips" width="60" height="60">
+                      </div>
+                      <span class="karthika-recent-card-name">Banana Chips</span>
+                    </button>
+                  </div>
+
+                  <!-- Coconut Oil -->
+                  <div class="karthika-recent-card">
+                    <button type="button" class="karthika-recent-remove-btn" aria-label="Remove Coconut Oil" onclick="this.closest('.karthika-recent-card').remove()">&times;</button>
+                    <button type="button" class="karthika-recent-card-btn" onclick="document.getElementById('KarthikaSearchModalInput').value='Coconut Oil'">
+                      <div class="karthika-recent-card-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=160&q=80" alt="Coconut Oil" width="60" height="60">
+                      </div>
+                      <span class="karthika-recent-card-name">Coconut Oil</span>
+                    </button>
+                  </div>
+
+                  <!-- Filter Coffee -->
+                  <div class="karthika-recent-card">
+                    <button type="button" class="karthika-recent-remove-btn" aria-label="Remove Filter Coffee" onclick="this.closest('.karthika-recent-card').remove()">&times;</button>
+                    <button type="button" class="karthika-recent-card-btn" onclick="document.getElementById('KarthikaSearchModalInput').value='Filter Coffee'">
+                      <div class="karthika-recent-card-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=160&q=80" alt="Filter Coffee" width="60" height="60">
+                      </div>
+                      <span class="karthika-recent-card-name">Filter Coffee</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Popular Searches -->
+              <div class="karthika-search-group">
+                <div class="karthika-search-section-header">
+                  <h2 class="karthika-search-section-title">Popular searches</h2>
+                </div>
+                <div class="karthika-popular-icons-row">
+                  <!-- Rice -->
+                  <button type="button" class="karthika-popular-icon-btn" onclick="document.getElementById('KarthikaSearchModalInput').value='Rice'">
+                    <div class="karthika-popular-icon-circle" style="background-color: #FDE8E8;">
+                      <span class="karthika-popular-emoji">🍚</span>
+                    </div>
+                    <span class="karthika-popular-icon-label">Rice</span>
+                  </button>
+
+                  <!-- Spices -->
+                  <button type="button" class="karthika-popular-icon-btn" onclick="document.getElementById('KarthikaSearchModalInput').value='Spices'">
+                    <div class="karthika-popular-icon-circle" style="background-color: #FEF3C7;">
+                      <span class="karthika-popular-emoji">🥘</span>
+                    </div>
+                    <span class="karthika-popular-icon-label">Spices</span>
+                  </button>
+
+                  <!-- Snacks -->
+                  <button type="button" class="karthika-popular-icon-btn" onclick="document.getElementById('KarthikaSearchModalInput').value='Snacks'">
+                    <div class="karthika-popular-icon-circle" style="background-color: #FFEDD5;">
+                      <span class="karthika-popular-emoji">🍿</span>
+                    </div>
+                    <span class="karthika-popular-icon-label">Snacks</span>
+                  </button>
+
+                  <!-- Kerala Products -->
+                  <button type="button" class="karthika-popular-icon-btn" onclick="document.getElementById('KarthikaSearchModalInput').value='Kerala Products'">
+                    <div class="karthika-popular-icon-circle" style="background-color: #DCFCE7;">
+                      <span class="karthika-popular-emoji">🌴</span>
+                    </div>
+                    <span class="karthika-popular-icon-label">Kerala Products</span>
+                  </button>
+
+                  <!-- Vegetables -->
+                  <button type="button" class="karthika-popular-icon-btn" onclick="document.getElementById('KarthikaSearchModalInput').value='Vegetables'">
+                    <div class="karthika-popular-icon-circle" style="background-color: #FEE2E2;">
+                      <span class="karthika-popular-emoji">🍅</span>
+                    </div>
+                    <span class="karthika-popular-icon-label">Vegetables</span>
+                  </button>
+
+                  <!-- Dairy -->
+                  <button type="button" class="karthika-popular-icon-btn" onclick="document.getElementById('KarthikaSearchModalInput').value='Dairy'">
+                    <div class="karthika-popular-icon-circle" style="background-color: #E0F2FE;">
+                      <span class="karthika-popular-emoji">🥛</span>
+                    </div>
+                    <span class="karthika-popular-icon-label">Dairy</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 3. Shop By Category -->
+              <div class="karthika-search-group">
+                <div class="karthika-search-section-header">
+                  <h2 class="karthika-search-section-title">Shop by category</h2>
+                </div>
+                <div class="karthika-search-cat-grid">
+                  <!-- 1. Rice -->
+                  <a href="#" class="karthika-cat-card" onclick="document.getElementById('KarthikaSearchModalInput').value='Rice'">
+                    <span class="karthika-cat-card-name">Rice</span>
+                    <div class="karthika-cat-card-img-wrap">
+                      <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=260&q=80" alt="Rice">
+                    </div>
+                    <span class="karthika-cat-card-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </span>
+                  </a>
+
+                  <!-- 2. Spices -->
+                  <a href="#" class="karthika-cat-card" onclick="document.getElementById('KarthikaSearchModalInput').value='Spices'">
+                    <span class="karthika-cat-card-name">Spices</span>
+                    <div class="karthika-cat-card-img-wrap">
+                      <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=260&q=80" alt="Spices">
+                    </div>
+                    <span class="karthika-cat-card-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </span>
+                  </a>
+
+                  <!-- 3. Snacks -->
+                  <a href="#" class="karthika-cat-card" onclick="document.getElementById('KarthikaSearchModalInput').value='Snacks'">
+                    <span class="karthika-cat-card-name">Snacks</span>
+                    <div class="karthika-cat-card-img-wrap">
+                      <img src="https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=260&q=80" alt="Snacks">
+                    </div>
+                    <span class="karthika-cat-card-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </span>
+                  </a>
+
+                  <!-- 4. Kerala Products -->
+                  <a href="#" class="karthika-cat-card" onclick="document.getElementById('KarthikaSearchModalInput').value='Kerala Products'">
+                    <span class="karthika-cat-card-name">Kerala<br>Products</span>
+                    <div class="karthika-cat-card-img-wrap">
+                      <img src="https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&w=260&q=80" alt="Kerala Products">
+                    </div>
+                    <span class="karthika-cat-card-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </span>
+                  </a>
+
+                  <!-- 5. Vegetables -->
+                  <a href="#" class="karthika-cat-card" onclick="document.getElementById('KarthikaSearchModalInput').value='Vegetables'">
+                    <span class="karthika-cat-card-name">Vegetables</span>
+                    <div class="karthika-cat-card-img-wrap">
+                      <img src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=260&q=80" alt="Vegetables">
+                    </div>
+                    <span class="karthika-cat-card-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </span>
+                  </a>
+
+                  <!-- 6. Dairy -->
+                  <a href="#" class="karthika-cat-card" onclick="document.getElementById('KarthikaSearchModalInput').value='Dairy'">
+                    <span class="karthika-cat-card-name">Dairy</span>
+                    <div class="karthika-cat-card-img-wrap">
+                      <img src="https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=260&q=80" alt="Dairy">
+                    </div>
+                    <span class="karthika-cat-card-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </span>
+                  </a>
+                </div>
+              </div>
+
+              <!-- 4. Special Offers Banner -->
+              <div class="karthika-search-group">
+                <div class="karthika-search-offer-banner">
+                  <div class="karthika-offer-content">
+                    <div class="karthika-offer-tag">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-offer-tag-icon">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                      </svg>
+                      <span>Special Offers</span>
+                    </div>
+                    <h3 class="karthika-offer-title">Up to <span class="karthika-offer-highlight">30%</span> off on select groceries</h3>
+                    <a href="#" class="karthika-offer-btn">
+                      <span>Shop Offers</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                    </a>
+                  </div>
+                  
+                  <div class="karthika-offer-visual">
+                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=320&q=80" alt="Special Offers Grocery Basket" class="karthika-offer-img">
+                    <div class="karthika-offer-percent-badge" aria-hidden="true">%</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. You Might Need -->
+              <div class="karthika-search-group">
+                <div class="karthika-search-section-header">
+                  <h2 class="karthika-search-section-title">You might need</h2>
+                </div>
+                <div class="karthika-need-cards-scroll karthika-hide-scrollbar">
+                  <!-- Product 1 -->
+                  <div class="karthika-need-card">
+                    <div class="karthika-need-card-media">
+                      <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=220&q=80" alt="Fortune Basmati Rice 1kg">
+                    </div>
+                    <div class="karthika-need-card-info">
+                      <h4 class="karthika-need-card-title">Fortune Basmati Rice 1kg</h4>
+                      <div class="karthika-need-card-footer">
+                        <span class="karthika-need-card-price">$2.99</span>
+                        <button type="button" class="karthika-need-card-add-btn" aria-label="Add Fortune Basmati Rice to cart" onclick="this.classList.toggle('is-added'); updateCartCount(1);">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Product 2 -->
+                  <div class="karthika-need-card">
+                    <div class="karthika-need-card-media">
+                      <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=220&q=80" alt="Aashirvaad Atta 5kg">
+                    </div>
+                    <div class="karthika-need-card-info">
+                      <h4 class="karthika-need-card-title">Aashirvaad Atta 5kg</h4>
+                      <div class="karthika-need-card-footer">
+                        <span class="karthika-need-card-price">$6.49</span>
+                        <button type="button" class="karthika-need-card-add-btn" aria-label="Add Aashirvaad Atta to cart" onclick="this.classList.toggle('is-added'); updateCartCount(1);">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Product 3 -->
+                  <div class="karthika-need-card">
+                    <div class="karthika-need-card-media">
+                      <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=220&q=80" alt="Sunpure Coconut Oil 1L">
+                    </div>
+                    <div class="karthika-need-card-info">
+                      <h4 class="karthika-need-card-title">Sunpure Coconut Oil 1L</h4>
+                      <div class="karthika-need-card-footer">
+                        <span class="karthika-need-card-price">$7.49</span>
+                        <button type="button" class="karthika-need-card-add-btn" aria-label="Add Sunpure Coconut Oil to cart" onclick="this.classList.toggle('is-added'); updateCartCount(1);">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Product 4 -->
+                  <div class="karthika-need-card">
+                    <div class="karthika-need-card-media">
+                      <img src="https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?auto=format&fit=crop&w=220&q=80" alt="Tata Salt 1kg">
+                    </div>
+                    <div class="karthika-need-card-info">
+                      <h4 class="karthika-need-card-title">Tata Salt 1kg</h4>
+                      <div class="karthika-need-card-footer">
+                        <span class="karthika-need-card-price">$1.29</span>
+                        <button type="button" class="karthika-need-card-add-btn" aria-label="Add Tata Salt to cart" onclick="this.classList.toggle('is-added'); updateCartCount(1);">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Fixed Bottom 5-Tab Navigation -->
+          <nav class="karthika-bottom-nav karthika-search-bottom-nav" aria-label="Mobile Navigation">
+            <a href="#" class="karthika-nav-item" onclick="closeSearchModalPreview(event)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"></path></svg>
+              <span>Home</span>
+            </a>
+
+            <a href="#" class="karthika-nav-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="3" y="3" width="7" height="7" rx="2"></rect>
+                <rect x="14" y="3" width="7" height="7" rx="2"></rect>
+                <rect x="14" y="14" width="7" height="7" rx="2"></rect>
+                <rect x="3" y="14" width="7" height="7" rx="2"></rect>
+              </svg>
+              <span>Categories</span>
+            </a>
+
+            <button type="button" class="karthika-nav-item is-active" style="background: none; border: none; padding: 0; cursor: pointer;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <span>Search</span>
+            </button>
+
+            <a href="#" class="karthika-nav-item" aria-label="Open cart" style="background: none; border: none; padding: 0; cursor: pointer;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M2 3h3l2.5 13h12l3-9H6"></path></svg>
+              <span>Cart</span>
+              <span class="karthika-nav-badge">9</span>
+            </a>
+
+            <a href="#" class="karthika-nav-item" aria-label="Account">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <span>Account</span>
+            </a>
+          </nav>
+
+        </div>
+      </div>
 
     </div>
   </div>
@@ -1647,6 +2036,25 @@
       // Start automatic sliding
       startAutoPlay();
     })();
+
+    // Preview search modal controls
+    function openSearchModalPreview(e) {
+      if (e) e.preventDefault();
+      const modal = document.getElementById('KarthikaSearchModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('is-open');
+      }
+    }
+
+    function closeSearchModalPreview(e) {
+      if (e) e.preventDefault();
+      const modal = document.getElementById('KarthikaSearchModal');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('is-open');
+      }
+    }
   </script>
 </body>
 </html>

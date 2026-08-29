@@ -388,7 +388,33 @@
           return;
         }
 
-        const searchChip = e.target.closest('.karthika-search-chip, .karthika-search-category');
+        // Clear recent searches
+        const clearRecentBtn = e.target.closest('#karthikaClearRecentBtn');
+        if (clearRecentBtn) {
+          const recentGroup = document.querySelector('#karthikaRecentSearchesGroup');
+          if (recentGroup) {
+            recentGroup.style.display = 'none';
+          }
+          return;
+        }
+
+        // Remove single recent card
+        const removeRecentBtn = e.target.closest('.karthika-recent-remove-btn');
+        if (removeRecentBtn) {
+          const card = removeRecentBtn.closest('.karthika-recent-card');
+          if (card) {
+            card.remove();
+            const remaining = document.querySelectorAll('.karthika-recent-card');
+            if (remaining.length === 0) {
+              const recentGroup = document.querySelector('#karthikaRecentSearchesGroup');
+              if (recentGroup) recentGroup.style.display = 'none';
+            }
+          }
+          return;
+        }
+
+        // Query trigger clicks (recent cards, popular icons, category shortcuts)
+        const searchChip = e.target.closest('.karthika-search-chip, .karthika-search-category, .karthika-recent-card-btn, .karthika-popular-icon-btn, .karthika-cat-card');
         if (searchChip) {
           const query = searchChip.dataset.query;
           if (query) {
