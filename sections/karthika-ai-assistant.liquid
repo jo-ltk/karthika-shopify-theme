@@ -87,14 +87,16 @@
 
   <script type="application/json" id="KarthikaCatalogVariants">
     [
-      {%- for product in collections.all.products limit: 50 -%}
+      {%- for product in collections.all.products limit: 250 -%}
         {%- assign v = product.selected_or_first_available_variant | default: product.variants.first -%}
-        {%- if v and v.available -%}
+        {%- if v -%}
           {
             "id": {{ v.id }},
             "title": {{ product.title | json }},
             "price": {{ product.price | money | json }},
             "price_raw": {{ product.price }},
+            "available": {{ v.available }},
+            "handle": {{ product.handle | json }},
             "image": {{ product.featured_media | image_url: width: 120 | json }},
             "url": {{ product.url | json }}
           }{%- unless forloop.last -%},{%- endunless -%}
