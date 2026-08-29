@@ -1933,6 +1933,16 @@ textarea {
   color: var(--karthika-red);
 }
 
+.karthika-ai-fallback-msg {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--karthika-radius-md);
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .karthika-ai-basket-box {
   background: #FAFAFA;
   border-radius: var(--karthika-radius-md);
@@ -1994,12 +2004,16 @@ textarea {
 }
 
 .karthika-ai-item-thumb {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 6px;
   object-fit: cover;
-  background: #F1F5F9;
+  background: #F4F5EF;
   flex-shrink: 0;
+}
+
+.karthika-ai-item-row .karthika-compact-media-placeholder {
+  display: block;
 }
 
 .karthika-ai-item-info {

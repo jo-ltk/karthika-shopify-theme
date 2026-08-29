@@ -1,14 +1,5 @@
 {%- comment -%}
   Renders the compact mobile-app style product card using Shopify product data only.
-  UPDATED: Added wishlist heart icon, star rating row (placeholder data).
-
-  ⚠️  PLACEHOLDER DATA NOTE — Star ratings:
-  Ratings (★ 4.6 (128)) are PLACEHOLDER values based on product ID mod 5.
-  To wire real review data, install a reviews app (Judge.me, Okendo, Yotpo, etc.)
-  and replace the placeholder_rating / placeholder_review_count assignments with:
-    product.metafields.reviews.rating.value
-    product.metafields.reviews.rating_count.value
-  (exact namespace depends on which reviews app is installed.)
 {%- endcomment -%}
 
 {%- if card_product and card_product != empty -%}
@@ -38,36 +29,12 @@
     if is_available
       assign inventory_label = 'In stock'
     endif
-
-    assign id_mod = card_product.id | modulo: 5
-    if id_mod == 0
-      assign placeholder_rating = '4.6'
-      assign placeholder_review_count = '128'
-    elsif id_mod == 1
-      assign placeholder_rating = '4.5'
-      assign placeholder_review_count = '96'
-    elsif id_mod == 2
-      assign placeholder_rating = '4.7'
-      assign placeholder_review_count = '76'
-    elsif id_mod == 3
-      assign placeholder_rating = '4.3'
-      assign placeholder_review_count = '214'
-    else
-      assign placeholder_rating = '4.8'
-      assign placeholder_review_count = '52'
-    endif
   -%}
 
   <div
     class="karthika-compact-card"
     data-product-id="{{ card_product.id }}"
     data-variant-id="{{ current_variant.id }}"
-    data-debug-product-available="{{ card_product.available }}"
-    data-debug-variant-id="{{ current_variant.id }}"
-    data-debug-variant-available="{{ current_variant.available }}"
-    data-debug-variant-inventory-quantity="{{ current_variant.inventory_quantity }}"
-    data-debug-variant-inventory-management="{{ current_variant.inventory_management }}"
-    data-debug-variant-inventory-policy="{{ current_variant.inventory_policy }}"
   >
     <div class="karthika-compact-media">
       {%- if on_sale -%}
@@ -118,15 +85,6 @@
       <a href="{{ card_product.url }}" class="karthika-compact-title" title="{{ card_product.title | escape }}">
         {{ card_product.title | escape }}
       </a>
-
-      <!-- Star rating row — PLACEHOLDER data (see comment at top of file for real data hookup) -->
-      <div class="karthika-rating-row" aria-label="Rating: {{ placeholder_rating }} out of 5, {{ placeholder_review_count }} reviews">
-        <svg class="karthika-rating-star" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.953a1 1 0 00.95.69h4.156c.969 0 1.371 1.24.588 1.81l-3.364 2.444a1 1 0 00-.364 1.118l1.287 3.953c.3.921-.755 1.688-1.54 1.118l-3.363-2.444a1 1 0 00-1.175 0l-3.363 2.444c-.784.57-1.838-.197-1.539-1.118l1.286-3.953a1 1 0 00-.364-1.118L2.07 9.38c-.783-.57-.38-1.81.588-1.81h4.156a1 1 0 00.951-.69l1.286-3.953z"/>
-        </svg>
-        <span class="karthika-rating-value">{{ placeholder_rating }}</span>
-        <span class="karthika-rating-count">({{ placeholder_review_count }})</span>
-      </div>
 
       <div class="karthika-price-container">
         <div class="karthika-price-main-row">

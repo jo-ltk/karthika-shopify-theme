@@ -1,8 +1,6 @@
 {
   "name": "karthika",
-  "module": "index.ts",
   "scripts": {
-    "start": "tsx server.ts",
     "build": "echo 'No build step required'",
     "theme:dev": "shopify theme dev -e development",
     "theme:check": "shopify theme check -e development",
@@ -10,9 +8,6 @@
     "theme:pull": "shopify theme pull -e development",
     "theme:info": "shopify theme info -e development",
     "mcp:shopify": "npx @shopify/dev-mcp"
-  },
-  "dependencies": {
-    "tsx": "^4.19.3"
   },
   "devDependencies": {
     "@shopify/cli": "^4.7.0",

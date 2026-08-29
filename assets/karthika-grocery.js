@@ -574,276 +574,197 @@
   };
 
   /* --------------------------------------------------------------------------
-     4. AI Shopping Assistant Interactive Recipes
+     4. AI Shopping Assistant (Remix App Proxy)
      -------------------------------------------------------------------------- */
-  const recipes = {
-    biryani: {
-      title: "Malabar Chicken Biryani Kit",
-      price: "$24.50",
-      ingredients: [
-        "v Kaima Jeerakasala Biryani Rice (1kg) - $4.80",
-        "v Fresh Farm Chicken Curry Cut (1kg) - $9.50",
-        "v Eastern Biryani Masala & Pure Ghee - $4.40",
-        "v Fresh Mint Leaves, Coriander & Onions - $5.80"
-      ]
-    },
-    kerala_breakfast: {
-      title: "Kerala Appam & Stew Kit",
-      price: "$14.20",
-      ingredients: [
-        "v Brahmins Easy Appam Mix (1kg) - $3.60",
-        "v Pure Coconut Milk Can (400ml) - $2.80",
-        "v Fresh Stew Veggies (Potato, Carrot, Beans) - $4.80",
-        "v Whole Kerala Spices & Ginger Pack - $3.00"
-      ]
-    },
-    sambar: {
-      title: "Authentic Sambar & Rasam Kit",
-      price: "$11.80",
-      ingredients: [
-        "v Karthika Premium Toor Dal (1kg) - $3.50",
-        "v MTR Traditional Sambar Powder - $2.40",
-        "v Sambar Veggies (Drumstick, Shallots, Tomato) - $4.10",
-        "v Natural Tamarind Block (200g) - $1.80"
-      ]
-    },
-    tea_snacks: {
-      title: "Kerala Evening Chai & Snacks Combo",
-      price: "$13.90",
-      ingredients: [
-        "v Crispy Kerala Banana Chips (250g) - $4.50",
-        "v Spicy Mixture & Ribbon Pakoda - $3.80",
-        "v AVT Premium Kerala Dust Tea (500g) - $5.60"
-      ]
-    }
-  };
-
   const AIAssistantManager = {
     _isLoading: false,
     _matchedProducts: [],
 
-    getCatalog() {
-      const catalogEl = document.getElementById('KarthikaCatalogVariants');
-      if (catalogEl) {
-        try { 
-          const parsed = JSON.parse(catalogEl.textContent || '[]'); 
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        } catch(e) {}
+    getProxyUrl() {
+      const cardEl = document.querySelector('.karthika-ai-assistant-card');
+      return cardEl?.getAttribute('data-ai-endpoint') || '/apps/karthika/recommend';
+    },
+
+    setLoading(isLoading) {
+      this._isLoading = isLoading;
+      const submitBtn = document.getElementById('KarthikaAISubmitBtn');
+      if (!submitBtn) return;
+
+      if (isLoading) {
+        if (!submitBtn.dataset.originalHtml) {
+          submitBtn.dataset.originalHtml = submitBtn.innerHTML;
+        }
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Thinking...</span>';
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = submitBtn.dataset.originalHtml || '<span>Ask AI</span>';
       }
-
-      // Extract from page DOM products if JSON script was empty
-      const domProducts = [];
-      document.querySelectorAll('.karthika-compact-card[data-variant-id]').forEach(card => {
-        const id = parseInt(card.dataset.variantId, 10);
-        const title = card.querySelector('.karthika-compact-title')?.textContent?.trim() || '';
-        const price = card.querySelector('.karthika-price-current')?.textContent?.trim() || '$3.50';
-        const img = card.querySelector('.karthika-compact-img')?.src || '';
-        if (id && title && !domProducts.some(p => p.id === id)) {
-          domProducts.push({ id, title, price, image: img, price_raw: 350 });
-        }
-      });
-      return domProducts;
     },
 
-    matchAndRenderStoreProducts(title, targetPrice, ingredientNames) {
-      const catalog = this.getCatalog();
-      let matched = [];
-
-      // Default grocery image dictionary for authentic Indian / Kerala ingredients
-      const fallbackImages = {
-        rice: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=120&q=80",
-        biryani: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=120&q=80",
-        chicken: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=120&q=80",
-        meat: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=120&q=80",
-        coconut: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=120&q=80",
-        masala: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=120&q=80",
-        curry: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=120&q=80",
-        spice: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=120&q=80",
-        onion: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=120&q=80",
-        vegetable: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=120&q=80",
-        appam: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=120&q=80",
-        tea: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=120&q=80",
-        chips: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=120&q=80"
-      };
-
-      const getFallbackImg = (name) => {
-        const lower = name.toLowerCase();
-        for (const key in fallbackImages) {
-          if (lower.includes(key)) return fallbackImages[key];
-        }
-        return "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=120&q=80";
-      };
-
-      // Stopwords: too generic to use alone for product matching
-      const stopWords = new Set([
-        'fresh', 'pure', 'organic', 'raw', 'natural', 'premium', 'best',
-        'quality', 'homemade', 'authentic', 'traditional', 'special',
-        'large', 'small', 'medium', 'whole', 'cut', 'sliced', 'pieces',
-        'pack', 'packet', 'bag', 'box', 'bottle', 'jar', 'can',
-        'for', 'and', 'the', 'with', 'from'
-      ]);
-
-      // Match ingredients against catalog
-      ingredientNames.forEach(ing => {
-        const cleanName = ing.replace(/^v\s*|\u2713\s*/, '').trim();
-        const parts = cleanName.split(/\u2014|-/);
-        const itemName = (parts[0] || cleanName).trim();
-        const itemPrice = (parts[1] || '').trim();
-
-        const allKeywords = itemName.toLowerCase().replace(/[(),&\u2014\-$0-9.]/g, ' ').split(' ').filter(w => w.length > 2);
-        const keywords = allKeywords.filter(w => !stopWords.has(w));
-
-        let found = null;
-        if (keywords.length > 0) {
-          let bestMatch = null;
-          let bestScore = 0;
-          catalog.forEach(p => {
-            if (matched.some(m => m.id === p.id)) return;
-            const pTitle = p.title.toLowerCase();
-            const score = keywords.filter(kw => pTitle.includes(kw)).length;
-            if (score > bestScore) {
-              bestScore = score;
-              bestMatch = p;
-            }
-          });
-          if (bestMatch && bestScore > 0) found = bestMatch;
-        }
-
-        if (found && !matched.some(m => m.id === found.id)) {
-          matched.push({
-            ...found,
-            _inStock: found.available !== false,
-            _originalQuery: itemName
-          });
-        } else {
-          matched.push({
-            id: null,
-            title: itemName,
-            price: itemPrice || '',
-            image: getFallbackImg(itemName),
-            _isUnavailable: true,
-            _originalQuery: itemName
-          });
-        }
-      });
-
-      this._matchedProducts = matched;
-
-      this.renderBasketUI(title, targetPrice, matched);
+    showFallback(show) {
+      const fallbackEl = document.getElementById('KarthikaAIFallbackMsg');
+      if (fallbackEl) fallbackEl.style.display = show ? 'block' : 'none';
     },
 
-    renderBasketUI(title, price, matchedItems) {
+    renderItemThumb(item) {
+      const alt = (item.title || 'Product').replace(/"/g, '&quot;');
+      if (item.image) {
+        return `<img src="${item.image}" alt="${alt}" class="karthika-ai-item-thumb" width="44" height="44" loading="lazy">`;
+      }
+      return `<div class="karthika-ai-item-thumb karthika-compact-media-placeholder" aria-label="Product image unavailable" role="img"></div>`;
+    },
+
+    renderRecommendation(data) {
       const titleEl = document.getElementById('KarthikaAIRecipeTitle');
       const countEl = document.getElementById('KarthikaAIMatchedCount');
       const priceEl = document.getElementById('KarthikaAIRecipePrice');
       const listEl = document.getElementById('KarthikaAIIngredientList');
       const buildBtn = document.getElementById('KarthikaAIBuildBtn');
 
-      const inStockItems = matchedItems.filter(item => item.id && !item._isUnavailable && item._inStock !== false);
-      const availableCount = inStockItems.length;
+      if (!data || !data.dishName) return;
 
-      if (titleEl) titleEl.textContent = title;
-      if (priceEl) {
-        if (availableCount > 0) {
-          const totalRaw = inStockItems.reduce((acc, curr) => acc + (curr.price_raw || 350), 0);
-          priceEl.textContent = `$${(totalRaw / 100).toFixed(2)}`;
-        } else {
-          priceEl.textContent = '$0.00';
-        }
-      }
+      const matched = data.matched || [];
+      const unmatched = data.unmatched || [];
+      this._matchedProducts = matched;
+
+      if (titleEl) titleEl.textContent = data.dishName;
+      if (priceEl) priceEl.textContent = `$${parseFloat(data.total || 0).toFixed(2)}`;
 
       if (countEl) {
-        if (availableCount > 0) {
-          countEl.textContent = `${availableCount} store item${availableCount > 1 ? 's' : ''} available`;
+        if (matched.length > 0) {
+          countEl.textContent = `${matched.length} store item${matched.length > 1 ? 's' : ''} matched`;
           countEl.style.color = 'var(--karthika-green, #16A34A)';
         } else {
-          countEl.textContent = `Items not available in store`;
+          countEl.textContent = 'No matching products in store';
           countEl.style.color = '#dc2626';
         }
       }
 
       if (listEl) {
-        if (matchedItems.length === 0 || availableCount === 0) {
+        if (matched.length === 0 && unmatched.length === 0) {
           listEl.innerHTML = `
-            <div class="karthika-ai-item-row" style="padding: 16px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-              <span style="font-size: 24px;">🏬</span>
-              <span style="font-weight: 600; color: #374151; font-size: 14px;">Ingredients not currently stocked</span>
-              <span style="font-size: 12px; color: #6b7280; max-width: 280px; line-height: 1.4;">
-                We couldn't find in-stock fresh ingredients for this recipe in our store right now. Try Chicken Biryani or Kerala Breakfast!
-              </span>
+            <div class="karthika-ai-item-row" style="padding: 16px; text-align: center;">
+              <span class="karthika-ai-item-name">No ingredients matched for this dish yet.</span>
             </div>
           `;
         } else {
-          listEl.innerHTML = matchedItems.map(item => {
-            if (item.id && !item._isUnavailable) {
-              const isAvailable = item._inStock !== false;
-              return `
-                <div class="karthika-ai-item-row">
-                  <img 
-                    src="${item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=120&q=80'}" 
-                    alt="${item.title}" 
-                    class="karthika-ai-item-thumb" 
-                    loading="lazy"
-                  />
-                  <div class="karthika-ai-item-info">
-                    <span class="karthika-ai-item-name">${item.title}</span>
-                    <span class="karthika-ai-item-tag" style="color: ${isAvailable ? 'var(--karthika-green, #16A34A)' : '#dc2626'}">
-                      ${isAvailable ? '✓ In Stock & Fresh' : '✕ Currently Sold Out'}
-                    </span>
-                  </div>
-                  <span class="karthika-ai-item-price">${item.price || '$3.50'}</span>
+          listEl.innerHTML = matched.map((item) => `
+            <div class="karthika-ai-item-row">
+              ${this.renderItemThumb(item)}
+              <div class="karthika-ai-item-info">
+                <span class="karthika-ai-item-name">${item.title}</span>
+                <span class="karthika-ai-item-tag" style="color: var(--karthika-green, #16A34A);">
+                  ✓ In stock (x${item.qty || 1})
+                </span>
+              </div>
+              <span class="karthika-ai-item-price">$${parseFloat(item.price || 0).toFixed(2)}</span>
+            </div>
+          `).join('');
+
+          if (unmatched.length > 0) {
+            listEl.innerHTML += `
+              <div class="karthika-ai-item-row" style="opacity: 0.75; background: #fafafa;">
+                <div class="karthika-ai-item-info">
+                  <span class="karthika-ai-item-name">Not currently available</span>
+                  <span class="karthika-ai-item-tag" style="color: #6b7280;">
+                    ${unmatched.join(', ')}
+                  </span>
                 </div>
-              `;
-            } else {
-              return `
-                <div class="karthika-ai-item-row" style="opacity: 0.6; background: #fafafa;">
-                  <img 
-                    src="${item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=120&q=80'}" 
-                    alt="${item.title}" 
-                    class="karthika-ai-item-thumb" 
-                    loading="lazy"
-                    style="filter: grayscale(80%);"
-                  />
-                  <div class="karthika-ai-item-info">
-                    <span class="karthika-ai-item-name">${item.title}</span>
-                    <span class="karthika-ai-item-tag" style="color: #6b7280;">
-                      ✕ Not available in store
-                    </span>
-                  </div>
-                  <span class="karthika-ai-item-price" style="color: #9ca3af; text-decoration: line-through;">${item.price || ''}</span>
-                </div>
-              `;
-            }
-          }).join('');
+              </div>
+            `;
+          }
         }
       }
 
       if (buildBtn) {
-        if (availableCount === 0) {
-          buildBtn.disabled = true;
-          buildBtn.style.opacity = '0.5';
-          buildBtn.style.cursor = 'not-allowed';
-          buildBtn.innerHTML = `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="15" y1="9" x2="9" y2="15"></line>
-              <line x1="9" y1="9" x2="15" y2="15"></line>
-            </svg>
-            <span>Items not available in store</span>
-          `;
-        } else {
-          buildBtn.disabled = false;
-          buildBtn.style.opacity = '1';
-          buildBtn.style.cursor = 'pointer';
-          buildBtn.innerHTML = `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        const canAdd = matched.length > 0;
+        buildBtn.disabled = !canAdd;
+        buildBtn.style.opacity = canAdd ? '1' : '0.5';
+        buildBtn.style.cursor = canAdd ? 'pointer' : 'not-allowed';
+        buildBtn.innerHTML = canAdd
+          ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <path d="M16 10a4 4 0 0 1-8 0"></path>
             </svg>
-            <span>Add Available Items to Cart (${availableCount})</span>
-          `;
+            <span>Add Available Items to Cart (${matched.length})</span>`
+          : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+            <span>Items not available in store</span>`;
+      }
+    },
+
+    async sendRecommendationRequest(payload) {
+      if (this._isLoading) return;
+
+      this.showFallback(false);
+      this.setLoading(true);
+
+      const titleEl = document.getElementById('KarthikaAIRecipeTitle');
+      const countEl = document.getElementById('KarthikaAIMatchedCount');
+      const priceEl = document.getElementById('KarthikaAIRecipePrice');
+      const listEl = document.getElementById('KarthikaAIIngredientList');
+
+      if (titleEl) titleEl.textContent = 'Finding ingredients...';
+      if (countEl) countEl.textContent = 'Searching store catalog...';
+      if (priceEl) priceEl.textContent = '...';
+      if (listEl) {
+        listEl.innerHTML = `
+          <div class="karthika-ai-item-row" style="opacity: 0.7;">
+            <div class="karthika-ai-item-info">
+              <span class="karthika-ai-item-name">Searching store for matched products...</span>
+            </div>
+          </div>
+        `;
+      }
+
+      try {
+        const response = await fetch(this.getProxyUrl(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (data.fallback) {
+          this.showFallback(true);
+          return;
         }
+
+        if (response.status === 404 || data.error === 'not found') {
+          if (titleEl) titleEl.textContent = payload.dishName || 'Recipe not found';
+          if (countEl) countEl.textContent = 'No recipe configured for this dish yet';
+          if (priceEl) priceEl.textContent = '$0.00';
+          if (listEl) {
+            listEl.innerHTML = `
+              <div class="karthika-ai-item-row" style="padding: 16px; text-align: center;">
+                <span class="karthika-ai-item-name">This dish is not in the recipe catalog yet.</span>
+              </div>
+            `;
+          }
+          this._matchedProducts = [];
+          const buildBtn = document.getElementById('KarthikaAIBuildBtn');
+          if (buildBtn) buildBtn.disabled = true;
+          return;
+        }
+
+        if (response.ok && data.dishName) {
+          this.renderRecommendation(data);
+        } else {
+          this.showFallback(true);
+        }
+      } catch (err) {
+        this.showFallback(true);
+      } finally {
+        this.setLoading(false);
       }
     },
 
@@ -851,12 +772,18 @@
       const originalText = btn.innerHTML;
       btn.disabled = true;
 
-      // Filter only products that have a valid variant id and are NOT marked unavailable
-      const seenIds = new Set();
-      const itemsToAdd = this._matchedProducts
-        .filter(p => p.id && !p._isUnavailable && p._displayOnly !== true)
-        .filter(p => { if (seenIds.has(p.id)) return false; seenIds.add(p.id); return true; })
-        .map(p => ({ id: p.id, quantity: 1, title: p.title }));
+      const itemsToAdd = (this._matchedProducts || [])
+        .map((item) => {
+          let rawId = item.variantId;
+          if (typeof rawId === 'string' && rawId.includes('/')) {
+            rawId = rawId.split('/').pop();
+          }
+          return {
+            id: rawId,
+            quantity: parseInt(item.qty, 10) || 1,
+          };
+        })
+        .filter((item) => item.id);
 
       if (!itemsToAdd.length) {
         btn.disabled = false;
@@ -871,29 +798,25 @@
       const base = root.endsWith('/') ? root : root + '/';
       let successCount = 0;
 
-      // Add each item using standard Shopify Cart form-data format
       for (const item of itemsToAdd) {
         try {
           const formData = new FormData();
           formData.append('id', String(item.id));
-          formData.append('quantity', '1');
+          formData.append('quantity', String(item.quantity));
 
           const res = await fetch(`${base}cart/add.js`, {
             method: 'POST',
-            body: formData
+            body: formData,
           });
 
-          if (res.ok) {
-            successCount++;
-          }
+          if (res.ok) successCount++;
         } catch (e) {}
       }
 
-      // Sync CartManager state if available
       if (window.Karthika?.Cart?.refreshCartState) {
         try {
           await window.Karthika.Cart.refreshCartState(false);
-        } catch(e) {}
+        } catch (e) {}
       }
 
       btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>${successCount} item${successCount !== 1 ? 's' : ''} added! Redirecting...</span>`;
@@ -906,34 +829,23 @@
     },
 
     init() {
-      // Show default recipe (biryani) immediately on page load
-      const defaultRecipe = recipes['biryani'];
-      if (defaultRecipe) {
-        this.matchAndRenderStoreProducts(
-          defaultRecipe.title,
-          defaultRecipe.price,
-          defaultRecipe.ingredients
-        );
-      }
+      const cardEl = document.querySelector('.karthika-ai-assistant-card');
+      if (!cardEl) return;
 
-      // Chip buttons → load preset recipe
       document.addEventListener('click', (e) => {
-        const chip = e.target.closest('.karthika-ai-chip[data-recipe]');
+        const chip = e.target.closest('.karthika-ai-chip[data-dish]');
         if (!chip) return;
         e.preventDefault();
 
-        // Toggle active chip style
-        document.querySelectorAll('.karthika-ai-chip').forEach(c => c.classList.remove('is-active'));
+        document.querySelectorAll('.karthika-ai-chip').forEach((c) => c.classList.remove('is-active'));
         chip.classList.add('is-active');
 
-        const key = chip.dataset.recipe;
-        const recipe = recipes[key];
-        if (recipe) {
-          this.matchAndRenderStoreProducts(recipe.title, recipe.price, recipe.ingredients);
+        const dishName = chip.getAttribute('data-dish');
+        if (dishName) {
+          this.sendRecommendationRequest({ type: 'chip', dishName });
         }
       });
 
-      // Form submit → Ask AI with free text
       const form = document.getElementById('KarthikaAIPromptForm');
       if (form) {
         form.addEventListener('submit', (e) => {
@@ -941,76 +853,21 @@
           const input = document.getElementById('KarthikaAIPromptInput');
           const query = input ? input.value.trim() : '';
           if (query) {
-            this.generateRecipeWithAI(query);
+            this.sendRecommendationRequest({ type: 'text', query });
           }
         });
       }
 
-      // Build basket button
       document.addEventListener('click', (e) => {
         const btn = e.target.closest('#KarthikaAIBuildBtn');
-        if (!btn) return;
+        if (!btn || btn.disabled) return;
         this.buildAndAddBasket(btn);
       });
-    },
 
-    async generateRecipeWithAI(dishQuery) {
-      this._isLoading = true;
-      const submitBtn = document.getElementById('KarthikaAISubmitBtn');
-      const listEl = document.getElementById('KarthikaAIIngredientList');
-      const titleEl = document.getElementById('KarthikaAIRecipeTitle');
-      const countEl = document.getElementById('KarthikaAIMatchedCount');
-      const priceEl = document.getElementById('KarthikaAIRecipePrice');
-
-      const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Ask';
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>Thinking...</span>';
-      }
-
-      if (titleEl) titleEl.textContent = `Finding products for "${dishQuery}"...`;
-      if (countEl) countEl.textContent = 'Searching store catalog...';
-      if (priceEl) priceEl.textContent = '...';
-      if (listEl) {
-        listEl.innerHTML = `
-          <div class="karthika-ai-item-row" style="opacity: 0.7;">
-            <div class="karthika-ai-item-info">
-              <span class="karthika-ai-item-name">🔍 Checking store stock for "${dishQuery}"...</span>
-            </div>
-          </div>
-        `;
-      }
-
-      try {
-        const cardEl = document.querySelector('.karthika-ai-assistant-card');
-        const endpoint = cardEl?.getAttribute('data-ai-endpoint') || 'https://karthika-shopify-theme.onrender.com/api/ai-assistant';
-
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: dishQuery })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          this.matchAndRenderStoreProducts(data.title, data.price, data.ingredients || []);
-        } else {
-          throw new Error('API failed');
-        }
-      } catch (err) {
-        setTimeout(() => {
-          this.matchAndRenderStoreProducts(
-            `${dishQuery.charAt(0).toUpperCase() + dishQuery.slice(1)} Fresh Meal Kit`,
-            '$16.80',
-            [dishQuery, 'Curry Masala', 'Fresh Onions & Aromatics']
-          );
-        }, 500);
-      } finally {
-        this._isLoading = false;
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-        }
+      const defaultChip = document.querySelector('.karthika-ai-chip.is-active[data-dish]');
+      const defaultDish = defaultChip?.getAttribute('data-dish');
+      if (defaultDish) {
+        this.sendRecommendationRequest({ type: 'chip', dishName: defaultDish });
       }
     }
   };

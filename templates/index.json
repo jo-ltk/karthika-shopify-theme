@@ -3,59 +3,10 @@
     "desktop_home": { "type": "karthika-desktop-home", "settings": { "products_collection": "all" } },
     "order_again": {
       "type": "karthika-order-again",
-      "blocks": {
-        "kor_cat_1": {
-          "type": "demo_category",
-          "settings": {
-            "name": "Drinks & Beverages",
-            "bg_color": "#E0F0FF",
-            "extra_count": 3
-          }
-        },
-        "kor_cat_2": {
-          "type": "demo_category",
-          "settings": {
-            "name": "Dairy, Bread & Eggs",
-            "bg_color": "#FFF4E0",
-            "extra_count": 10
-          }
-        },
-        "kor_cat_3": {
-          "type": "demo_category",
-          "settings": {
-            "name": "Sweet Tooth",
-            "bg_color": "#FFE8F2",
-            "extra_count": 4
-          }
-        },
-        "kor_cat_4": {
-          "type": "demo_category",
-          "settings": {
-            "name": "Fresh Fruits",
-            "bg_color": "#E8F8E8",
-            "extra_count": 2
-          }
-        },
-        "kor_cat_5": {
-          "type": "demo_category",
-          "settings": {
-            "name": "Vegetables",
-            "bg_color": "#EDFCE0",
-            "extra_count": 6
-          }
-        },
-        "kor_cat_6": {
-          "type": "demo_category",
-          "settings": {
-            "name": "Kerala Favourites",
-            "bg_color": "#F0ECF9",
-            "extra_count": 5
-          }
-        }
-      },
-      "block_order": ["kor_cat_1", "kor_cat_2", "kor_cat_3", "kor_cat_4", "kor_cat_5", "kor_cat_6"],
+      "blocks": {},
+      "block_order": [],
       "settings": {
-        "enable_demo_mode": true,
+        "enable_demo_mode": false,
         "show_guest_prompt": true,
         "guest_heading": "Order again",
         "guest_subtext": "Sign in to quickly reorder your favourites.",

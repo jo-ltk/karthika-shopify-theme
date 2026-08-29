@@ -1,11 +1,11 @@
 {%- comment -%}
   Karthika AI Shopping Assistant & Recipe Meal Builder Section
-  "Not sure what to cook? Tell Karthika what you're making and we'll find the ingredients."
+  Calls Remix app via Shopify App Proxy (/apps/karthika/recommend).
 {%- endcomment -%}
 
-<div 
+<div
   class="karthika-ai-assistant-card"
-  data-ai-endpoint="{{ section.settings.ai_endpoint | default: 'https://karthika-shopify-theme.onrender.com/api/ai-assistant' }}"
+  data-ai-endpoint="{{ section.settings.ai_endpoint | default: '/apps/karthika/recommend' }}"
 >
   <div class="karthika-ai-badge">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -17,7 +17,6 @@
   <h3 class="karthika-ai-title">{{ section.settings.heading | default: "Not sure what to cook?" }}</h3>
   <p class="karthika-ai-desc">{{ section.settings.subheading | default: "Tell Karthika what you're making and we'll find the fresh ingredients." }}</p>
 
-  <!-- AI Custom Prompt Input -->
   <form id="KarthikaAIPromptForm" class="karthika-ai-prompt-form">
     <div class="karthika-ai-input-wrap">
       <input
@@ -36,45 +35,45 @@
     </div>
   </form>
 
-  <!-- Recipe / Dish Selection Chips -->
   <div class="karthika-ai-chips-wrap karthika-hide-scrollbar">
-    <button type="button" class="karthika-ai-chip is-active karthika-ai-pill-btn" data-recipe="biryani">
+    <button type="button" class="karthika-ai-chip is-active karthika-ai-pill-btn" data-dish="Chicken Biryani">
       🍗 Chicken Biryani
     </button>
-    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-recipe="kerala_breakfast">
+    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-dish="Kerala Breakfast">
       🥞 Kerala Breakfast
     </button>
-    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-recipe="sambar">
+    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-dish="Sambar & Rasam">
       🍛 Sambar & Rasam
     </button>
-    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-recipe="tea_snacks">
+    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-dish="Tea Time Snacks">
       ☕ Tea Time Snacks
     </button>
   </div>
 
-  <!-- Interactive Basket Preview Box -->
+  <div id="KarthikaAIFallbackMsg" class="karthika-ai-fallback-msg" style="display: none;">
+    Karthika's thinking cap isn't working right now — try one of the recipe chips instead.
+  </div>
+
   <div class="karthika-ai-basket-box">
     <div class="karthika-ai-basket-head">
       <div>
         <span id="KarthikaAIRecipeTitle" class="karthika-ai-basket-dish">
-          Malabar Chicken Biryani Kit
+          Select a recipe
         </span>
-        <span class="karthika-ai-basket-matched-count" id="KarthikaAIMatchedCount">4 store items matched</span>
+        <span class="karthika-ai-basket-matched-count" id="KarthikaAIMatchedCount">Choose a dish to see matched items</span>
       </div>
       <span id="KarthikaAIRecipePrice" class="karthika-ai-basket-price">
-        $24.50
+        $0.00
       </span>
     </div>
 
-    <!-- Visual Matched Product List with Images -->
-    <div id="KarthikaAIIngredientList" class="karthika-ai-ingredients-list karthika-ai-product-items">
-      <!-- Injected dynamically with actual products & images -->
-    </div>
+    <div id="KarthikaAIIngredientList" class="karthika-ai-ingredients-list karthika-ai-product-items"></div>
 
     <button
       type="button"
       id="KarthikaAIBuildBtn"
       class="karthika-ai-build-btn karthika-ai-add-all-btn"
+      disabled
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -84,26 +83,6 @@
       <span>Build my basket & Go to Cart</span>
     </button>
   </div>
-
-  <script type="application/json" id="KarthikaCatalogVariants">
-    [
-      {%- for product in collections.all.products limit: 250 -%}
-        {%- assign v = product.selected_or_first_available_variant | default: product.variants.first -%}
-        {%- if v -%}
-          {
-            "id": {{ v.id }},
-            "title": {{ product.title | json }},
-            "price": {{ product.price | money | json }},
-            "price_raw": {{ product.price }},
-            "available": {{ v.available }},
-            "handle": {{ product.handle | json }},
-            "image": {{ product.featured_media | image_url: width: 120 | json }},
-            "url": {{ product.url | json }}
-          }{%- unless forloop.last -%},{%- endunless -%}
-        {%- endif -%}
-      {%- endfor -%}
-    ]
-  </script>
 </div>
 
 {% schema %}
@@ -127,9 +106,9 @@
     {
       "type": "text",
       "id": "ai_endpoint",
-      "label": "AI API Endpoint URL (Production)",
-      "default": "https://karthika-shopify-theme.onrender.com/api/ai-assistant",
-      "info": "URL of your deployed server.ts (e.g., https://karthika-shopify-theme.onrender.com/api/ai-assistant)"
+      "label": "AI API endpoint",
+      "default": "/apps/karthika/recommend",
+      "info": "Shopify App Proxy path for the Karthika Remix app recommend route."
     }
   ],
   "presets": [

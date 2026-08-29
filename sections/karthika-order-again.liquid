@@ -59,7 +59,7 @@
       role="list"
       aria-label="Order again categories"
     >
-      {%- if section.blocks.size > 0 -%}
+      {%- if section.settings.enable_demo_mode and section.blocks.size > 0 -%}
         {%- for block in section.blocks -%}
           {%- if block.type == 'demo_category' -%}
             {%- liquid
@@ -246,8 +246,8 @@
           {%- endif -%}
         {%- endfor -%}
 
-      {%- else -%}
-        <!-- Default Fallback Dummy Cards (Reference Design) -->
+      {%- elsif section.settings.enable_demo_mode -%}
+        <!-- Demo fallback cards (theme editor / demo mode only) -->
         <div class="kor-card" style="--kor-card-bg: #E0F0FF;" role="listitem">
           <a href="/collections/all" class="kor-card__header">
             <span class="kor-card__title">Drinks &<br>Beverages</span>
@@ -285,6 +285,27 @@
             <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
           </div>
           <a href="/collections/all" class="kor-badge">+4</a>
+        </div>
+
+      {%- elsif section.settings.show_guest_prompt and customer == nil -%}
+        <div class="kor-guest" role="listitem">
+          <div class="kor-guest__icon" aria-hidden="true">↻</div>
+          <div class="kor-guest__copy">
+            <p class="kor-guest__title">{{ section.settings.guest_heading | default: 'Order again' | escape }}</p>
+            <p class="kor-guest__sub">{{ section.settings.guest_subtext | default: 'Sign in to quickly reorder your favourites.' | escape }}</p>
+          </div>
+          <a href="{{ routes.account_login_url }}" class="kor-guest__btn">
+            {{ section.settings.guest_btn_label | default: 'Sign in' | escape }}
+          </a>
+        </div>
+
+      {%- elsif customer -%}
+        <div class="kor-guest" role="listitem">
+          <div class="kor-guest__copy">
+            <p class="kor-guest__title">No previous orders yet</p>
+            <p class="kor-guest__sub">Your reorder shortcuts will appear here after your first purchase.</p>
+          </div>
+          <a href="{{ routes.all_products_collection_url }}" class="kor-guest__btn">Start shopping</a>
         </div>
       {%- endif -%}
     </div>
