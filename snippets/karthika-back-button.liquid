@@ -1,0 +1,35 @@
+{%- doc -%}
+  Reusable back button for category pages.
+  @param {string} [href] - Optional override URL. When set, renders a link; otherwise uses history.back().
+  @param {string} [aria_label] - Accessible label (default: "Back to previous page")
+  @param {string} [class] - Optional extra CSS class(es)
+{%- enddoc -%}
+
+{%- liquid
+  assign back_href = href | default: ''
+  assign back_label = aria_label | default: 'Back to previous page'
+  assign extra_class = class | default: ''
+-%}
+
+{%- if back_href != blank -%}
+  <a
+    href="{{ back_href }}"
+    class="karthika-search-modal-back {{ extra_class }}"
+    aria-label="{{ back_label | escape }}"
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  </a>
+{%- else -%}
+  <button
+    type="button"
+    class="karthika-search-modal-back karthika-back-button {{ extra_class }}"
+    aria-label="{{ back_label | escape }}"
+    onclick="window.history.back();"
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  </button>
+{%- endif -%}

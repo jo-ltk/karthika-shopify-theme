@@ -31,62 +31,14 @@
 >
   <div class="page-width">
     <div class="title-wrapper-with-link">
-      <h1 class="title title--primary">{{ 'sections.cart.title' | t }}</h1>
+      <div class="kcb2-top-bar__left">
+        {% render 'karthika-back-button' %}
+        <h1 class="title title--primary">{{ 'sections.cart.title' | t }}</h1>
+      </div>
       <a href="{{ routes.all_products_collection_url }}" class="underlined-link">
         {{- 'general.continue_shopping' | t -}}
       </a>
     </div>
-
-    {%- if cart != empty -%}
-    {%- assign free_delivery_threshold = 5000 -%}
-    {%- assign cart_total_cents = cart.total_price -%}
-    {%- assign remaining_cents = free_delivery_threshold | minus: cart_total_cents -%}
-    {%- assign progress_pct = cart_total_cents | times: 100 | divided_by: free_delivery_threshold -%}
-    {%- if progress_pct > 100 -%}{%- assign progress_pct = 100 -%}{%- endif -%}
-    <div
-      class="kcb-free-delivery-bar"
-      data-threshold="{{ free_delivery_threshold }}"
-      id="kcb-delivery-bar"
-    >
-      <div class="kcb-fdb__inner">
-        <div class="kcb-fdb__message">
-          {%- if remaining_cents > 0 -%}
-            <span class="kcb-fdb__icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
-              </svg>
-            </span>
-            <span class="kcb-fdb__text">
-              You're <strong class="kcb-fdb__amount">{{ remaining_cents | money }}</strong> away from <strong>FREE delivery!</strong>
-            </span>
-          {%- else -%}
-            <span class="kcb-fdb__icon kcb-fdb__icon--done">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </span>
-            <span class="kcb-fdb__text">
-              🎉 You've unlocked <strong>FREE delivery!</strong>
-            </span>
-          {%- endif -%}
-        </div>
-        <div class="kcb-fdb__track">
-          <div
-            class="kcb-fdb__fill{% if progress_pct >= 100 %} kcb-fdb__fill--complete{% endif %}"
-            style="width: {{ progress_pct }}%"
-          ></div>
-        </div>
-        <div class="kcb-fdb__labels">
-          <span></span>
-          <span class="kcb-fdb__totals">
-            <span class="kcb-fdb__current">{{ cart_total_cents | money }}</span>
-            <span class="kcb-fdb__sep"> / </span>
-            <span class="kcb-fdb__goal">{{ free_delivery_threshold | money }}</span>
-          </span>
-        </div>
-      </div>
-    </div>
-    {%- endif -%}
 
     <div class="cart__warnings">
       <h1 class="cart__empty-text">Your cart is empty</h1>
