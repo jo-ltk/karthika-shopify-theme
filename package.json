@@ -8,12 +8,15 @@
     "theme:check": "shopify theme check -e development",
     "theme:push": "shopify theme push -e development",
     "theme:pull": "shopify theme pull -e development",
-    "theme:info": "shopify theme info -e development"
+    "theme:info": "shopify theme info -e development",
+    "mcp:shopify": "npx @shopify/dev-mcp"
   },
   "dependencies": {
     "tsx": "^4.19.3"
   },
   "devDependencies": {
+    "@shopify/cli": "^4.7.0",
+    "@shopify/dev-mcp": "^1.14.7",
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
   }
