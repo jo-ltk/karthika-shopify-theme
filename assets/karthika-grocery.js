@@ -45,7 +45,7 @@
         const cart = await response.json();
         this.processCartData(cart, isInit);
       } catch (err) {
-        console.warn('[Karthika Cart] Refresh warning:', err);
+        // Refresh failed silently
       }
     },
 
@@ -202,8 +202,6 @@
         // Check if item is already in Shopify server cart
         const isCurrentlyInCart = (this.state.items || []).some(item => Number(item.variant_id) === vId || Number(item.id) === vId);
 
-        console.log(`[Karthika Cart] Syncing variant ${vId} -> finalQty: ${finalQty} (inCartOnServer: ${isCurrentlyInCart})`);
-
         try {
           let response;
           if (finalQty > 0 && !isCurrentlyInCart) {
@@ -225,8 +223,6 @@
           }
 
           if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            console.warn('[Karthika Cart] Request rejected by Shopify:', response.status, errData);
             // If another change was queued in the meantime, don't rollback
             if (!this._pendingTimers[vId]) {
               await this.refreshCartState();
@@ -235,7 +231,6 @@
           }
 
           const responseData = await response.json();
-          console.log('[Karthika Cart] Shopify response:', responseData);
 
           // If another debounce was queued while request was in-flight, let that newer one proceed
           if (this._pendingTimers[vId]) return;
@@ -248,10 +243,7 @@
             await this.refreshCartState(false);
           }
         } catch (err) {
-          console.error('[Karthika Cart] Network error during cart sync, rolling back:', err);
-          if (!this._pendingTimers[vId]) {
-            await this.refreshCartState();
-          }
+          // Silent catch on cart refresh
         }
       })();
 
@@ -657,8 +649,6 @@
       const catalog = this.getCatalog();
       let matched = [];
 
-      console.log('[Karthika AI] Catalog size:', catalog.length, '| Sample titles:', catalog.slice(0, 5).map(p => p.title));
-
       // Default grocery image dictionary for authentic Indian / Kerala ingredients
       const fallbackImages = {
         rice: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=120&q=80",
@@ -720,14 +710,12 @@
         }
 
         if (found && !matched.some(m => m.id === found.id)) {
-          console.log('[Karthika AI] Matched "' + itemName + '" -> catalog product "' + found.title + '" (id:' + found.id + ', available:' + found.available + ')');
           matched.push({
             ...found,
             _inStock: found.available !== false,
             _originalQuery: itemName
           });
         } else {
-          console.log('[Karthika AI] No catalog match for "' + itemName + '"');
           matched.push({
             id: null,
             title: itemName,
@@ -740,7 +728,6 @@
       });
 
       this._matchedProducts = matched;
-      console.log('[Karthika AI] _matchedProducts set:', JSON.stringify(matched.map(m => ({ id: m.id, title: m.title, unavailable: !!m._isUnavailable }))));
 
       this.renderBasketUI(title, targetPrice, matched);
     },
@@ -864,8 +851,6 @@
       const originalText = btn.innerHTML;
       btn.disabled = true;
 
-      console.log('[Karthika AI] buildAndAddBasket. _matchedProducts:', JSON.stringify(this._matchedProducts));
-
       // Filter only products that have a valid variant id and are NOT marked unavailable
       const seenIds = new Set();
       const itemsToAdd = this._matchedProducts
@@ -873,10 +858,7 @@
         .filter(p => { if (seenIds.has(p.id)) return false; seenIds.add(p.id); return true; })
         .map(p => ({ id: p.id, quantity: 1, title: p.title }));
 
-      console.log('[Karthika AI] Items to add:', JSON.stringify(itemsToAdd));
-
       if (!itemsToAdd.length) {
-        console.warn('[Karthika AI] No in-stock store items to add.');
         btn.disabled = false;
         btn.innerHTML = '<span style="font-size:12px;color:#c00">No items available in store</span>';
         setTimeout(() => { btn.innerHTML = originalText; }, 2000);
@@ -903,17 +885,9 @@
 
           if (res.ok) {
             successCount++;
-            console.log(`[Karthika AI] Successfully added "${item.title}" (id: ${item.id}) to cart.`);
-          } else {
-            const errJson = await res.json().catch(() => ({}));
-            console.warn(`[Karthika AI] Could not add "${item.title}" (id: ${item.id}):`, res.status, errJson);
           }
-        } catch (e) {
-          console.warn(`[Karthika AI] Network error adding "${item.title}":`, e);
-        }
+        } catch (e) {}
       }
-
-      console.log(`[Karthika AI] Add to basket complete: ${successCount}/${itemsToAdd.length} items added.`);
 
       // Sync CartManager state if available
       if (window.Karthika?.Cart?.refreshCartState) {
