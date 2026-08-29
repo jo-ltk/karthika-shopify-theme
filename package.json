@@ -3,7 +3,12 @@
   "module": "index.ts",
   "scripts": {
     "start": "tsx server.ts",
-    "build": "echo 'No build step required'"
+    "build": "echo 'No build step required'",
+    "theme:dev": "shopify theme dev -e development",
+    "theme:check": "shopify theme check -e development",
+    "theme:push": "shopify theme push -e development",
+    "theme:pull": "shopify theme pull -e development",
+    "theme:info": "shopify theme info -e development"
   },
   "dependencies": {
     "tsx": "^4.19.3"
