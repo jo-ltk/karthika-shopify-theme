@@ -602,9 +602,15 @@
       }
     },
 
+    showBasketBox(show) {
+      const basketEl = document.querySelector('.karthika-ai-basket-box');
+      if (basketEl) basketEl.style.display = show ? '' : 'none';
+    },
+
     showFallback(show) {
       const fallbackEl = document.getElementById('KarthikaAIFallbackMsg');
       if (fallbackEl) fallbackEl.style.display = show ? 'block' : 'none';
+      this.showBasketBox(!show);
     },
 
     renderItemThumb(item) {
@@ -702,6 +708,7 @@
       if (this._isLoading) return;
 
       this.showFallback(false);
+      this.showBasketBox(true);
       this.setLoading(true);
 
       const titleEl = document.getElementById('KarthikaAIRecipeTitle');
