@@ -708,7 +708,6 @@
       if (this._isLoading) return;
 
       this.showFallback(false);
-      this.showBasketBox(true);
       this.setLoading(true);
 
       const titleEl = document.getElementById('KarthikaAIRecipeTitle');
