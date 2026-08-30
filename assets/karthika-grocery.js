@@ -578,6 +578,7 @@
      -------------------------------------------------------------------------- */
   const AIAssistantManager = {
     _isLoading: false,
+    _requestSeq: 0,
     _matchedProducts: [],
 
     getProxyUrl() {
@@ -705,7 +706,7 @@
     },
 
     async sendRecommendationRequest(payload) {
-      if (this._isLoading) return;
+      const requestId = ++this._requestSeq;
 
       this.showFallback(false);
       this.setLoading(true);
@@ -740,6 +741,8 @@
 
         const data = await response.json();
 
+        if (requestId !== this._requestSeq) return;
+
         if (data.fallback) {
           this.showFallback(true);
           return;
@@ -768,9 +771,13 @@
           this.showFallback(true);
         }
       } catch (err) {
-        this.showFallback(true);
+        if (requestId === this._requestSeq) {
+          this.showFallback(true);
+        }
       } finally {
-        this.setLoading(false);
+        if (requestId === this._requestSeq) {
+          this.setLoading(false);
+        }
       }
     },
 
@@ -859,6 +866,7 @@
           const input = document.getElementById('KarthikaAIPromptInput');
           const query = input ? input.value.trim() : '';
           if (query) {
+            document.querySelectorAll('.karthika-ai-chip').forEach((c) => c.classList.remove('is-active'));
             this.sendRecommendationRequest({ type: 'text', query });
           }
         });

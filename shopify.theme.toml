@@ -1,2 +1,6 @@
 [environments.development]
 store = "karthika-demo-cjracfc7.myshopify.com"
+
+[environments.production]
+store = "karthika-demo-cjracfc7.myshopify.com"
+theme = "148178534474"
