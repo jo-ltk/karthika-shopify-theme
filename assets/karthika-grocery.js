@@ -580,6 +580,7 @@
     _isLoading: false,
     _requestSeq: 0,
     _matchedProducts: [],
+    _loadingPhraseTimer: null,
 
     getProxyUrl() {
       const cardEl = document.querySelector('.karthika-ai-assistant-card');
@@ -589,6 +590,11 @@
     setLoading(isLoading) {
       this._isLoading = isLoading;
       const submitBtn = document.getElementById('KarthikaAISubmitBtn');
+      const basketEl = document.querySelector('.karthika-ai-basket-box');
+
+      if (!isLoading) this.stopLoadingPhrases();
+      if (basketEl) basketEl.classList.toggle('is-ai-loading', !!isLoading);
+
       if (!submitBtn) return;
 
       if (isLoading) {
@@ -601,6 +607,54 @@
         submitBtn.disabled = false;
         submitBtn.innerHTML = submitBtn.dataset.originalHtml || '<span>Ask AI</span>';
       }
+    },
+
+    stopLoadingPhrases() {
+      if (this._loadingPhraseTimer) {
+        clearInterval(this._loadingPhraseTimer);
+        this._loadingPhraseTimer = null;
+      }
+    },
+
+    startLoadingPhrases(titleEl, countEl, copyEl) {
+      this.stopLoadingPhrases();
+
+      const phrases = [
+        { title: 'Finding ingredients...', sub: 'Searching store catalog...' },
+        { title: 'Finding the best matches...', sub: 'Matching items to your dish...' },
+        { title: 'Checking what’s fresh...', sub: 'Looking at what’s in stock...' },
+        { title: 'Putting your basket together...', sub: 'Picking quantities and prices...' },
+        { title: 'Almost ready...', sub: 'Finishing up...' },
+      ];
+
+      const apply = (phrase, animate) => {
+        if (titleEl) titleEl.textContent = phrase.title;
+        if (countEl) countEl.textContent = phrase.sub;
+        if (copyEl) {
+          copyEl.textContent = phrase.title;
+          if (animate) {
+            copyEl.classList.remove('is-swapping');
+            void copyEl.offsetWidth;
+            copyEl.classList.add('is-swapping');
+          }
+        }
+      };
+
+      apply(phrases[0], false);
+
+      let index = 0;
+      this._loadingPhraseTimer = setInterval(() => {
+        if (!this._isLoading) {
+          this.stopLoadingPhrases();
+          return;
+        }
+        if (index >= phrases.length - 1) {
+          this.stopLoadingPhrases();
+          return;
+        }
+        index += 1;
+        apply(phrases[index], true);
+      }, 1600);
     },
 
     showBasketBox(show) {
@@ -716,18 +770,25 @@
       const priceEl = document.getElementById('KarthikaAIRecipePrice');
       const listEl = document.getElementById('KarthikaAIIngredientList');
 
-      if (titleEl) titleEl.textContent = 'Finding ingredients...';
-      if (countEl) countEl.textContent = 'Searching store catalog...';
       if (priceEl) priceEl.textContent = '...';
       if (listEl) {
         listEl.innerHTML = `
-          <div class="karthika-ai-item-row" style="opacity: 0.7;">
-            <div class="karthika-ai-item-info">
-              <span class="karthika-ai-item-name">Searching store for matched products...</span>
+          <div class="karthika-ai-loading" role="status" aria-live="polite">
+            <div class="karthika-ai-loading-status">
+              <span class="karthika-ai-loading-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="karthika-ai-loading-copy">Finding ingredients...</span>
             </div>
+            <div class="karthika-ai-loading-skel"><b></b><span><i></i><i></i></span></div>
+            <div class="karthika-ai-loading-skel"><b></b><span><i></i><i></i></span></div>
+            <div class="karthika-ai-loading-skel"><b></b><span><i></i><i></i></span></div>
           </div>
         `;
       }
+      this.startLoadingPhrases(
+        titleEl,
+        countEl,
+        listEl?.querySelector('.karthika-ai-loading-copy')
+      );
 
       try {
         const response = await fetch(this.getProxyUrl(), {
