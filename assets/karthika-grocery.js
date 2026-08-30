@@ -739,9 +739,22 @@
           body: JSON.stringify(payload),
         });
 
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          console.warn('[Karthika AI] Non-JSON proxy response', response.status, contentType);
+          this.showFallback(true);
+          return;
+        }
+
         const data = await response.json();
 
         if (requestId !== this._requestSeq) return;
+
+        if (response.status === 401) {
+          console.warn('[Karthika AI] App proxy auth failed (401)');
+          this.showFallback(true);
+          return;
+        }
 
         if (data.fallback) {
           this.showFallback(true);
