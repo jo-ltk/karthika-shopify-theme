@@ -32,11 +32,11 @@ if (!customElements.get('product-form')) {
         delete config.headers['Content-Type'];
 
         const formData = new FormData(this.form);
+        const sections = this.cart
+          ? this.cart.getSectionsToRender().map((section) => section.id)
+          : null;
         if (this.cart) {
-          formData.append(
-            'sections',
-            this.cart.getSectionsToRender().map((section) => section.id)
-          );
+          formData.append('sections', sections);
           formData.append('sections_url', window.location.pathname);
           this.cart.setActiveElement(document.activeElement);
         }
@@ -48,6 +48,13 @@ if (!customElements.get('product-form')) {
 
         fetch(`${routes.cart_add_url}`, config)
           .then((response) => response.json())
+          .then((response) => {
+            if (response.status || !window.CartItemOrder) return response;
+            return window.CartItemOrder.promoteFromAddResponse(response, {
+              sections,
+              sections_url: window.location.pathname,
+            });
+          })
           .then((response) => {
             if (response.status) {
               publish(PUB_SUB_EVENTS.cartError, {

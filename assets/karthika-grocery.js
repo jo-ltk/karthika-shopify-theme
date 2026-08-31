@@ -38,6 +38,32 @@
       this.syncAllSteppers();
     },
 
+    async promoteAddedVariant(variantId, cartHint) {
+      if (!window.CartItemOrder) return cartHint;
+
+      let cart = cartHint?.items ? cartHint : null;
+      if (!cart) {
+        try {
+          const cartResponse = await fetch(this.getCartEndpoint('cart'), {
+            cache: 'no-store',
+            credentials: 'same-origin',
+          });
+          if (!cartResponse.ok) return cartHint;
+          cart = await cartResponse.json();
+        } catch (e) {
+          return cartHint;
+        }
+      }
+
+      const line = (cart.items || []).find(
+        (item) => Number(item.variant_id) === Number(variantId) || Number(item.id) === Number(variantId)
+      );
+      const lineKey = line?.key || cartHint?.key;
+      if (!lineKey) return cart;
+
+      return window.CartItemOrder.promoteLine(cart, lineKey);
+    },
+
     async refreshCartState(isInit = false) {
       try {
         const response = await fetch(this.getCartEndpoint('cart'));
@@ -200,7 +226,11 @@
         if (this._pendingTimers[vId]) return;
 
         // Check if item is already in Shopify server cart
-        const isCurrentlyInCart = (this.state.items || []).some(item => Number(item.variant_id) === vId || Number(item.id) === vId);
+        const existingItem = (this.state.items || []).find(
+          (item) => Number(item.variant_id) === vId || Number(item.id) === vId
+        );
+        const previousQty = existingItem?.quantity || 0;
+        const isCurrentlyInCart = Boolean(existingItem);
 
         try {
           let response;
@@ -230,10 +260,14 @@
             return;
           }
 
-          const responseData = await response.json();
+          let responseData = await response.json();
 
           // If another debounce was queued while request was in-flight, let that newer one proceed
           if (this._pendingTimers[vId]) return;
+
+          if (finalQty > previousQty && window.CartItemOrder) {
+            responseData = await this.promoteAddedVariant(vId, responseData);
+          }
 
           // /cart/change returns full cart (with .items array).
           // /cart/add returns the added item object (without .items array), so we fetch fresh cart state.
@@ -303,14 +337,10 @@
       if (countEl) countEl.textContent = `${count} ITEMS`;
       if (badgeEl) badgeEl.textContent = count;
       if (thumbnailsEl) {
-        const recents = this.state.recentVariantIds || [];
-        const sortedItems = [...(cart?.items || [])].sort((a, b) => {
-          const indexA = recents.indexOf(a.variant_id);
-          const indexB = recents.indexOf(b.variant_id);
-          const posA = indexA === -1 ? 999 : indexA;
-          const posB = indexB === -1 ? 999 : indexB;
-          return posB - posA;
-        });
+        const items = cart?.items || [];
+        const sortedItems = window.CartItemOrder
+          ? window.CartItemOrder.sortItems(items, cart?.attributes)
+          : [...items].reverse();
 
         const images = sortedItems.filter((item) => item.image).slice(0, 2).map((item) => {
           const image = document.createElement('img');
@@ -884,6 +914,7 @@
       const root = window.Shopify?.routes?.root || window.routes?.root || '/';
       const base = root.endsWith('/') ? root : root + '/';
       let successCount = 0;
+      const addedKeysNewestFirst = [];
 
       for (const item of itemsToAdd) {
         try {
@@ -896,7 +927,19 @@
             body: formData,
           });
 
-          if (res.ok) successCount++;
+          if (res.ok) {
+            successCount++;
+            try {
+              const added = await res.json();
+              if (added?.key) addedKeysNewestFirst.unshift(added.key);
+            } catch (e) {}
+          }
+        } catch (e) {}
+      }
+
+      if (addedKeysNewestFirst.length && window.CartItemOrder?.promoteKeys) {
+        try {
+          await window.CartItemOrder.promoteKeys(addedKeysNewestFirst);
         } catch (e) {}
       }
 

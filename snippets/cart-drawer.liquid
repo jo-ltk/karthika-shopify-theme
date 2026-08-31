@@ -143,7 +143,19 @@
                   </thead>
 
                   <tbody role="rowgroup">
-                    {%- for item in cart.items -%}
+                    {%- capture cart_line_keys_newest -%}
+                      {%- render 'cart-items-newest-first' -%}
+                    {%- endcapture -%}
+                    {%- assign cart_line_keys_newest = cart_line_keys_newest | strip | split: '|' -%}
+                    {%- for cart_line_key in cart_line_keys_newest -%}
+                      {%- if cart_line_key == blank -%}
+                        {%- continue -%}
+                      {%- endif -%}
+                      {%- for item in cart.items -%}
+                        {%- assign item_parent_key = item.parent_relationship.parent.key -%}
+                        {%- if item.key != cart_line_key and item_parent_key != cart_line_key -%}
+                          {%- continue -%}
+                        {%- endif -%}
                       <tr
                         id="CartDrawer-Item-{{ item.index | plus: 1 }}"
                         class="cart-item{% if item.parent_relationship.parent != null %} cart-item__nested-line{% endif %}"
@@ -498,6 +510,7 @@
                           </quantity-popover>
                         </td>
                       </tr>
+                      {%- endfor -%}
                     {%- endfor -%}
                   </tbody>
                 </table>

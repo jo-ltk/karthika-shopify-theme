@@ -10,10 +10,22 @@
     <span class="karthika-floating-cart-count">{{ cart.item_count }} ITEMS</span>
   </span>
   <span class="karthika-floating-cart-thumbnails" aria-hidden="true">
-    {%- for item in cart.items limit: 3 -%}
-      {%- if item.image -%}
-        <img src="{{ item.image | image_url: width: 64 }}" alt="" loading="lazy" width="36" height="36">
+    {%- capture cart_line_keys_newest -%}
+      {%- render 'cart-items-newest-first' -%}
+    {%- endcapture -%}
+    {%- assign cart_line_keys_newest = cart_line_keys_newest | strip | split: '|' -%}
+    {%- assign floating_cart_shown = 0 -%}
+    {%- for cart_line_key in cart_line_keys_newest -%}
+      {%- if floating_cart_shown >= 3 -%}
+        {%- break -%}
       {%- endif -%}
+      {%- for item in cart.items -%}
+        {%- if item.key == cart_line_key and item.image -%}
+          <img src="{{ item.image | image_url: width: 64 }}" alt="" loading="lazy" width="36" height="36">
+          {%- assign floating_cart_shown = floating_cart_shown | plus: 1 -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
     {%- endfor -%}
   </span>
   <span class="karthika-floating-cart-arrow" aria-hidden="true">&#8250;</span>

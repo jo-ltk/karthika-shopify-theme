@@ -731,18 +731,28 @@
 
       <div class="ks-cart-bar-thumbs" aria-hidden="true">
         {%- assign shown = 0 -%}
-        {%- for item in cart.items limit: 3 -%}
-          {%- if item.image -%}
-            <img
-              src="{{ item.image | image_url: width: 64 }}"
-              alt="{{ item.title | escape }}"
-              class="ks-cart-thumb"
-              loading="lazy"
-              width="32"
-              height="32"
-            >
-            {%- assign shown = shown | plus: 1 -%}
+        {%- capture cart_line_keys_newest -%}
+          {%- render 'cart-items-newest-first' -%}
+        {%- endcapture -%}
+        {%- assign cart_line_keys_newest = cart_line_keys_newest | strip | split: '|' -%}
+        {%- for cart_line_key in cart_line_keys_newest -%}
+          {%- if shown >= 3 -%}
+            {%- break -%}
           {%- endif -%}
+          {%- for item in cart.items -%}
+            {%- if item.key == cart_line_key and item.image -%}
+              <img
+                src="{{ item.image | image_url: width: 64 }}"
+                alt="{{ item.title | escape }}"
+                class="ks-cart-thumb"
+                loading="lazy"
+                width="32"
+                height="32"
+              >
+              {%- assign shown = shown | plus: 1 -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
         {%- endfor -%}
         {%- if cart.item_count > shown -%}
           <span class="ks-cart-more">+{{ cart.item_count | minus: shown }}</span>

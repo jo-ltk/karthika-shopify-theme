@@ -1,0 +1,35 @@
+{%- comment -%}
+  Outputs top-level cart line keys, newest added first, pipe-separated.
+  Prefers cart.attributes._cart_line_order (maintained on add). Remaining lines
+  follow reversed Shopify order so unstamped carts still list later lines first.
+{%- endcomment -%}
+{%- assign cart_order_attr = cart.attributes._cart_line_order | default: '' | strip -%}
+{%- assign emitted_cart_keys = '|' -%}
+{%- if cart_order_attr != blank -%}
+  {%- assign cart_order_attr_keys = cart_order_attr | split: '|' -%}
+  {%- for order_key in cart_order_attr_keys -%}
+    {%- assign order_key_stripped = order_key | strip -%}
+    {%- if order_key_stripped == blank -%}
+      {%- continue -%}
+    {%- endif -%}
+    {%- for item in cart.items -%}
+      {%- if item.parent_relationship.parent != null -%}
+        {%- continue -%}
+      {%- endif -%}
+      {%- if item.key == order_key_stripped -%}
+        {{- item.key -}}|
+        {%- assign emitted_cart_keys = emitted_cart_keys | append: item.key | append: '|' -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endfor -%}
+{%- endif -%}
+{%- for item in cart.items reversed -%}
+  {%- if item.parent_relationship.parent != null -%}
+    {%- continue -%}
+  {%- endif -%}
+  {%- assign emitted_needle = '|' | append: item.key | append: '|' -%}
+  {%- unless emitted_cart_keys contains emitted_needle -%}
+    {{- item.key -}}|
+  {%- endunless -%}
+{%- endfor -%}
