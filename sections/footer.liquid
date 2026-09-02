@@ -41,15 +41,67 @@
     if section.blocks.size == 1 and section.blocks[0].type == 'brand_information' and brand_empty and has_social_icons == false and section.settings.newsletter_enable == false and section.settings.enable_follow_on_shop == false
       assign only_empty_brand = true
     endif
+
+    assign show_store_contact = true
+    assign helpline_phone = section.settings.helpline_phone | default: '(65) 6297 7533' | strip
+    assign fax_number = section.settings.fax_number | default: '(65) 62977511' | strip
+    assign contact_email = section.settings.contact_email | default: 'grocery@karthika.sg' | strip
+    assign store_address = section.settings.store_address | default: '34, Buffalo Road Singapore 219796' | strip
+    assign gst_number = section.settings.gst_number | default: '200311912H' | strip
+    assign helpline_heading = section.settings.helpline_heading | default: 'Helpline' | strip
+    assign helpline_tel = helpline_phone | replace: ' ', '' | replace: '(', '' | replace: ')', '' | replace: '-', ''
+    unless helpline_tel == blank or helpline_tel contains '+'
+      assign helpline_tel = helpline_tel | prepend: '+'
+    endunless
   -%}
-  {%- if section.blocks.size > 0
+  {%- if show_store_contact
+    or section.blocks.size > 0
     or section.settings.newsletter_enable
     or section.settings.show_social
     and has_social_icons == true
     or section.settings.enable_follow_on_shop
   -%}
-    {%- unless only_empty_brand -%}
       <div class="footer__content-top page-width">
+        {%- if show_store_contact -%}
+          <div class="footer-store-contact">
+            <div class="footer-store-contact__brand">
+              <a href="{{ routes.root_url }}" class="footer-store-contact__logo" aria-label="{{ shop.name }}">
+                {% render 'karthika-logo', class: 'karthika-logo--footer', loading: 'lazy' %}
+              </a>
+              {%- if store_address != blank -%}
+                <address class="footer-store-contact__address">{{ store_address | escape | newline_to_br }}</address>
+              {%- endif -%}
+              {%- if gst_number != blank -%}
+                <p class="footer-store-contact__gst">
+                  <span>{{ 'sections.footer.gst_label' | t }}:</span>
+                  {{ gst_number | escape }}
+                </p>
+              {%- endif -%}
+            </div>
+            <div class="footer-store-contact__helpline">
+              <p class="footer-store-contact__kicker">{{ helpline_heading | escape }}</p>
+              {%- if helpline_phone != blank -%}
+                <a class="footer-store-contact__phone" href="tel:{{ helpline_tel }}">
+                  <span>{{ 'sections.footer.tel_label' | t }}</span>
+                  {{ helpline_phone | escape }}
+                </a>
+              {%- endif -%}
+              {%- if fax_number != blank -%}
+                <p class="footer-store-contact__meta">
+                  <span>{{ 'sections.footer.fax_label' | t }}:</span>
+                  {{ fax_number | escape }}
+                </p>
+              {%- endif -%}
+              {%- if contact_email != blank -%}
+                <a class="footer-store-contact__email" href="mailto:{{ contact_email }}">
+                  <span>{{ 'sections.footer.email_label' | t }}:</span>
+                  {{ contact_email | escape }}
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+        {%- unless only_empty_brand -%}
         {%- if section.blocks.size > 0 -%}
           {%- liquid
             if section.blocks.size == 9
@@ -265,8 +317,8 @@
             {%- endif -%}
           </div>
         {%- endif -%}
+        {%- endunless -%}
       </div>
-    {%- endunless -%}
   {%- endif -%}
 
   <div
@@ -470,6 +522,52 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Store contact"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_store_contact",
+      "default": true,
+      "label": "Show logo, helpline, and store details"
+    },
+    {
+      "type": "text",
+      "id": "helpline_heading",
+      "label": "Helpline heading",
+      "default": "Helpline"
+    },
+    {
+      "type": "text",
+      "id": "helpline_phone",
+      "label": "Helpline number",
+      "default": "(65) 6297 7533"
+    },
+    {
+      "type": "text",
+      "id": "fax_number",
+      "label": "Fax",
+      "default": "(65) 62977511"
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Email",
+      "default": "grocery@karthika.sg"
+    },
+    {
+      "type": "textarea",
+      "id": "store_address",
+      "label": "Address",
+      "default": "34, Buffalo Road Singapore 219796"
+    },
+    {
+      "type": "text",
+      "id": "gst_number",
+      "label": "GST registration number",
+      "default": "200311912H"
     },
     {
       "type": "header",

@@ -17,6 +17,36 @@
         "padding_bottom": 24
       }
     },
+    "delivery-gift": {
+      "type": "karthika-delivery-gift",
+      "blocks": {
+        "standard": {
+          "type": "delivery_method",
+          "settings": {
+            "title": "Standard",
+            "subtitle": "2–4 days",
+            "price": "Free"
+          }
+        },
+        "express": {
+          "type": "delivery_method",
+          "settings": {
+            "title": "Express",
+            "subtitle": "Same day / next day",
+            "price": "From checkout"
+          }
+        }
+      },
+      "block_order": [
+        "standard",
+        "express"
+      ],
+      "settings": {
+        "heading": "Delivery & Gift",
+        "subheading": "Choose who this order is for, pick an address, and select a delivery method before you place the order.",
+        "gift_message_max": 250
+      }
+    },
     "cart-footer": {
       "type": "main-cart-footer",
       "blocks": {
@@ -42,6 +72,7 @@
   },
   "order": [
     "cart-items",
+    "delivery-gift",
     "cart-footer"
   ]
 }

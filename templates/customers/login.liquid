@@ -3,11 +3,7 @@
     <a class="karthika-auth-back" href="{{ routes.root_url }}" aria-label="Back to home">&larr;</a>
     <div class="karthika-auth-decor" aria-hidden="true"><span>Tomato</span><span>Lemon</span><span>Apple</span></div>
     <div class="karthika-auth-brand">
-      {% if settings.logo != blank %}
-        <img src="{{ settings.logo | image_url: width: 280 }}" alt="{{ shop.name | escape }}" width="140" height="50">
-      {% else %}
-        <strong>Karthika</strong><small>Supermarket</small>
-      {% endif %}
+      {% render 'karthika-logo', class: 'karthika-logo--auth', loading: 'eager' %}
     </div>
   </div>
 

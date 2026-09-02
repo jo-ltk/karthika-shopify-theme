@@ -1,0 +1,548 @@
+{%- liquid
+  assign delivery_type = cart.attributes['Delivery type'] | default: 'My address'
+  assign delivery_method = cart.attributes['Delivery method'] | default: ''
+  assign selected_address_id = cart.attributes['_delivery_address_id'] | default: ''
+  if selected_address_id == blank and customer != nil and customer.default_address
+    assign selected_address_id = customer.default_address.id | append: ''
+  endif
+  assign gift_selected = false
+  if delivery_type == 'Gift'
+    assign gift_selected = true
+  endif
+  assign one_time = false
+  if customer == nil or selected_address_id == blank and customer.addresses_count == 0
+    assign one_time = true
+  endif
+  if cart.attributes['_delivery_address_id'] == 'one_time'
+    assign one_time = true
+  endif
+-%}
+
+<karthika-delivery-gift
+  id="KarthikaDeliveryGift"
+  class="kdg{% if cart == empty %} is-empty{% endif %}"
+  data-form-id="cart"
+  data-error-address="{{ 'sections.delivery_gift.error_address' | t | escape }}"
+  data-error-method="{{ 'sections.delivery_gift.error_method' | t | escape }}"
+  data-error-recipient="{{ 'sections.delivery_gift.error_recipient' | t | escape }}"
+  data-error-phone="{{ 'sections.delivery_gift.error_phone' | t | escape }}"
+  data-error-save="{{ 'sections.delivery_gift.error_save' | t | escape }}"
+>
+  <div class="page-width kdg__inner">
+    <header class="kdg__header">
+      <h2 class="kdg__title">
+        {%- if section.settings.heading != blank -%}
+          {{ section.settings.heading }}
+        {%- else -%}
+          {{ 'sections.delivery_gift.title' | t }}
+        {%- endif -%}
+      </h2>
+      <p class="kdg__intro">
+        {%- if section.settings.subheading != blank -%}
+          {{ section.settings.subheading }}
+        {%- else -%}
+          {{ 'sections.delivery_gift.intro' | t }}
+        {%- endif -%}
+      </p>
+    </header>
+
+    <div class="kdg__types" role="radiogroup" aria-label="{{ 'sections.delivery_gift.destination' | t }}">
+      <label class="kdg-option kdg-option--type{% unless gift_selected %} is-selected{% endunless %}" data-kdg-type-card>
+        <input type="radio" name="kdg-type" value="My address"{% unless gift_selected %} checked{% endunless %}>
+        <span>
+          <strong>{{ 'sections.delivery_gift.deliver_to_me' | t }}</strong>
+          <small>{{ 'sections.delivery_gift.deliver_to_me_hint' | t }}</small>
+        </span>
+      </label>
+      <label class="kdg-option kdg-option--type{% if gift_selected %} is-selected{% endif %}" data-kdg-type-card>
+        <input type="radio" name="kdg-type" value="Gift"{% if gift_selected %} checked{% endif %}>
+        <span>
+          <strong>{{ 'sections.delivery_gift.send_as_gift' | t }}</strong>
+          <small>{{ 'sections.delivery_gift.send_as_gift_hint' | t }}</small>
+        </span>
+      </label>
+    </div>
+
+    <div class="kdg-panel" data-kdg-gift-fields{% unless gift_selected %} hidden{% endunless %}>
+      <h3 class="kdg__subtitle">{{ 'sections.delivery_gift.gift_details' | t }}</h3>
+      <div class="karthika-address-fields">
+        <label for="KdgRecipientName">{{ 'sections.delivery_gift.recipient_name' | t }}</label>
+        <input
+          id="KdgRecipientName"
+          type="text"
+          autocomplete="name"
+          data-kdg-field="recipient_name"
+          value="{{ cart.attributes['Recipient name'] | escape }}"
+        >
+        <label for="KdgRecipientPhone">{{ 'sections.delivery_gift.recipient_phone' | t }}</label>
+        <input
+          id="KdgRecipientPhone"
+          type="tel"
+          autocomplete="tel"
+          data-kdg-field="recipient_phone"
+          value="{{ cart.attributes['Recipient phone'] | escape }}"
+        >
+        <label for="KdgGiftMessage">{{ 'sections.delivery_gift.gift_message' | t }}</label>
+        <textarea
+          id="KdgGiftMessage"
+          rows="3"
+          maxlength="{{ section.settings.gift_message_max | default: 250 }}"
+          data-kdg-field="gift_message"
+          placeholder="{{ 'sections.delivery_gift.gift_message_placeholder' | t }}"
+        >{{ cart.attributes['Gift message'] | escape }}</textarea>
+      </div>
+    </div>
+
+    <div class="kdg-panel">
+      <div class="kdg__row">
+        <h3 class="kdg__subtitle">{{ 'sections.delivery_gift.address_title' | t }}</h3>
+        {%- if customer == nil -%}
+          <a class="kdg__link" href="{{ routes.account_login_url }}">{{ 'sections.delivery_gift.login_to_save' | t }}</a>
+        {%- endif -%}
+      </div>
+
+      {%- if customer -%}
+        <div class="kdg-address-list" data-kdg-saved-list{% if one_time %} hidden{% endif %}>
+          {%- for address in customer.addresses -%}
+            {%- assign address_id = address.id | append: '' -%}
+            {%- assign address_checked = false -%}
+            {%- if address_id == selected_address_id -%}
+              {%- assign address_checked = true -%}
+            {%- elsif selected_address_id == blank and address == customer.default_address -%}
+              {%- assign address_checked = true -%}
+            {%- endif -%}
+            <article class="kdg-address{% if address_checked %} is-selected{% endif %}" data-kdg-address-card>
+              <label class="kdg-address__choose">
+                <input
+                  type="radio"
+                  name="kdg-address"
+                  value="{{ address.id }}"
+                  data-formatted="{{ address | format_address | strip_html | strip_newlines | escape }}"
+                  data-name="{{ address.first_name | escape }} {{ address.last_name | escape }}"
+                  data-phone="{{ address.phone | escape }}"
+                  data-country="{{ address.country | escape }}"
+                  data-province="{{ address.province | escape }}"
+                  data-zip="{{ address.zip | escape }}"
+                  {% if address_checked %}
+                    checked
+                  {% endif %}
+                >
+                <span>
+                  <strong>
+                    {%- if address == customer.default_address -%}
+                      {{ 'sections.delivery_gift.default_address' | t }}
+                    {%- elsif address.company != blank -%}
+                      {{ address.company | escape }}
+                    {%- else -%}
+                      {{ address.first_name | escape }} {{ address.last_name | escape }}
+                    {%- endif -%}
+                  </strong>
+                  <small>{{ address | format_address }}</small>
+                </span>
+              </label>
+              <div class="kdg-address__actions">
+                <button type="button" class="kdg-text-btn" data-kdg-edit aria-expanded="false" aria-controls="KdgEdit-{{ address.id }}">
+                  {{ 'sections.delivery_gift.edit' | t }}
+                </button>
+                <button
+                  type="button"
+                  class="kdg-text-btn kdg-text-btn--danger"
+                  data-kdg-delete
+                  data-target="{{ address.url }}"
+                  data-confirm-message="{{ 'sections.delivery_gift.delete_confirm' | t | escape }}"
+                >
+                  {{ 'sections.delivery_gift.delete' | t }}
+                </button>
+              </div>
+              <div id="KdgEdit-{{ address.id }}" class="kdg-address__editor" data-kdg-edit-panel hidden>
+                {% form 'customer_address', address, class: 'kdg-form' %}
+                  {% render 'karthika-address-fields', address: address, form_id: address.id %}
+                  <div class="karthika-address-form__actions">
+                    <button class="karthika-primary-button" type="submit">{{ 'sections.delivery_gift.save_address' | t }}</button>
+                    <button class="karthika-secondary-button" type="button" data-kdg-cancel>{{ 'sections.delivery_gift.cancel' | t }}</button>
+                  </div>
+                {% endform %}
+              </div>
+            </article>
+          {%- else -%}
+            <p class="kdg-empty">{{ 'sections.delivery_gift.no_addresses' | t }}</p>
+          {%- endfor -%}
+        </div>
+
+        <div class="kdg__toolbar">
+          <button type="button" class="karthika-secondary-button" data-kdg-add aria-expanded="false" aria-controls="KdgAddAddress">
+            {{ 'sections.delivery_gift.add_address' | t }}
+          </button>
+          <label class="kdg-onetime">
+            <input type="checkbox" name="kdg-one-time"{% if one_time %} checked{% endif %}>
+            {{ 'sections.delivery_gift.one_time_address' | t }}
+          </label>
+        </div>
+
+        <div id="KdgAddAddress" class="kdg-address__editor" data-kdg-add-panel hidden>
+          {% form 'customer_address', customer.new_address, class: 'kdg-form' %}
+            {% render 'karthika-address-fields', address: customer.new_address, form_id: 'New' %}
+            <div class="karthika-address-form__actions">
+              <button class="karthika-primary-button" type="submit">{{ 'sections.delivery_gift.save_address' | t }}</button>
+              <button class="karthika-secondary-button" type="button" data-kdg-cancel>{{ 'sections.delivery_gift.cancel' | t }}</button>
+            </div>
+          {% endform %}
+        </div>
+      {%- endif -%}
+
+      <div class="karthika-address-fields" data-kdg-guest-fields{% unless one_time %} hidden{% endunless %}>
+        {%- if customer -%}
+          <p class="kdg-empty">{{ 'sections.delivery_gift.one_time_hint' | t }}</p>
+        {%- endif -%}
+        <label for="AddressFirstName_Guest">{{ 'sections.delivery_gift.first_name' | t }}</label>
+        <input id="AddressFirstName_Guest" type="text" autocomplete="shipping given-name" data-kdg-field="first_name" value="{{ customer.default_address.first_name | default: customer.first_name | escape }}">
+        <label for="AddressLastName_Guest">{{ 'sections.delivery_gift.last_name' | t }}</label>
+        <input id="AddressLastName_Guest" type="text" autocomplete="shipping family-name" data-kdg-field="last_name" value="{{ customer.default_address.last_name | default: customer.last_name | escape }}">
+        <label for="AddressAddress1_Guest">{{ 'sections.delivery_gift.street' | t }}</label>
+        <input id="AddressAddress1_Guest" type="text" autocomplete="shipping address-line1" data-kdg-field="address1" value="{{ customer.default_address.address1 | escape }}">
+        <label for="AddressAddress2_Guest">{{ 'sections.delivery_gift.apartment' | t }}</label>
+        <input id="AddressAddress2_Guest" type="text" autocomplete="shipping address-line2" data-kdg-field="address2" value="{{ customer.default_address.address2 | escape }}">
+        <label for="AddressCity_Guest">{{ 'sections.delivery_gift.city' | t }}</label>
+        <input id="AddressCity_Guest" type="text" autocomplete="shipping address-level2" data-kdg-field="city" value="{{ customer.default_address.city | escape }}">
+        <label for="AddressCountry_Guest">{{ 'sections.delivery_gift.country' | t }}</label>
+        <select
+          id="AddressCountry_Guest"
+          data-kdg-field="country"
+          data-address-country-select
+          data-default="{{ customer.default_address.country | default: shop.address.country }}"
+          data-form-id="Guest"
+          autocomplete="shipping country"
+        >
+          {{ all_country_option_tags }}
+        </select>
+        <div id="AddressProvinceContainer_Guest">
+          <label for="AddressProvince_Guest">{{ 'sections.delivery_gift.province' | t }}</label>
+          <select id="AddressProvince_Guest" data-kdg-field="province" data-default="{{ customer.default_address.province }}" autocomplete="shipping address-level1"></select>
+        </div>
+        <label for="AddressZip_Guest">{{ 'sections.delivery_gift.zip' | t }}</label>
+        <input id="AddressZip_Guest" type="text" autocomplete="shipping postal-code" data-kdg-field="zip" value="{{ customer.default_address.zip | escape }}">
+        <label for="AddressPhone_Guest">{{ 'sections.delivery_gift.phone' | t }}</label>
+        <input id="AddressPhone_Guest" type="tel" autocomplete="shipping tel" data-kdg-field="phone" value="{{ customer.default_address.phone | default: customer.phone | escape }}">
+      </div>
+    </div>
+
+    <div class="kdg-panel">
+      <h3 class="kdg__subtitle">{{ 'sections.delivery_gift.method_title' | t }}</h3>
+      <div class="kdg__methods" data-kdg-live-methods hidden></div>
+      <div class="kdg__methods" data-kdg-fallback-methods>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'delivery_method' -%}
+            {%- assign method_value = block.settings.title | default: 'Standard' -%}
+            {%- assign method_checked = false -%}
+            {%- if delivery_method == method_value or delivery_method == blank and forloop.first -%}
+              {%- assign method_checked = true -%}
+            {%- endif -%}
+            <label class="kdg-option kdg-option--method{% if method_checked %} is-selected{% endif %}" data-kdg-method-card {{ block.shopify_attributes }}>
+              <input type="radio" name="kdg-method" value="{{ method_value | escape }}"{% if method_checked %} checked{% endif %}>
+              <span>
+                <strong>{{ method_value | escape }}</strong>
+                <small>{{ block.settings.subtitle | escape }}</small>
+              </span>
+              {%- if block.settings.price != blank -%}
+                <em>{{ block.settings.price | escape }}</em>
+              {%- endif -%}
+            </label>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <p class="kdg-error" data-kdg-error hidden role="alert"></p>
+
+    <input type="hidden" form="cart" name="attributes[Delivery type]" data-kdg-attr="Delivery type" value="{{ delivery_type | escape }}">
+    <input type="hidden" form="cart" name="attributes[Delivery method]" data-kdg-attr="Delivery method" value="{{ delivery_method | escape }}">
+    <input type="hidden" form="cart" name="attributes[Delivery address]" data-kdg-attr="Delivery address" value="{{ cart.attributes['Delivery address'] | escape }}">
+    <input type="hidden" form="cart" name="attributes[Recipient name]" data-kdg-attr="Recipient name" value="{{ cart.attributes['Recipient name'] | escape }}">
+    <input type="hidden" form="cart" name="attributes[Recipient phone]" data-kdg-attr="Recipient phone" value="{{ cart.attributes['Recipient phone'] | escape }}">
+    <input type="hidden" form="cart" name="attributes[Gift message]" data-kdg-attr="Gift message" value="{{ cart.attributes['Gift message'] | escape }}">
+    <input type="hidden" form="cart" name="attributes[_delivery_address_id]" data-kdg-attr="_delivery_address_id" value="{{ selected_address_id | escape }}">
+    <input type="hidden" form="cart" name="attributes[_delivery_country]" data-kdg-attr="_delivery_country" value="{{ cart.attributes['_delivery_country'] | escape }}">
+    <input type="hidden" form="cart" name="attributes[_delivery_zip]" data-kdg-attr="_delivery_zip" value="{{ cart.attributes['_delivery_zip'] | escape }}">
+    <input type="hidden" form="cart" name="attributes[_delivery_province]" data-kdg-attr="_delivery_province" value="{{ cart.attributes['_delivery_province'] | escape }}">
+  </div>
+</karthika-delivery-gift>
+
+<script src="{{ 'karthika-delivery-gift.js' | asset_url }}" defer="defer"></script>
+
+{% stylesheet %}
+  karthika-delivery-gift {
+    display: block;
+    scroll-margin-top: 88px;
+  }
+
+  karthika-delivery-gift.is-empty {
+    display: none;
+  }
+
+  .kdg__inner {
+    padding-bottom: 8px;
+  }
+
+  .kdg__header {
+    margin-bottom: 16px;
+  }
+
+  .kdg__title {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.15;
+    letter-spacing: -0.3px;
+  }
+
+  .kdg__intro,
+  .kdg-empty {
+    margin: 6px 0 0;
+    color: var(--karthika-text-muted, #5c6b52);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .kdg__subtitle {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .kdg__row,
+  .kdg__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .kdg__link,
+  .kdg-text-btn {
+    border: 0;
+    background: transparent;
+    color: var(--karthika-red, #3f7d2e);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .kdg-text-btn--danger {
+    color: #b42318;
+  }
+
+  .kdg-panel {
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: var(--karthika-radius-sm, 14px);
+    background: #fff;
+    box-shadow: var(--karthika-shadow-card, 0 2px 10px rgba(31, 41, 21, 0.05));
+  }
+
+  .kdg__types,
+  .kdg__methods {
+    display: grid;
+    gap: 10px;
+  }
+
+  .kdg-option {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 14px;
+    border: 1px solid var(--karthika-border, #e1e8d3);
+    border-radius: var(--karthika-radius-sm, 14px);
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .kdg-option.is-selected {
+    border-color: var(--karthika-red, #3f7d2e);
+    background: var(--karthika-red-subtle, #eaf4de);
+  }
+
+  .kdg-option input {
+    margin: 0;
+    accent-color: var(--karthika-red, #3f7d2e);
+  }
+
+  .kdg-option span {
+    display: grid;
+    gap: 3px;
+  }
+
+  .kdg-option strong {
+    font-size: 14px;
+  }
+
+  .kdg-option small {
+    color: var(--karthika-text-muted, #5c6b52);
+    font-size: 12px;
+  }
+
+  .kdg-option em {
+    font-style: normal;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .kdg-address-list {
+    overflow: hidden;
+    border: 1px solid var(--karthika-border-light, #eaf0de);
+    border-radius: var(--karthika-radius-sm, 14px);
+  }
+
+  .kdg-address {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--karthika-border-light, #eaf0de);
+  }
+
+  .kdg-address:last-child {
+    border-bottom: 0;
+  }
+
+  .kdg-address.is-selected {
+    background: var(--karthika-red-subtle, #eaf4de);
+  }
+
+  .kdg-address__choose {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    cursor: pointer;
+  }
+
+  .kdg-address__choose small p {
+    margin: 4px 0 0;
+  }
+
+  .kdg-address__actions {
+    display: flex;
+    gap: 14px;
+    margin: 8px 0 0 28px;
+  }
+
+  .kdg-address__editor {
+    margin-top: 12px;
+  }
+
+  .kdg-onetime {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .kdg-error {
+    margin: 14px 0 0;
+    color: #b42318;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .kdg textarea {
+    width: 100%;
+    min-height: 88px;
+    padding: 12px 13px;
+    border: 1px solid var(--karthika-border, #e1e8d3);
+    border-radius: var(--karthika-radius-xs, 8px);
+    resize: vertical;
+    font: inherit;
+  }
+
+  @media screen and (min-width: 750px) {
+    .kdg__types,
+    .kdg__methods {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Delivery & Gift",
+  "tag": "section",
+  "class": "section",
+  "enabled_on": {
+    "templates": ["cart"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Delivery & Gift"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Choose who this order is for, pick an address, and select a delivery method before you place the order."
+    },
+    {
+      "type": "range",
+      "id": "gift_message_max",
+      "min": 50,
+      "max": 500,
+      "step": 10,
+      "label": "Gift message character limit",
+      "default": 250
+    }
+  ],
+  "blocks": [
+    {
+      "type": "delivery_method",
+      "name": "Delivery method",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Name",
+          "default": "Standard"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Estimated time",
+          "default": "2–4 days"
+        },
+        {
+          "type": "text",
+          "id": "price",
+          "label": "Price label",
+          "default": "Free"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Delivery & Gift",
+      "blocks": [
+        {
+          "type": "delivery_method",
+          "settings": {
+            "title": "Standard",
+            "subtitle": "2–4 days",
+            "price": "Free"
+          }
+        },
+        {
+          "type": "delivery_method",
+          "settings": {
+            "title": "Express",
+            "subtitle": "Same day / next day",
+            "price": "From checkout"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

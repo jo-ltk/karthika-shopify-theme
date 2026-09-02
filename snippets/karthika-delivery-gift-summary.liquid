@@ -1,0 +1,94 @@
+{% doc %}
+  Compact delivery and gift summary for the cart drawer.
+  @param {string} [form_id] - Cart form id for hidden attribute inputs
+  @example
+  {% render 'karthika-delivery-gift-summary', form_id: 'CartDrawer-Form' %}
+{% enddoc %}
+
+{%- liquid
+  assign form_id = form_id | default: 'CartDrawer-Form'
+  assign delivery_type = cart.attributes['Delivery type']
+  assign delivery_method = cart.attributes['Delivery method']
+  assign delivery_address = cart.attributes['Delivery address']
+  assign recipient_name = cart.attributes['Recipient name']
+-%}
+
+<script src="{{ 'karthika-delivery-gift.js' | asset_url }}" defer="defer"></script>
+
+<karthika-delivery-gift
+  class="kdg kdg--compact{% if cart == empty %} is-empty{% endif %}"
+  data-compact="true"
+  data-form-id="{{ form_id }}"
+>
+  <div class="kdg-summary">
+    <div class="kdg-summary__copy">
+      <strong>{{ 'sections.delivery_gift.title' | t }}</strong>
+      {%- if delivery_address != blank -%}
+        <small>
+          {%- if delivery_type == 'Gift' -%}
+            {{ 'sections.delivery_gift.gift_to' | t: name: recipient_name }}
+          {%- else -%}
+            {{ 'sections.delivery_gift.deliver_to_me' | t }}
+          {%- endif -%}
+          {%- if delivery_method != blank %} · {{ delivery_method | escape }}{% endif %}
+        </small>
+        <small>{{ delivery_address | escape }}</small>
+      {%- else -%}
+        <small>{{ 'sections.delivery_gift.choose_on_cart' | t }}</small>
+      {%- endif -%}
+    </div>
+    <a class="kdg-summary__link" href="{{ routes.cart_url }}#KarthikaDeliveryGift">
+      {{ 'sections.delivery_gift.change' | t }}
+    </a>
+  </div>
+  <input type="hidden" form="{{ form_id }}" name="attributes[Delivery type]" data-kdg-attr="Delivery type" value="{{ delivery_type | escape }}">
+  <input type="hidden" form="{{ form_id }}" name="attributes[Delivery method]" data-kdg-attr="Delivery method" value="{{ delivery_method | escape }}">
+  <input type="hidden" form="{{ form_id }}" name="attributes[Delivery address]" data-kdg-attr="Delivery address" value="{{ delivery_address | escape }}">
+  <input type="hidden" form="{{ form_id }}" name="attributes[Recipient name]" data-kdg-attr="Recipient name" value="{{ recipient_name | escape }}">
+  <input type="hidden" form="{{ form_id }}" name="attributes[Recipient phone]" data-kdg-attr="Recipient phone" value="{{ cart.attributes['Recipient phone'] | escape }}">
+  <input type="hidden" form="{{ form_id }}" name="attributes[Gift message]" data-kdg-attr="Gift message" value="{{ cart.attributes['Gift message'] | escape }}">
+</karthika-delivery-gift>
+
+{% stylesheet %}
+  .kdg--compact {
+    margin: 0 0 12px;
+  }
+
+  karthika-delivery-gift.is-empty {
+    display: none;
+  }
+
+  .kdg-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 14px;
+    border: 1px solid var(--karthika-border, #e1e8d3);
+    border-radius: var(--karthika-radius-sm, 14px);
+    background: #fff;
+  }
+
+  .kdg-summary__copy {
+    display: grid;
+    gap: 3px;
+  }
+
+  .kdg-summary__copy strong {
+    font-size: 13px;
+  }
+
+  .kdg-summary__copy small {
+    color: var(--karthika-text-muted, #5c6b52);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .kdg-summary__link {
+    color: var(--karthika-red, #3f7d2e);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+{% endstylesheet %}

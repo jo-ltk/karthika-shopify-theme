@@ -1,7 +1,7 @@
 <div class="karthika-auth-page">
   <div class="karthika-auth-hero karthika-auth-hero--compact">
     <a class="karthika-auth-back" href="{{ routes.account_login_url }}" aria-label="Back to login">&larr;</a>
-    <div class="karthika-auth-brand"><strong>Karthika</strong><small>Supermarket</small></div>
+    <div class="karthika-auth-brand">{% render 'karthika-logo', class: 'karthika-logo--auth', loading: 'eager' %}</div>
   </div>
   <section class="karthika-auth-panel" aria-labelledby="KarthikaRegisterTitle">
     <h1 id="KarthikaRegisterTitle">Create your account</h1>

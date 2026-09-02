@@ -1,0 +1,26 @@
+{% doc %}
+  Renders the updated Karthika Supermarket logo.
+
+  @param {string} [class] - Extra CSS class for the image
+  @param {string} [loading] - Image loading attribute. Defaults to lazy.
+
+  @example
+  {% render 'karthika-logo', class: 'karthika-logo--nav', loading: 'eager' %}
+{% enddoc %}
+
+{%- liquid
+  assign logo_class = 'karthika-logo'
+  if class != blank
+    assign logo_class = logo_class | append: ' ' | append: class
+  endif
+  assign logo_loading = loading | default: 'lazy'
+-%}
+
+<img
+  class="{{ logo_class }}"
+  src="{{ 'karthika-logo.png' | asset_url }}"
+  alt="{{ shop.name | escape }}"
+  width="198"
+  height="73"
+  loading="{{ logo_loading }}"
+>

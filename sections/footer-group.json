@@ -15,6 +15,13 @@
       "type": "footer",
       "settings": {
         "color_scheme": "scheme-4",
+        "show_store_contact": true,
+        "helpline_heading": "Helpline",
+        "helpline_phone": "(65) 6297 7533",
+        "fax_number": "(65) 62977511",
+        "contact_email": "grocery@karthika.sg",
+        "store_address": "34, Buffalo Road Singapore 219796",
+        "gst_number": "200311912H",
         "newsletter_enable": false,
         "newsletter_heading": "Subscribe to our emails",
         "enable_follow_on_shop": false,

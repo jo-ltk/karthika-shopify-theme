@@ -11,6 +11,11 @@
    ========================================================================== */
 
 :root {
+  /* ---- Brand colors from the updated logo ---- */
+  --karthika-maroon: #6E1A2A;
+  --karthika-maroon-hover: #581521;
+  --karthika-gold: #F5C400;
+
   /* ---- Primary palette (brand action color) ---- */
   --karthika-red: #3F7D2E;
   --karthika-red-hover: #336524;
@@ -255,8 +260,11 @@ textarea {
   }
 
   .karthika-desktop-header__brand {
-    flex: 0 0 250px;
-    color: #b40000;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    max-width: 180px;
+    color: var(--karthika-maroon);
     font-size: 24px;
     font-weight: 800;
     letter-spacing: -.03em;
@@ -264,16 +272,17 @@ textarea {
     text-decoration: none;
   }
 
-  .karthika-desktop-header__brand img {
+  .karthika-desktop-header__brand img,
+  .karthika-logo--nav-desktop {
     display: block;
     width: auto;
-    max-width: 180px;
-    height: 42px;
+    max-width: 168px;
+    height: 56px;
     object-fit: contain;
   }
 
   .karthika-desktop-header__brand span {
-    color: #ffd200;
+    color: var(--karthika-gold);
   }
 
   .karthika-desktop-header__nav {
@@ -300,7 +309,7 @@ textarea {
     bottom: 22px;
     left: 0;
     height: 2px;
-    background: #b40000;
+    background: var(--karthika-maroon);
     content: '';
   }
 
@@ -332,8 +341,8 @@ textarea {
   }
 
   .karthika-desktop-header__search:hover {
-    border-color: #b40000;
-    color: #b40000;
+    border-color: var(--karthika-maroon);
+    color: var(--karthika-maroon);
     background: #fafafa;
   }
 
@@ -344,7 +353,7 @@ textarea {
     left: 16px;
     right: 16px;
     height: 2px;
-    background: #b40000;
+    background: var(--karthika-maroon);
     border-radius: 2px;
     opacity: 0;
     transform: scaleX(0.5);
@@ -366,7 +375,7 @@ textarea {
   }
 
   .karthika-desktop-header__search:hover .karthika-desktop-search-icon {
-    color: #b40000;
+    color: var(--karthika-maroon);
   }
 
   .karthika-desktop-header__search .karthika-search-placeholder-text {
@@ -391,7 +400,7 @@ textarea {
     min-width: 126px;
     height: 46px;
     border-radius: 24px;
-    background: #b40000;
+    background: var(--karthika-maroon);
     color: #ffffff;
     font-size: 13px;
     font-weight: 700;
@@ -416,7 +425,7 @@ textarea {
     width: 17px;
     height: 17px;
     border-radius: 50%;
-    background: #ffd200;
+    background: var(--karthika-gold);
     color: #111111;
     font-size: 10px;
   }
@@ -452,18 +461,36 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
   min-height: 44px;
   margin-bottom: 0;
 }
 
+.karthika-mobile-header__logo {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.karthika-mobile-header__logo img,
+.karthika-logo--nav-mobile {
+  display: block;
+  width: auto;
+  height: 36px;
+  max-width: 98px;
+  object-fit: contain;
+}
+
 .karthika-delivery-strip {
   display: flex;
   align-items: center;
-  flex: 1;
+  width: 100%;
   min-width: 0;
-  gap: 9px;
+  min-height: 26px;
+  gap: 6px;
+  margin: 2px 0 4px;
   padding: 0;
   background: transparent;
   border: 0;
@@ -472,44 +499,55 @@ textarea {
   user-select: none;
 }
 
+.karthika-delivery-strip:focus-visible {
+  outline: 2px solid #2775D9;
+  outline-offset: 2px;
+}
+
 .karthika-delivery-copy {
   display: flex;
   flex: 1;
   min-width: 0;
-  flex-direction: column;
-  gap: 0px;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
 }
 
 .karthika-delivery-pin {
-  width: 25px;
-  height: 25px;
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
   color: #2775D9;
 }
 
 .karthika-delivery-label {
-  color: var(--karthika-red);
+  flex-shrink: 0;
+  color: #6B7280;
   font-size: 11px;
-  font-weight: 700;
-  line-height: 1.2;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: lowercase;
 }
 
 .karthika-delivery-address {
   display: block;
-  color: var(--karthika-text-dark);
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.2;
+  min-width: 0;
+  color: #171717;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: lowercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .karthika-delivery-caret {
-  width: 18px;
-  height: 18px;
-  color: var(--karthika-text-muted);
+  width: 12px;
+  height: 12px;
+  color: #8B9481;
   stroke-width: 2.5;
   flex-shrink: 0;
 }
@@ -4094,9 +4132,12 @@ textarea {
 }
 
 .kas-brand__logo-img {
-  max-width: 160px;
+  max-width: 170px;
   height: auto;
-  filter: brightness(0) invert(1);
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
 }
 
 .kas-brand__wordmark {
@@ -4332,7 +4373,7 @@ textarea {
 .karthika-auth-hero--compact { min-height: 30svh; }
 .karthika-auth-back, .karthika-account-page__back { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 16px); left: 16px; display: grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; background: rgba(255,255,255,.18); color: inherit; font-size: 24px; text-decoration: none; }
 .karthika-auth-brand { position: relative; z-index: 1; display: grid; place-items: center; gap: 4px; text-align: center; }
-.karthika-auth-brand img { width: min(170px, 55vw); height: auto; filter: brightness(0) invert(1); }
+.karthika-auth-brand img { width: min(180px, 58vw); height: auto; background: #fff; border-radius: 8px; padding: 4px; box-shadow: 0 4px 16px rgba(0,0,0,.16); }
 .karthika-auth-brand strong { font-size: 48px; font-weight: 800; line-height: 1; }.karthika-auth-brand small { font-size: 13px; font-weight: 600; letter-spacing: 1.8px; text-transform: uppercase; opacity: .84; }
 .karthika-auth-decor span { position: absolute; color: rgba(255,255,255,.2); font-size: 30px; font-weight: 800; text-transform: uppercase; transform: rotate(-22deg); }.karthika-auth-decor span:nth-child(1){top:16%;left:-12px}.karthika-auth-decor span:nth-child(2){top:22%;right:-12px;transform:rotate(20deg)}.karthika-auth-decor span:nth-child(3){right:-6px;bottom:12%;transform:rotate(-18deg)}
 .karthika-auth-panel { position: relative; z-index: 2; min-height: 58svh; margin-top: -48px; padding: 30px 20px calc(env(safe-area-inset-bottom, 0px) + 92px); border-radius: 28px 28px 0 0; background: #fff; color: var(--karthika-text-dark); box-shadow: 0 -8px 32px rgba(7,85,245,.14); }

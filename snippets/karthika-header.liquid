@@ -67,11 +67,7 @@
   </div>
   <div class="karthika-desktop-header__main">
     <a href="{{ home_url }}" class="karthika-desktop-header__brand" aria-label="{{ shop.name }}">
-      {%- if settings.logo != blank -%}
-        <img src="{{ settings.logo | image_url: width: 240 }}" alt="{{ shop.name | escape }}" width="120" height="42" loading="eager">
-      {%- else -%}
-        KARTHIKA<span>.</span>
-      {%- endif -%}
+      {% render 'karthika-logo', class: 'karthika-logo--nav-desktop', loading: 'eager' %}
     </a>
     <nav class="karthika-desktop-header__nav" aria-label="Main navigation">
       <a href="{{ home_url }}"{% if is_home %} class="is-active" aria-current="page"{% endif %}>Home</a>
@@ -104,18 +100,9 @@
 
 <header class="karthika-mobile-header" role="banner">
   <div class="karthika-header-row">
-    <div class="karthika-delivery-strip karthika-change-location-btn" role="button" tabindex="0" aria-label="Change delivery location">
-      <svg class="karthika-delivery-pin" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-      </svg>
-      <span class="karthika-delivery-copy">
-        <span class="karthika-delivery-label">LAMPINES CENTRAL</span>
-        <span class="karthika-delivery-address">Singapore 520123</span>
-      </span>
-      <svg class="karthika-delivery-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    </div>
+    <a href="{{ home_url }}" class="karthika-mobile-header__logo" aria-label="{{ shop.name }}">
+      {% render 'karthika-logo', class: 'karthika-logo--nav-mobile', loading: 'eager' %}
+    </a>
 
     <div class="karthika-header-icons">
       <button
@@ -154,6 +141,19 @@
       </a>
       {% endif %}
     </div>
+  </div>
+
+  <div class="karthika-delivery-strip karthika-change-location-btn" role="button" tabindex="0" aria-label="Change delivery location">
+    <svg class="karthika-delivery-pin" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+    </svg>
+    <span class="karthika-delivery-copy">
+      <span class="karthika-delivery-label">delivering to</span>
+      <span class="karthika-delivery-address">lampines central, singapore 520123</span>
+    </span>
+    <svg class="karthika-delivery-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
   </div>
 
   {%- liquid

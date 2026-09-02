@@ -81,7 +81,13 @@
 
                 <div class="totals totals--shipping">
                   <h2 class="totals__total">Delivery</h2>
-                  <p class="totals__total-value">Calculated at checkout</p>
+                  <p class="totals__total-value" data-kdg-footer-method data-fallback="Calculated at checkout">
+                    {%- if cart.attributes['Delivery method'] != blank -%}
+                      {{ cart.attributes['Delivery method'] | escape }}
+                    {%- else -%}
+                      Calculated at checkout
+                    {%- endif -%}
+                  </p>
                 </div>
 
                 <div class="totals totals--grand">

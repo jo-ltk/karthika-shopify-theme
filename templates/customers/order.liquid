@@ -1,0 +1,135 @@
+<div class="karthika-account-page karthika-order-page">
+  <header class="karthika-account-page__header">
+    <a class="karthika-account-page__back" href="{{ routes.account_url }}" aria-label="{{ 'customer.account.title' | t }}">&larr;</a>
+    {%- assign order_date = order.created_at | date: '%d %b %Y' -%}
+    <div>
+      <p>{{ 'customer.order.date_html' | t: date: order_date }}</p>
+      <h1>{{ 'customer.order.title' | t: name: order.name }}</h1>
+    </div>
+  </header>
+
+  {%- liquid
+    assign delivery_type = ''
+    assign delivery_method = ''
+    assign delivery_address = ''
+    assign recipient_name = ''
+    assign recipient_phone = ''
+    assign gift_message = ''
+    for attribute in order.note_attributes
+      if attribute.first == 'Delivery type'
+        assign delivery_type = attribute.last
+      elsif attribute.first == 'Delivery method'
+        assign delivery_method = attribute.last
+      elsif attribute.first == 'Delivery address'
+        assign delivery_address = attribute.last
+      elsif attribute.first == 'Recipient name'
+        assign recipient_name = attribute.last
+      elsif attribute.first == 'Recipient phone'
+        assign recipient_phone = attribute.last
+      elsif attribute.first == 'Gift message'
+        assign gift_message = attribute.last
+      endif
+    endfor
+  -%}
+
+  {%- if delivery_type != blank or delivery_method != blank or gift_message != blank -%}
+    <section class="karthika-account-section" aria-labelledby="KarthikaDeliveryTitle">
+      <div class="karthika-account-section__heading">
+        <h2 id="KarthikaDeliveryTitle">{{ 'customer.order.delivery_gift' | t }}</h2>
+      </div>
+      <div class="karthika-order-list">
+        <article class="karthika-order-card">
+          {%- if delivery_type != blank -%}
+            <div>
+              <strong>{{ 'customer.order.delivery_type' | t }}</strong>
+              <span>{{ delivery_type | escape }}</span>
+            </div>
+          {%- endif -%}
+          {%- if delivery_method != blank -%}
+            <div>
+              <strong>{{ 'customer.order.delivery_method' | t }}</strong>
+              <span>{{ delivery_method | escape }}</span>
+            </div>
+          {%- endif -%}
+          {%- if delivery_address != blank -%}
+            <div>
+              <strong>{{ 'customer.order.delivery_address' | t }}</strong>
+              <span>{{ delivery_address | escape }}</span>
+            </div>
+          {%- endif -%}
+          {%- if recipient_name != blank -%}
+            <div>
+              <strong>{{ 'customer.order.recipient_name' | t }}</strong>
+              <span>{{ recipient_name | escape }}</span>
+            </div>
+          {%- endif -%}
+          {%- if recipient_phone != blank -%}
+            <div>
+              <strong>{{ 'customer.order.recipient_phone' | t }}</strong>
+              <span>{{ recipient_phone | escape }}</span>
+            </div>
+          {%- endif -%}
+          {%- if gift_message != blank -%}
+            <div>
+              <strong>{{ 'customer.order.gift_message' | t }}</strong>
+              <span>{{ gift_message | escape }}</span>
+            </div>
+          {%- endif -%}
+        </article>
+      </div>
+    </section>
+  {%- endif -%}
+
+  <section class="karthika-account-section">
+    <div class="karthika-account-section__heading">
+      <h2>{{ 'customer.order.product' | t }}</h2>
+      <span>{{ order.financial_status_label }} · {{ order.fulfillment_status_label }}</span>
+    </div>
+    <div class="karthika-order-list">
+      {%- for line_item in order.line_items -%}
+        <article class="karthika-order-card">
+          <div>
+            <strong>{{ line_item.title | escape }}</strong>
+            <span>{{ 'customer.order.quantity' | t }} {{ line_item.quantity }}</span>
+          </div>
+          <div>
+            <span>{{ line_item.final_line_price | money }}</span>
+          </div>
+        </article>
+      {%- endfor -%}
+      <article class="karthika-order-card">
+        <div><strong>{{ 'customer.order.subtotal' | t }}</strong></div>
+        <div><span>{{ order.subtotal_price | money }}</span></div>
+      </article>
+      {%- if order.shipping_price > 0 -%}
+        <article class="karthika-order-card">
+          <div><strong>{{ 'customer.order.shipping' | t }}</strong></div>
+          <div><span>{{ order.shipping_price | money }}</span></div>
+        </article>
+      {%- endif -%}
+      <article class="karthika-order-card">
+        <div><strong>{{ 'customer.order.total' | t }}</strong></div>
+        <div><span>{{ order.total_price | money }}</span></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="karthika-account-section">
+    <div class="karthika-account-section__heading">
+      <h2>{{ 'customer.order.shipping_address' | t }}</h2>
+    </div>
+    <div class="karthika-order-list">
+      <article class="karthika-order-card">
+        <div>
+          {%- if order.shipping_address -%}
+            {{ order.shipping_address | format_address }}
+          {%- elsif delivery_address != blank -%}
+            <span>{{ delivery_address | escape }}</span>
+          {%- else -%}
+            <span>{{ order.billing_address | format_address }}</span>
+          {%- endif -%}
+        </div>
+      </article>
+    </div>
+  </section>
+</div>

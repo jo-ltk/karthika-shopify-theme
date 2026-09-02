@@ -21,7 +21,15 @@
         {% for order in customer.orders %}
           <article class="karthika-order-card">
             <div><strong>{{ order.name }}</strong><span>{{ order.created_at | date: '%d %b %Y' }}</span></div>
-            <div><span>{{ order.total_price | money }}</span><span class="karthika-order-card__status">{{ order.fulfillment_status_label | default: order.financial_status }}</span></div>
+            <div>
+              <span>{{ order.total_price | money }}</span>
+              <span class="karthika-order-card__status">{{ order.fulfillment_status_label | default: order.financial_status }}</span>
+              {%- for attribute in order.note_attributes -%}
+                {%- if attribute.first == 'Delivery type' and attribute.last == 'Gift' -%}
+                  <span class="karthika-order-card__status">{{ 'customer.order.delivery_gift' | t }}</span>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
             <a href="{{ order.customer_url }}">View order <span aria-hidden="true">&rarr;</span></a>
           </article>
         {% else %}
@@ -35,14 +43,14 @@
   <section class="karthika-account-section" aria-labelledby="KarthikaAccountToolsTitle">
     <div class="karthika-account-section__heading"><h2 id="KarthikaAccountToolsTitle">Account</h2></div>
     <div class="karthika-account-menu">
-      <a href="{{ routes.account_addresses_url }}" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-map-pin.svg' | asset_url }}" alt=""></span><span><strong>Saved Addresses</strong><small>Manage delivery addresses</small></span><b aria-hidden="true">&rsaquo;</b></a>
-      <a href="{{ routes.all_products_collection_url }}" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-price-tag.svg' | asset_url }}" alt=""></span><span><strong>Offers &amp; Coupons</strong><small>Browse current store offers</small></span><b aria-hidden="true">&rsaquo;</b></a>
-      <a href="/pages/contact" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-chat-bubble.svg' | asset_url }}" alt=""></span><span><strong>Help &amp; Support</strong><small>Contact the Karthika team</small></span><b aria-hidden="true">&rsaquo;</b></a>
-      <a href="/policies/privacy-policy" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-lock.svg' | asset_url }}" alt=""></span><span><strong>Privacy &amp; Security</strong><small>Read our privacy policy</small></span><b aria-hidden="true">&rsaquo;</b></a>
-      <div class="karthika-account-menu__row is-unavailable" aria-disabled="true"><span class="karthika-account-menu__icon"><img src="{{ 'icon-heart.svg' | asset_url }}" alt=""></span><span><strong>Wishlist</strong><small>Not available yet</small></span></div>
-      <div class="karthika-account-menu__row is-unavailable" aria-disabled="true"><span class="karthika-account-menu__icon"><img src="{{ 'icon-cart.svg' | asset_url }}" alt=""></span><span><strong>Payment Methods</strong><small>Managed securely at checkout</small></span></div>
-      <div class="karthika-account-menu__row is-unavailable" aria-disabled="true"><span class="karthika-account-menu__icon"><img src="{{ 'icon-star.svg' | asset_url }}" alt=""></span><span><strong>Karthika Rewards</strong><small>Not available yet</small></span></div>
-      <a href="{{ routes.account_logout_url }}" class="karthika-account-menu__row karthika-account-menu__row--logout"><span class="karthika-account-menu__icon"><img src="{{ 'icon-return.svg' | asset_url }}" alt=""></span><span><strong>Logout</strong><small>Sign out of this device</small></span><b aria-hidden="true">&rsaquo;</b></a>
+      <a href="{{ routes.account_addresses_url }}" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-map-pin.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Saved Addresses</strong><small>Manage delivery addresses</small></span><b aria-hidden="true">&rsaquo;</b></a>
+      <a href="{{ routes.all_products_collection_url }}" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-price-tag.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Offers &amp; Coupons</strong><small>Browse current store offers</small></span><b aria-hidden="true">&rsaquo;</b></a>
+      <a href="/pages/contact" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-chat-bubble.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Help &amp; Support</strong><small>Contact the Karthika team</small></span><b aria-hidden="true">&rsaquo;</b></a>
+      <a href="/policies/privacy-policy" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-lock.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Privacy &amp; Security</strong><small>Read our privacy policy</small></span><b aria-hidden="true">&rsaquo;</b></a>
+      <div class="karthika-account-menu__row is-unavailable" aria-disabled="true"><span class="karthika-account-menu__icon"><img src="{{ 'icon-heart.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Wishlist</strong><small>Not available yet</small></span></div>
+      <div class="karthika-account-menu__row is-unavailable" aria-disabled="true"><span class="karthika-account-menu__icon"><img src="{{ 'icon-cart.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Payment Methods</strong><small>Managed securely at checkout</small></span></div>
+      <div class="karthika-account-menu__row is-unavailable" aria-disabled="true"><span class="karthika-account-menu__icon"><img src="{{ 'icon-star.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Karthika Rewards</strong><small>Not available yet</small></span></div>
+      <a href="{{ routes.account_logout_url }}" class="karthika-account-menu__row karthika-account-menu__row--logout"><span class="karthika-account-menu__icon"><img src="{{ 'icon-return.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Logout</strong><small>Sign out of this device</small></span><b aria-hidden="true">&rsaquo;</b></a>
     </div>
   </section>
 </div>

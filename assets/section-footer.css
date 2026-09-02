@@ -835,7 +835,7 @@
 
 .footer__copyright-text a:hover {
   text-decoration: underline;
-  color: #3F7D2E;
+  color: var(--karthika-maroon, #6E1A2A);
 }
 
 .footer .policies {
@@ -861,13 +861,13 @@
 
 .footer .policies li:not(:last-child)::after {
   content: '•';
-  color: #3F7D2E;
+  color: var(--karthika-maroon, #6E1A2A);
   margin-left: 1.6rem;
   font-size: 1.2rem;
 }
 
 .footer .policies li a {
-  color: #3F7D2E;
+  color: var(--karthika-maroon, #6E1A2A);
   font-size: 1.35rem;
   font-weight: 500;
   text-decoration: none;
@@ -906,5 +906,144 @@
 
   .footer__payment .list-payment {
     gap: 0.8rem;
+  }
+}
+
+.footer-store-contact {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.8fr);
+  gap: 2.4rem 4rem;
+  align-items: start;
+  padding: 0.4rem 0 3.2rem;
+}
+
+.footer-store-contact__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.2rem;
+}
+
+.footer-store-contact__logo {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.footer-store-contact__logo img,
+.karthika-logo--footer {
+  display: block;
+  width: auto;
+  height: 64px;
+  max-width: 180px;
+  object-fit: contain;
+}
+
+.footer-store-contact__address {
+  margin: 0;
+  font-style: normal;
+  font-size: 1.45rem;
+  line-height: 1.5;
+  color: #3d3d3d;
+}
+
+.footer-store-contact__gst {
+  margin: 0;
+  font-size: 1.3rem;
+  line-height: 1.45;
+  color: #5c5c5c;
+}
+
+.footer-store-contact__gst span {
+  font-weight: 700;
+  color: #171717;
+}
+
+.footer-store-contact__helpline {
+  background: #6e1a2a;
+  color: #ffffff !important;
+  border-radius: 20px;
+  padding: 2.2rem 2.4rem;
+  box-shadow: 0 8px 24px rgba(110, 26, 42, 0.18);
+}
+
+.footer-store-contact__kicker {
+  margin: 0 0 0.8rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f5c400 !important;
+}
+
+.footer-store-contact__phone {
+  display: block;
+  margin: 0 0 1.2rem;
+  color: #f5c400 !important;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.footer-store-contact__phone span {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.footer-store-contact__phone:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+
+.footer-store-contact__meta,
+.footer-store-contact__email {
+  margin: 0 0 0.6rem;
+  display: block;
+  color: #ffffff !important;
+  font-size: 1.35rem;
+  line-height: 1.45;
+  text-decoration: none;
+}
+
+.footer-store-contact__meta span,
+.footer-store-contact__email span {
+  font-weight: 700;
+  color: #f5c400 !important;
+  margin-right: 0.4rem;
+}
+
+.footer-store-contact__email:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+@media screen and (max-width: 749px) {
+  .footer-store-contact {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding-bottom: 2.4rem;
+  }
+
+  .footer-store-contact__brand,
+  .footer-store-contact__helpline {
+    text-align: left;
+  }
+
+  .footer-store-contact__logo img,
+  .karthika-logo--footer {
+    height: 52px;
+    max-width: 150px;
+  }
+
+  .footer-store-contact__helpline {
+    padding: 1.8rem 1.8rem;
+  }
+
+  .footer-store-contact__phone {
+    font-size: 1.8rem;
   }
 }
