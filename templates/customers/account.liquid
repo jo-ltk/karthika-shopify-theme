@@ -1,20 +1,15 @@
 {%- unless request.design_mode -%}
   <script>
     (function () {
-      var home = {{ routes.root_url | default: '/' | json }};
-      var ref = document.referrer || '';
+      // Only bounce the one-shot post-login landing. Do NOT use document.referrer —
+      // that was also kicking people off /account when they opened Profile on purpose.
       var fromLogin = false;
       try {
         fromLogin = sessionStorage.getItem('karthikaReturnHome') === '1';
         if (fromLogin) sessionStorage.removeItem('karthikaReturnHome');
       } catch (err) {}
-      if (
-        fromLogin ||
-        /\/account\/login/i.test(ref) ||
-        /\/customer_authentication/i.test(ref) ||
-        /accounts\.shopify\.com/i.test(ref)
-      ) {
-        window.location.replace(home);
+      if (fromLogin) {
+        window.location.replace({{ routes.root_url | default: '/' | json }});
       }
     })();
   </script>
