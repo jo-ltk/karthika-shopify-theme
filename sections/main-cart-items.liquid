@@ -50,7 +50,8 @@
       {%- if shop.customer_accounts_enabled and customer == null -%}
         <h2 class="cart__login-title">{{ 'sections.cart.login.title' | t }}</h2>
         <p class="cart__login-paragraph">
-          {{ 'sections.cart.login.paragraph_html' | t: link: routes.account_login_url }}
+          {%- capture karthika_login_home_url -%}{% render 'karthika-login-home' %}{%- endcapture -%}
+          {{ 'sections.cart.login.paragraph_html' | t: link: karthika_login_home_url }}
         </p>
       {%- endif -%}
     </div>

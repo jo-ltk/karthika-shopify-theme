@@ -97,7 +97,7 @@
       <div class="kdg__row">
         <h3 class="kdg__subtitle">{{ 'sections.delivery_gift.address_title' | t }}</h3>
         {%- if customer == nil -%}
-          <a class="kdg__link" href="{{ routes.account_login_url }}">{{ 'sections.delivery_gift.login_to_save' | t }}</a>
+          <a class="kdg__link" href="{% render 'karthika-login-home' %}">{{ 'sections.delivery_gift.login_to_save' | t }}</a>
         {%- endif -%}
       </div>
 

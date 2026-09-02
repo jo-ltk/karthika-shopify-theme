@@ -1,3 +1,24 @@
+{%- unless request.design_mode -%}
+  <script>
+    (function () {
+      var home = {{ routes.root_url | default: '/' | json }};
+      var ref = document.referrer || '';
+      var fromLogin = false;
+      try {
+        fromLogin = sessionStorage.getItem('karthikaReturnHome') === '1';
+        if (fromLogin) sessionStorage.removeItem('karthikaReturnHome');
+      } catch (err) {}
+      if (
+        fromLogin ||
+        /\/account\/login/i.test(ref) ||
+        /\/customer_authentication/i.test(ref) ||
+        /accounts\.shopify\.com/i.test(ref)
+      ) {
+        window.location.replace(home);
+      }
+    })();
+  </script>
+{%- endunless -%}
 <div class="karthika-account-page">
   <header class="karthika-account-page__header">
     <a class="karthika-account-page__back" href="{{ routes.root_url }}" aria-label="Back to home">&larr;</a>

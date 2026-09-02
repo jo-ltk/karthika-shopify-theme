@@ -6,7 +6,7 @@
 
 <nav class="karthika-bottom-nav" aria-label="Mobile Navigation">
   <!-- 1. Home -->
-  <a href="{{ routes.root_url }}" class="karthika-nav-item {% if template.name == 'index' %}is-active{% endif %}">
+  <a href="{{ routes.root_url | default: '/' }}" class="karthika-nav-item {% if template.name == 'index' %}is-active{% endif %}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
       <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"></path>
     </svg>
@@ -47,7 +47,7 @@
   </a>
 
   <!-- 5. Account -->
-  <a href="{% if customer %}{{ routes.account_url }}{% else %}#karthika-account-screen{% endif %}" class="karthika-nav-item karthika-account-trigger {% if request.path contains '/account' %}is-active{% endif %}" data-account-href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" data-customer-state="{% if customer %}signed-in{% else %}guest{% endif %}" aria-label="Account" aria-haspopup="dialog">
+  <a href="{% if customer %}{{ routes.account_url }}{% else %}#karthika-account-screen{% endif %}" class="karthika-nav-item karthika-account-trigger {% if request.path contains '/account' %}is-active{% endif %}" data-account-href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{% render 'karthika-login-home' %}{%- endif -%}" data-customer-state="{% if customer %}signed-in{% else %}guest{% endif %}" aria-label="Account" aria-haspopup="dialog">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
       <circle cx="12" cy="7" r="4"></circle>

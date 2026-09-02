@@ -1,338 +1,351 @@
 {%- comment -%}
-  Karthika Supermarket — "Order Again" Section
-  ─────────────────────────────────────────────
-  Renders a personalized horizontal-scroll row of grocery category cards,
-  each showing up to 4 product images from the customer's previous orders.
-
-  STATE HIERARCHY
-  ───────────────
-  1. Customer logged in + has orders
-       → Group ordered products by category tag → render live cards
-  2. Customer logged in + no orders  OR  customer data unavailable
-       → Fall through to demo blocks (if enable_demo_mode = true)
-  3. Guest (not logged in) + demo enabled
-       → Render demo blocks
-  4. Guest + demo disabled
-       → Render sign-in prompt (if show_guest_prompt = true)
-       → Or hide section entirely
-
-  CATEGORY GROUPING (for real order data)
-  ────────────────────────────────────────
-  Each line-item product is tested against a tag keyword list.
-  If no keyword matches, product falls back to its Shopify product_type.
-  Unmatched products are silently skipped to keep the UI clean.
-
-  DEMO MODE
-  ─────────
-  Uses real Shopify products configured as blocks in the theme editor.
-  Up to 4 products per block are shown in the image grid.
-  
-
-  LIQUID COMPATIBILITY NOTES
-  ──────────────────────────
-  • Shopify Liquid does NOT support `break` or `continue`/`next` inside
-    {% liquid %} tag blocks in the same way — we use flag variables instead.
-  • `all_products[handle]` requires a string handle; product block settings
-    return the product object directly via block.settings.product_N.
-  • `customer.orders` returns up to 20 orders on the storefront.
+  Karthika — Order Again
+  Logged out: compact sign-in poster.
+  Logged in with orders: reorder cards grouped from previous purchases.
+  Logged in without orders: hide the section.
 {%- endcomment -%}
 
 {%- liquid
-  assign kor_heading = 'Melbin, order again'
-  if customer and customer.first_name != blank
-    assign kor_heading = customer.first_name | append: ', order again'
+  assign kor_is_guest = true
+  if customer
+    assign kor_is_guest = false
   endif
+
+  assign kor_favourites = 'sections.order_again.favourites' | t
+  assign kor_cats = ''
+  assign kor_cat_count = 0
+
+  if customer
+    for order in customer.orders
+      if order.cancelled_at == blank
+        for item in order.line_items
+          unless item.product == blank or item.gift_card
+            assign ptype = item.product.type
+            if ptype == blank and item.product.collections.size > 0
+              assign ptype = item.product.collections.first.title
+            endif
+            if ptype == blank
+              assign ptype = kor_favourites
+            endif
+            assign cat_token = ptype | prepend: '|' | append: '|'
+            unless kor_cats contains cat_token
+              if kor_cat_count < 8
+                assign kor_cats = kor_cats | append: cat_token
+                assign kor_cat_count = kor_cat_count | plus: 1
+              endif
+            endunless
+          endunless
+        endfor
+      endif
+    endfor
+  endif
+
+  assign kor_has_history = false
+  if kor_cat_count > 0
+    assign kor_has_history = true
+  endif
+
+  assign kor_show_demo = false
+  if request.design_mode and section.settings.enable_demo_mode
+    assign kor_show_demo = true
+  endif
+
+  assign kor_hide = false
+  if kor_is_guest == false and kor_has_history == false and kor_show_demo == false
+    unless request.design_mode
+      assign kor_hide = true
+    endunless
+  endif
+
+  assign kor_heading = 'sections.order_again.title' | t
+  if kor_has_history and customer.first_name != blank
+    assign kor_heading = 'sections.order_again.heading_named' | t: name: customer.first_name
+  endif
+
+  assign kor_see_all = section.settings.see_all_url
+  if kor_see_all == blank and kor_has_history
+    assign kor_see_all = routes.account_url
+  endif
+
+  assign kor_guest_heading = section.settings.guest_heading
+  if kor_guest_heading == blank
+    assign kor_guest_heading = kor_heading
+  endif
+  assign kor_guest_sub = section.settings.guest_subtext
+  if kor_guest_sub == blank
+    assign kor_guest_sub = 'sections.order_again.guest_subtext' | t
+  endif
+  assign kor_guest_btn = section.settings.guest_btn_label
+  if kor_guest_btn == blank
+    assign kor_guest_btn = 'sections.order_again.guest_button' | t
+  endif
+
+  assign kor_palettes = '#E8F8E8|#FFF4E0|#FFE8F2|#E0F0FF|#EDFCE0|#FEF9E0|#FFF0E0|#F0ECF9' | split: '|'
 -%}
 
-<div class="kor-section" id="kor-section-{{ section.id }}">
-  <div class="kor-head">
-    <h2 class="kor-head__title">{{ kor_heading }}</h2>
-    {%- if section.settings.see_all_url != blank -%}
-      <a href="{{ section.settings.see_all_url }}" class="kor-head__link">See all</a>
-    {%- endif -%}
-  </div>
-
-  <div class="kor-scroll-outer">
-    <div
-      class="kor-scroll-track karthika-hide-scrollbar"
-      id="korScrollTrack-{{ section.id }}"
-      role="list"
-      aria-label="Order again categories"
-    >
-      {%- if section.settings.enable_demo_mode and section.blocks.size > 0 -%}
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'demo_category' -%}
-            {%- liquid
-              assign demo_cat_name = block.settings.name | default: 'Category'
-              assign demo_bg = block.settings.bg_color | default: '#EBF4FF'
-              assign demo_col = block.settings.collection
-              assign demo_col_url = routes.all_products_collection_url
-              if demo_col != blank and demo_col.url != blank
-                assign demo_col_url = demo_col.url
-              endif
-              if block.settings.custom_link != blank
-                assign demo_col_url = block.settings.custom_link
-              endif
-
-              assign dp1 = block.settings.product_1
-              assign dp2 = block.settings.product_2
-              assign dp3 = block.settings.product_3
-              assign dp4 = block.settings.product_4
-
-              assign demo_extra = block.settings.extra_count | default: 0
-
-              assign fallback_imgs = ''
-              case demo_cat_name
-                when 'Drinks & Beverages'
-                  assign fallback_imgs = 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1560023907-5f339617ea30?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=200&q=80'
-                when 'Dairy, Bread & Eggs'
-                  assign fallback_imgs = 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=200&q=80'
-                when 'Sweet Tooth'
-                  assign fallback_imgs = 'https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&w=200&q=80'
-                when 'Fresh Fruits'
-                  assign fallback_imgs = 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&w=200&q=80'
-                when 'Vegetables'
-                  assign fallback_imgs = 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=200&q=80'
-                when 'Kerala Favourites'
-                  assign fallback_imgs = 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=200&q=80'
-                else
-                  assign fallback_imgs = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=200&q=80|https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=200&q=80'
-              endcase
-              assign fb_arr = fallback_imgs | split: '|'
-            -%}
-
-            <div
-              class="kor-card"
-              style="--kor-card-bg: {{ demo_bg }};"
-              role="listitem"
-              {{ block.shopify_attributes }}
-            >
-              <a href="{{ demo_col_url }}" class="kor-card__header" aria-label="Shop {{ demo_cat_name }}">
-                <span class="kor-card__title">{{ demo_cat_name }}</span>
-              </a>
-
-              <div class="kor-grid">
-                {%- comment -%}── Slot 1 ──────────────────────────────────{%- endcomment -%}
-                {%- if dp1 != blank and dp1.featured_media -%}
-                  <a href="{{ dp1.url }}" class="kor-grid__cell" aria-label="{{ dp1.title | escape }}">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ dp1.featured_media | image_url: width: 200 }}" alt="{{ dp1.title | escape }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </a>
-                {%- elsif block.settings.image_1 != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ block.settings.image_1 | image_url: width: 200 }}" alt="" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- elsif block.settings.demo_img_1 != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ block.settings.demo_img_1 }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- elsif fb_arr[0] != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ fb_arr[0] }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- else -%}
-                  <div class="kor-grid__cell kor-grid__cell--empty" aria-hidden="true">
-                    <div class="kor-grid__img-wrap kor-grid__img-wrap--empty"></div>
-                  </div>
-                {%- endif -%}
-
-                {%- comment -%}── Slot 2 ──────────────────────────────────{%- endcomment -%}
-                {%- if dp2 != blank and dp2.featured_media -%}
-                  <a href="{{ dp2.url }}" class="kor-grid__cell" aria-label="{{ dp2.title | escape }}">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ dp2.featured_media | image_url: width: 200 }}" alt="{{ dp2.title | escape }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </a>
-                {%- elsif block.settings.image_2 != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ block.settings.image_2 | image_url: width: 200 }}" alt="" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- elsif block.settings.demo_img_2 != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ block.settings.demo_img_2 }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- elsif fb_arr[1] != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ fb_arr[1] }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- else -%}
-                  <div class="kor-grid__cell kor-grid__cell--empty" aria-hidden="true">
-                    <div class="kor-grid__img-wrap kor-grid__img-wrap--empty"></div>
-                  </div>
-                {%- endif -%}
-
-                {%- comment -%}── Slot 3 ──────────────────────────────────{%- endcomment -%}
-                {%- if dp3 != blank and dp3.featured_media -%}
-                  <a href="{{ dp3.url }}" class="kor-grid__cell" aria-label="{{ dp3.title | escape }}">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ dp3.featured_media | image_url: width: 200 }}" alt="{{ dp3.title | escape }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </a>
-                {%- elsif block.settings.image_3 != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ block.settings.image_3 | image_url: width: 200 }}" alt="" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- elsif block.settings.demo_img_3 != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ block.settings.demo_img_3 }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- elsif fb_arr[2] != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ fb_arr[2] }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- else -%}
-                  <div class="kor-grid__cell kor-grid__cell--empty" aria-hidden="true">
-                    <div class="kor-grid__img-wrap kor-grid__img-wrap--empty"></div>
-                  </div>
-                {%- endif -%}
-
-                {%- comment -%}── Slot 4 ──────────────────────────────────{%- endcomment -%}
-                {%- if dp4 != blank and dp4.featured_media -%}
-                  <a href="{{ dp4.url }}" class="kor-grid__cell" aria-label="{{ dp4.title | escape }}">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ dp4.featured_media | image_url: width: 200 }}" alt="{{ dp4.title | escape }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </a>
-                {%- elsif block.settings.image_4 != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ block.settings.image_4 | image_url: width: 200 }}" alt="" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- elsif block.settings.demo_img_4 != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ block.settings.demo_img_4 }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- elsif fb_arr[3] != blank -%}
-                  <div class="kor-grid__cell">
-                    <div class="kor-grid__img-wrap">
-                      <img src="{{ fb_arr[3] }}" alt="{{ demo_cat_name }}" class="kor-grid__img" width="100" height="100" loading="lazy">
-                    </div>
-                  </div>
-                {%- else -%}
-                  <div class="kor-grid__cell kor-grid__cell--empty" aria-hidden="true">
-                    <div class="kor-grid__img-wrap kor-grid__img-wrap--empty"></div>
-                  </div>
-                {%- endif -%}
-              </div>
-
-              {%- if demo_extra > 0 -%}
-                <a href="{{ demo_col_url }}" class="kor-badge" aria-label="{{ demo_extra }} more products">
-                  +{{ demo_extra }}
-                </a>
-              {%- endif -%}
-            </div>
+{%- if kor_hide -%}
+  <style>
+    #shopify-section-{{ section.id }} { display: none !important; }
+  </style>
+{%- else -%}
+  <div class="kor-section" id="kor-section-{{ section.id }}">
+    {%- if kor_is_guest and kor_show_demo == false -%}
+      <div class="kor-poster-wrap">
+        <div class="kor-poster">
+          <div class="kor-poster__art" aria-hidden="true">
+            {%- if section.settings.guest_image != blank -%}
+              <img
+                src="{{ section.settings.guest_image | image_url: width: 240 }}"
+                alt=""
+                width="80"
+                height="80"
+                loading="lazy"
+              >
+            {%- else -%}
+              <span class="kor-poster__art-svg">
+                {{ 'karthika-order-again-art.svg' | inline_asset_content }}
+              </span>
+            {%- endif -%}
+          </div>
+          <div class="kor-poster__copy">
+            <h2 class="kor-poster__title">{{ kor_guest_heading | escape }}</h2>
+            <p class="kor-poster__sub">{{ kor_guest_sub | escape }}</p>
+          </div>
+          {%- capture kor_login_url -%}{% render 'karthika-login-home' %}{%- endcapture -%}
+          <a href="{{ kor_login_url | strip }}" class="kor-poster__btn karthika-login-home-link">
+            {{ kor_guest_btn | escape }}
+          </a>
+        </div>
+      </div>
+    {%- else -%}
+      {%- if kor_has_history or kor_show_demo -%}
+        <div class="kor-head">
+          <h2 class="kor-head__title">{{ kor_heading }}</h2>
+          {%- if kor_see_all != blank -%}
+            <a href="{{ kor_see_all }}" class="kor-head__link">{{ 'sections.order_again.see_all' | t }}</a>
           {%- endif -%}
-        {%- endfor -%}
-
-      {%- elsif section.settings.enable_demo_mode -%}
-        <!-- Demo fallback cards (theme editor / demo mode only) -->
-        <div class="kor-card" style="--kor-card-bg: #E0F0FF;" role="listitem">
-          <a href="/collections/all" class="kor-card__header">
-            <span class="kor-card__title">Drinks &<br>Beverages</span>
-          </a>
-          <div class="kor-grid">
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1560023907-5f339617ea30?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-          </div>
-          <a href="/collections/all" class="kor-badge">+3</a>
         </div>
 
-        <div class="kor-card" style="--kor-card-bg: #FFF4E0;" role="listitem">
-          <a href="/collections/all" class="kor-card__header">
-            <span class="kor-card__title">Dairy, Bread &<br>Eggs</span>
-          </a>
-          <div class="kor-grid">
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-          </div>
-          <a href="/collections/all" class="kor-badge">+10</a>
-        </div>
+        <div class="kor-scroll-outer">
+          <div
+            class="kor-scroll-track karthika-hide-scrollbar"
+            id="korScrollTrack-{{ section.id }}"
+            role="list"
+            aria-label="{{ 'sections.order_again.title' | t }}"
+          >
+            {%- if kor_has_history -%}
+              {%- assign cat_arr = kor_cats | split: '|' -%}
+              {%- assign cat_index = 0 -%}
+              {%- for cat in cat_arr -%}
+                {%- unless cat == blank -%}
+                {%- liquid
+                  assign img_1 = ''
+                  assign url_1 = ''
+                  assign alt_1 = cat
+                  assign img_2 = ''
+                  assign url_2 = ''
+                  assign alt_2 = cat
+                  assign img_3 = ''
+                  assign url_3 = ''
+                  assign alt_3 = cat
+                  assign img_4 = ''
+                  assign url_4 = ''
+                  assign alt_4 = cat
+                  assign slot = 0
+                  assign extra_count = 0
+                  assign seen_ids = ''
+                  assign cat_query = cat | url_encode
+                  assign cat_url = routes.search_url | append: '?q=' | append: cat_query
+                  assign pal_i = cat_index | modulo: kor_palettes.size
+                  assign cat_bg = kor_palettes[pal_i]
+                -%}
+                {%- for order in customer.orders -%}
+                  {%- if order.cancelled_at == blank -%}
+                    {%- for item in order.line_items -%}
+                      {%- unless item.product == blank or item.gift_card -%}
+                        {%- liquid
+                          assign ptype = item.product.type
+                          if ptype == blank and item.product.collections.size > 0
+                            assign ptype = item.product.collections.first.title
+                          endif
+                          if ptype == blank
+                            assign ptype = kor_favourites
+                          endif
+                        -%}
+                        {%- if ptype == cat -%}
+                          {%- assign pid_token = item.product.id | prepend: '|' | append: '|' -%}
+                          {%- unless seen_ids contains pid_token -%}
+                            {%- liquid
+                              assign seen_ids = seen_ids | append: pid_token
+                              assign media = item.image
+                              if item.product.featured_media
+                                assign media = item.product.featured_media
+                              endif
+                              if item.product.collections.size > 0 and item.product.collections.first.url != blank
+                                assign cat_url = item.product.collections.first.url
+                              endif
+                            -%}
+                            {%- if media != blank -%}
+                              {%- if slot < 4 -%}
+                                {%- liquid
+                                  assign slot = slot | plus: 1
+                                  assign media_url = media | image_url: width: 200
+                                  assign product_url = item.product.url | default: item.url
+                                  assign product_alt = item.product.title | default: item.title
+                                  case slot
+                                    when 1
+                                      assign img_1 = media_url
+                                      assign url_1 = product_url
+                                      assign alt_1 = product_alt
+                                    when 2
+                                      assign img_2 = media_url
+                                      assign url_2 = product_url
+                                      assign alt_2 = product_alt
+                                    when 3
+                                      assign img_3 = media_url
+                                      assign url_3 = product_url
+                                      assign alt_3 = product_alt
+                                    when 4
+                                      assign img_4 = media_url
+                                      assign url_4 = product_url
+                                      assign alt_4 = product_alt
+                                  endcase
+                                -%}
+                              {%- else -%}
+                                {%- assign extra_count = extra_count | plus: 1 -%}
+                              {%- endif -%}
+                            {%- endif -%}
+                          {%- endunless -%}
+                        {%- endif -%}
+                      {%- endunless -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+                {%- endfor -%}
 
-        <div class="kor-card" style="--kor-card-bg: #FFE8F2;" role="listitem">
-          <a href="/collections/all" class="kor-card__header">
-            <span class="kor-card__title">Sweet<br>Tooth</span>
-          </a>
-          <div class="kor-grid">
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
-            <div class="kor-grid__cell"><div class="kor-grid__img-wrap"><img src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&w=200&q=80" alt="" class="kor-grid__img" width="100" height="100" loading="lazy"></div></div>
+                {%- if slot > 0 -%}
+                  {% render 'karthika-order-again-card',
+                    title: cat,
+                    bg: cat_bg,
+                    url: cat_url,
+                    extra: extra_count,
+                    img_1: img_1,
+                    url_1: url_1,
+                    alt_1: alt_1,
+                    img_2: img_2,
+                    url_2: url_2,
+                    alt_2: alt_2,
+                    img_3: img_3,
+                    url_3: url_3,
+                    alt_3: alt_3,
+                    img_4: img_4,
+                    url_4: url_4,
+                    alt_4: alt_4
+                  %}
+                  {%- assign cat_index = cat_index | plus: 1 -%}
+                {%- endif -%}
+                {%- endunless -%}
+              {%- endfor -%}
+            {%- elsif kor_show_demo -%}
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'demo_category' -%}
+                  {%- liquid
+                    assign demo_cat_name = block.settings.name | default: kor_favourites
+                    assign demo_bg = block.settings.bg_color | default: '#EBF4FF'
+                    assign demo_col = block.settings.collection
+                    assign demo_col_url = routes.all_products_collection_url
+                    if demo_col != blank and demo_col.url != blank
+                      assign demo_col_url = demo_col.url
+                    endif
+                    if block.settings.custom_link != blank
+                      assign demo_col_url = block.settings.custom_link
+                    endif
+                    assign dp1 = block.settings.product_1
+                    assign dp2 = block.settings.product_2
+                    assign dp3 = block.settings.product_3
+                    assign dp4 = block.settings.product_4
+                    assign demo_extra = block.settings.extra_count | default: 0
+                    assign d_img1 = ''
+                    assign d_url1 = ''
+                    assign d_alt1 = demo_cat_name
+                    assign d_img2 = ''
+                    assign d_url2 = ''
+                    assign d_alt2 = demo_cat_name
+                    assign d_img3 = ''
+                    assign d_url3 = ''
+                    assign d_alt3 = demo_cat_name
+                    assign d_img4 = ''
+                    assign d_url4 = ''
+                    assign d_alt4 = demo_cat_name
+                    if dp1 != blank and dp1.featured_media
+                      assign d_img1 = dp1.featured_media | image_url: width: 200
+                      assign d_url1 = dp1.url
+                      assign d_alt1 = dp1.title
+                    elsif block.settings.image_1 != blank
+                      assign d_img1 = block.settings.image_1 | image_url: width: 200
+                    endif
+                    if dp2 != blank and dp2.featured_media
+                      assign d_img2 = dp2.featured_media | image_url: width: 200
+                      assign d_url2 = dp2.url
+                      assign d_alt2 = dp2.title
+                    elsif block.settings.image_2 != blank
+                      assign d_img2 = block.settings.image_2 | image_url: width: 200
+                    endif
+                    if dp3 != blank and dp3.featured_media
+                      assign d_img3 = dp3.featured_media | image_url: width: 200
+                      assign d_url3 = dp3.url
+                      assign d_alt3 = dp3.title
+                    elsif block.settings.image_3 != blank
+                      assign d_img3 = block.settings.image_3 | image_url: width: 200
+                    endif
+                    if dp4 != blank and dp4.featured_media
+                      assign d_img4 = dp4.featured_media | image_url: width: 200
+                      assign d_url4 = dp4.url
+                      assign d_alt4 = dp4.title
+                    elsif block.settings.image_4 != blank
+                      assign d_img4 = block.settings.image_4 | image_url: width: 200
+                    endif
+                  -%}
+                  <div style="display: contents" {{ block.shopify_attributes }}>
+                  {% render 'karthika-order-again-card',
+                    title: demo_cat_name,
+                    bg: demo_bg,
+                    url: demo_col_url,
+                    extra: demo_extra,
+                    img_1: d_img1,
+                    url_1: d_url1,
+                    alt_1: d_alt1,
+                    img_2: d_img2,
+                    url_2: d_url2,
+                    alt_2: d_alt2,
+                    img_3: d_img3,
+                    url_3: d_url3,
+                    alt_3: d_alt3,
+                    img_4: d_img4,
+                    url_4: d_url4,
+                    alt_4: d_alt4
+                  %}
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
           </div>
-          <a href="/collections/all" class="kor-badge">+4</a>
         </div>
-
-      {%- elsif section.settings.show_guest_prompt and customer == nil -%}
-        <div class="kor-guest" role="listitem">
-          <div class="kor-guest__icon" aria-hidden="true">↻</div>
-          <div class="kor-guest__copy">
-            <p class="kor-guest__title">{{ section.settings.guest_heading | default: 'Order again' | escape }}</p>
-            <p class="kor-guest__sub">{{ section.settings.guest_subtext | default: 'Sign in to quickly reorder your favourites.' | escape }}</p>
-          </div>
-          <a href="{{ routes.account_login_url }}" class="kor-guest__btn">
-            {{ section.settings.guest_btn_label | default: 'Sign in' | escape }}
-          </a>
-        </div>
-
-      {%- elsif customer -%}
-        <div class="kor-guest" role="listitem">
-          <div class="kor-guest__copy">
-            <p class="kor-guest__title">No previous orders yet</p>
-            <p class="kor-guest__sub">Your reorder shortcuts will appear here after your first purchase.</p>
-          </div>
-          <a href="{{ routes.all_products_collection_url }}" class="kor-guest__btn">Start shopping</a>
+      {%- elsif request.design_mode -%}
+        <div class="kor-poster-wrap">
+          <p class="kor-editor-hint">{{ 'sections.order_again.editor_hidden_hint' | t }}</p>
         </div>
       {%- endif -%}
-    </div>
+    {%- endif -%}
   </div>
+{%- endif -%}
 
-  <div class="kor-dots" id="korDots-{{ section.id }}" aria-hidden="true">
-    <span class="kor-dot kor-dot--active"></span>
-    <span class="kor-dot"></span>
-    <span class="kor-dot"></span>
-  </div>
-</div>
-
-{%- comment -%}──────────────────────────────── SCOPED CSS ─────────────────────────────────────{%- endcomment -%}
 <style>
-  /* ═══════════════════════════════════════════════════════════════════
-   Karthika — Order Again Section (kor-*)
-   All rules scoped to .kor-* to prevent global conflicts.
-   ═══════════════════════════════════════════════════════════════════ */
-
-  /* ── Section wrapper ───────────────────────────────────────────── */
   .kor-section {
     padding: 20px 0 12px;
     font-family: var(--karthika-font-sans, 'Gilroy', sans-serif);
     color: var(--karthika-text-dark, #171717);
   }
 
-  /* ── Section header ────────────────────────────────────────────── */
   .kor-head {
     display: flex;
     align-items: baseline;
@@ -363,22 +376,19 @@
     text-decoration: underline;
   }
 
-  /* ── Scroll outer (clips overflow) ────────────────────────────── */
   .kor-scroll-outer {
     position: relative;
   }
 
-  /* ── Horizontal scroll track ───────────────────────────────────── */
   .kor-scroll-track {
     display: flex;
     gap: 12px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding: 4px 16px 16px;
+    padding: 4px 16px 8px;
   }
 
-  /* ── Category card ─────────────────────────────────────────────── */
   .kor-card {
     position: relative;
     flex: 0 0 calc(55vw);
@@ -397,7 +407,6 @@
     box-shadow: var(--karthika-shadow-hover, 0 6px 18px rgba(0, 0, 0, 0.07));
   }
 
-  /* ── Card header (category title link) ────────────────────────── */
   .kor-card__header {
     display: block;
     text-decoration: none;
@@ -418,7 +427,6 @@
     color: var(--karthika-red, #3f7d2e);
   }
 
-  /* ── 2×2 product image grid ────────────────────────────────────── */
   .kor-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -457,14 +465,6 @@
     transform: scale(1.05);
   }
 
-  .kor-grid__placeholder {
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.04);
-    border-radius: 12px;
-  }
-
-  /* ── Overflow badge ────────────────────────────────────────────── */
   .kor-badge {
     position: absolute;
     right: 8px;
@@ -492,78 +492,97 @@
     transform: scale(1.06);
   }
 
-  /* ── Scroll progress dots ──────────────────────────────────────── */
-  .kor-dots {
+  .kor-poster-wrap {
+    padding: 0 16px 4px;
+  }
+
+  .kor-poster {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 5px;
-    padding: 2px 0 4px;
-  }
-
-  .kor-dot {
-    display: block;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--karthika-border, #e1e8d3);
-    transition: width 0.2s ease, background 0.2s ease, border-radius 0.2s ease;
-  }
-
-  .kor-dot--active {
-    width: 16px;
-    border-radius: 3px;
-    background: var(--karthika-red, #3f7d2e);
-  }
-
-  /* ── Guest sign-in prompt ──────────────────────────────────────── */
-  .kor-guest {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin: 0 16px;
-    padding: 18px 20px;
-    background: var(--karthika-bg-surface, #eff4e3);
-    border-radius: var(--karthika-radius-md, 20px);
+    gap: 12px;
+    overflow: hidden;
+    min-height: 92px;
+    padding: 14px 16px;
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(63, 125, 46, 0.10), transparent 42%),
+      radial-gradient(circle at 0% 100%, rgba(245, 196, 0, 0.16), transparent 38%),
+      var(--karthika-bg-surface, #eff4e3);
     border: 1px solid var(--karthika-border-light, #eaf0de);
-  }
-
-  .kor-guest__icon {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--karthika-bg-white, #fff);
-    color: var(--karthika-red, #3f7d2e);
     box-shadow: var(--karthika-shadow-subtle, 0 1px 3px rgba(0, 0, 0, 0.05));
   }
 
-  .kor-guest__copy {
+  .kor-poster::after {
+    position: absolute;
+    right: -18px;
+    bottom: -22px;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: rgba(63, 125, 46, 0.08);
+    content: '';
+    pointer-events: none;
+  }
+
+  .kor-poster__art {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    background: #e8f4dc;
+    box-shadow: 0 4px 12px rgba(63, 125, 46, 0.12);
+    overflow: hidden;
+  }
+
+  .kor-poster__art img,
+  .kor-poster__art-svg,
+  .kor-poster__art svg {
+    display: block;
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+  }
+
+  .kor-poster__copy {
+    position: relative;
+    z-index: 1;
     flex: 1 1 auto;
     min-width: 0;
   }
 
-  .kor-guest__title {
-    margin: 0 0 3px;
-    font-size: 14px;
+  .kor-poster__title {
+    margin: 0 0 4px;
+    font-family: inherit;
+    font-size: 15px;
     font-weight: 800;
     line-height: 1.2;
+    letter-spacing: -0.2px;
+    text-transform: none;
+    color: var(--karthika-text-dark, #171717);
   }
 
-  .kor-guest__sub {
+  .kor-poster__sub {
     margin: 0;
     font-size: 12px;
-    color: var(--karthika-text-muted, #5c6b52);
+    font-weight: 500;
     line-height: 1.4;
+    color: var(--karthika-text-muted, #5c6b52);
   }
 
-  .kor-guest__btn {
+  .kor-poster__btn {
+    position: relative;
+    z-index: 1;
     flex: 0 0 auto;
-    display: inline-block;
-    padding: 10px 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 8px 16px;
     border-radius: var(--karthika-radius-btn, 9999px);
     background: var(--karthika-red, #3f7d2e);
     color: #ffffff;
@@ -573,33 +592,42 @@
     letter-spacing: 0.02em;
     text-decoration: none;
     white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(63, 125, 46, 0.22);
     transition: background 0.15s ease, transform 0.15s ease;
   }
 
-  .kor-guest__btn:hover {
+  .kor-poster__btn:hover {
     background: var(--karthika-red-hover, #336524);
     transform: translateY(-1px);
   }
 
-  /* ── Editor hint ───────────────────────────────────────────────── */
-  .kor-empty-hint {
-    margin: 0 16px;
-    padding: 24px;
-    background: var(--karthika-bg-surface, #eff4e3);
-    border-radius: var(--karthika-radius-md, 20px);
+  .kor-editor-hint {
+    margin: 0;
+    padding: 18px 16px;
+    border-radius: 20px;
     border: 1.5px dashed var(--karthika-border, #e1e8d3);
-    text-align: center;
+    background: var(--karthika-bg-surface, #eff4e3);
     color: var(--karthika-text-muted, #5c6b52);
     font-size: 13px;
+    line-height: 1.4;
+    text-align: center;
   }
 
-  .kor-empty-hint p {
-    margin: 0;
+  @media screen and (max-width: 389px) {
+    .kor-poster {
+      flex-wrap: wrap;
+      padding: 14px;
+    }
+
+    .kor-poster__btn {
+      width: 100%;
+    }
+
+    .kor-poster__copy {
+      flex: 1 1 calc(100% - 84px);
+    }
   }
 
-  /* ═══════════════════════════════════════════════════════════════════
-   TABLET (768px+): ~2 cards visible
-   ═══════════════════════════════════════════════════════════════════ */
   @media screen and (min-width: 768px) {
     .kor-section {
       padding: 28px 0 16px;
@@ -616,7 +644,7 @@
 
     .kor-scroll-track {
       gap: 14px;
-      padding: 6px 24px 18px;
+      padding: 6px 24px 10px;
     }
 
     .kor-card {
@@ -629,15 +657,40 @@
       font-size: 14px;
     }
 
-    .kor-guest {
-      margin: 0 24px;
-      padding: 22px 28px;
+    .kor-poster-wrap {
+      padding: 0 24px 8px;
+    }
+
+    .kor-poster {
+      gap: 16px;
+      min-height: 108px;
+      padding: 18px 22px;
+    }
+
+    .kor-poster__art,
+    .kor-poster__art img,
+    .kor-poster__art-svg,
+    .kor-poster__art svg {
+      width: 84px;
+      height: 84px;
+      border-radius: 22px;
+    }
+
+    .kor-poster__title {
+      font-size: 18px;
+    }
+
+    .kor-poster__sub {
+      font-size: 13px;
+    }
+
+    .kor-poster__btn {
+      min-height: 40px;
+      padding: 10px 20px;
+      font-size: 13px;
     }
   }
 
-  /* ═══════════════════════════════════════════════════════════════════
-   DESKTOP (990px+): ~3 cards visible, generous spacing
-   ═══════════════════════════════════════════════════════════════════ */
   @media screen and (min-width: 990px) {
     .kor-section {
       padding: 36px 0 20px;
@@ -658,7 +711,7 @@
 
     .kor-scroll-track {
       gap: 16px;
-      padding: 8px 32px 20px;
+      padding: 8px 32px 12px;
     }
 
     .kor-card {
@@ -679,38 +732,41 @@
       font-size: 11px;
     }
 
-    /* Dots not needed for mouse users */
-    .kor-dots {
-      display: none;
+    .kor-poster-wrap {
+      padding: 0 32px 10px;
     }
 
-    .kor-guest {
-      margin: 0 32px;
-      padding: 28px 36px;
+    .kor-poster {
+      gap: 20px;
+      max-width: 720px;
+      min-height: 116px;
+      padding: 20px 26px;
     }
 
-    .kor-guest__icon {
-      width: 56px;
-      height: 56px;
+    .kor-poster__art,
+    .kor-poster__art img,
+    .kor-poster__art-svg,
+    .kor-poster__art svg {
+      width: 92px;
+      height: 92px;
+      border-radius: 24px;
     }
 
-    .kor-guest__title {
-      font-size: 16px;
+    .kor-poster__title {
+      font-size: 20px;
     }
 
-    .kor-guest__sub {
-      font-size: 13px;
+    .kor-poster__sub {
+      font-size: 14px;
     }
 
-    .kor-guest__btn {
+    .kor-poster__btn {
+      min-height: 44px;
       padding: 12px 24px;
-      font-size: 13px;
+      font-size: 14px;
     }
   }
 
-  /* ═══════════════════════════════════════════════════════════════════
-   LARGE DESKTOP (1280px+)
-   ═══════════════════════════════════════════════════════════════════ */
   @media screen and (min-width: 1280px) {
     .kor-card {
       flex: 0 0 calc(18% - 12px);
@@ -718,53 +774,30 @@
   }
 </style>
 
-{%- comment -%}──────────────────────────────── SCROLL JS ──────────────────────────────────────{%- endcomment -%}
-<script>
-  (function () {
-    'use strict';
+{%- if kor_has_history or kor_show_demo -%}
+  <script>
+    (function () {
+      'use strict';
+      var trackEl = document.getElementById('korScrollTrack-{{ section.id | escape }}');
+      if (!trackEl) return;
 
-    var sectionId = '{{ section.id | escape }}';
-    var trackEl = document.getElementById('korScrollTrack-' + sectionId);
-    var dotsWrap = document.getElementById('korDots-' + sectionId);
+      trackEl.addEventListener('keydown', function (e) {
+        var cards = trackEl.querySelectorAll('.kor-card');
+        if (!cards.length) return;
+        var cardW = cards[0].offsetWidth + 12;
 
-    if (!trackEl) return;
+        if (e.key === 'ArrowRight') {
+          trackEl.scrollBy({ left: cardW, behavior: 'smooth' });
+          e.preventDefault();
+        } else if (e.key === 'ArrowLeft') {
+          trackEl.scrollBy({ left: -cardW, behavior: 'smooth' });
+          e.preventDefault();
+        }
+      });
+    })();
+  </script>
+{%- endif -%}
 
-    /* Dot progress indicator */
-    if (dotsWrap) {
-      var dots = Array.prototype.slice.call(dotsWrap.querySelectorAll('.kor-dot'));
-
-      function updateDots() {
-        if (!dots.length) return;
-        var maxScroll = trackEl.scrollWidth - trackEl.clientWidth;
-        var ratio = maxScroll > 0 ? trackEl.scrollLeft / maxScroll : 0;
-        var idx = Math.round(ratio * (dots.length - 1));
-        dots.forEach(function (d, i) {
-          d.classList.toggle('kor-dot--active', i === idx);
-        });
-      }
-
-      trackEl.addEventListener('scroll', updateDots, { passive: true });
-      updateDots();
-    }
-
-    /* Keyboard arrow navigation */
-    trackEl.addEventListener('keydown', function (e) {
-      var cards = trackEl.querySelectorAll('.kor-card');
-      if (!cards.length) return;
-      var cardW = cards[0].offsetWidth + 12; /* card width + gap */
-
-      if (e.key === 'ArrowRight') {
-        trackEl.scrollBy({ left: cardW, behavior: 'smooth' });
-        e.preventDefault();
-      } else if (e.key === 'ArrowLeft') {
-        trackEl.scrollBy({ left: -cardW, behavior: 'smooth' });
-        e.preventDefault();
-      }
-    });
-  })();
-</script>
-
-{%- comment -%}──────────────────────────────── SCHEMA ──────────────────────────────────────────{%- endcomment -%}
 {% schema %}
 {
   "name": "Order Again",
@@ -778,38 +811,37 @@
     {
       "type": "checkbox",
       "id": "enable_demo_mode",
-      "label": "Enable demo mode",
-      "info": "Show configured demo category blocks when no real order history is available. Safe for client demos.",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_guest_prompt",
-      "label": "Show sign-in prompt for guests",
-      "info": "When demo mode is off and the customer is not logged in, show a sign-in call-to-action.",
-      "default": true
+      "label": "Preview demo cards in the theme editor",
+      "info": "Live storefront always shows the sign-in poster to guests, real reorder cards to customers with order history, and hides this section when a signed-in customer has no previous orders.",
+      "default": false
     },
     {
       "type": "header",
-      "content": "Guest prompt copy"
+      "content": "Guest poster"
     },
     {
       "type": "text",
       "id": "guest_heading",
-      "label": "Guest prompt title",
+      "label": "Poster title",
       "default": "Order again"
     },
     {
       "type": "text",
       "id": "guest_subtext",
-      "label": "Guest prompt subtitle",
-      "default": "Sign in to quickly reorder your favourites."
+      "label": "Poster message",
+      "default": "Sign in to reorder your favourites."
     },
     {
       "type": "text",
       "id": "guest_btn_label",
       "label": "Sign-in button label",
       "default": "Sign in"
+    },
+    {
+      "type": "image_picker",
+      "id": "guest_image",
+      "label": "Poster image",
+      "info": "Optional grocery image. Leave empty to use the built-in illustration."
     },
     {
       "type": "header",
@@ -819,7 +851,7 @@
       "type": "url",
       "id": "see_all_url",
       "label": "See all link URL",
-      "info": "Leave blank to hide the link."
+      "info": "Shown for signed-in customers with order history. Leave blank to link to the account page."
     }
   ],
   "blocks": [

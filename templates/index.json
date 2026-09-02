@@ -7,9 +7,8 @@
       "block_order": [],
       "settings": {
         "enable_demo_mode": false,
-        "show_guest_prompt": true,
         "guest_heading": "Order again",
-        "guest_subtext": "Sign in to quickly reorder your favourites.",
+        "guest_subtext": "Sign in to reorder your favourites.",
         "guest_btn_label": "Sign in"
       }
     },

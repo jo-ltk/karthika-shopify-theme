@@ -1,0 +1,87 @@
+{% doc %}
+  Renders one Order Again category card with a 2x2 product image grid.
+
+  @param {string} title - Category or order title
+  @param {string} bg - Card background colour
+  @param {string} url - Destination for the card header
+  @param {string} [attributes] - Optional Shopify block attributes
+  @param {number} [extra] - Extra product count for the overflow badge
+  @param {string} [img_1] - Image URL for slot 1
+  @param {string} [url_1] - Link for slot 1
+  @param {string} [alt_1] - Alt text for slot 1
+  @param {string} [img_2] - Image URL for slot 2
+  @param {string} [url_2] - Link for slot 2
+  @param {string} [alt_2] - Alt text for slot 2
+  @param {string} [img_3] - Image URL for slot 3
+  @param {string} [url_3] - Link for slot 3
+  @param {string} [alt_3] - Alt text for slot 3
+  @param {string} [img_4] - Image URL for slot 4
+  @param {string} [url_4] - Link for slot 4
+  @param {string} [alt_4] - Alt text for slot 4
+  @example
+  {% render 'karthika-order-again-card', title: 'Dairy', bg: '#FFF4E0', url: collection.url %}
+{% enddoc %}
+
+{%- liquid
+  assign extra_count = extra | default: 0 | plus: 0
+  assign card_url = url | default: routes.all_products_collection_url
+-%}
+
+<div class="kor-card" style="--kor-card-bg: {{ bg | default: '#E8F8E8' }};" role="listitem" {{ attributes }}>
+  <a href="{{ card_url }}" class="kor-card__header" aria-label="{{ 'sections.order_again.shop_category' | t: name: title }}">
+    <span class="kor-card__title">{{ title | escape }}</span>
+  </a>
+
+  <div class="kor-grid">
+    {%- for i in (1..4) -%}
+      {%- liquid
+        assign slot_img = ''
+        assign slot_url = ''
+        assign slot_alt = title
+        case i
+          when 1
+            assign slot_img = img_1
+            assign slot_url = url_1
+            assign slot_alt = alt_1 | default: title
+          when 2
+            assign slot_img = img_2
+            assign slot_url = url_2
+            assign slot_alt = alt_2 | default: title
+          when 3
+            assign slot_img = img_3
+            assign slot_url = url_3
+            assign slot_alt = alt_3 | default: title
+          when 4
+            assign slot_img = img_4
+            assign slot_url = url_4
+            assign slot_alt = alt_4 | default: title
+        endcase
+      -%}
+      {%- if slot_img != blank -%}
+        {%- if slot_url != blank -%}
+          <a href="{{ slot_url }}" class="kor-grid__cell" aria-label="{{ slot_alt | escape }}">
+            <div class="kor-grid__img-wrap">
+              <img src="{{ slot_img }}" alt="{{ slot_alt | escape }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+            </div>
+          </a>
+        {%- else -%}
+          <div class="kor-grid__cell">
+            <div class="kor-grid__img-wrap">
+              <img src="{{ slot_img }}" alt="{{ slot_alt | escape }}" class="kor-grid__img" width="100" height="100" loading="lazy">
+            </div>
+          </div>
+        {%- endif -%}
+      {%- else -%}
+        <div class="kor-grid__cell kor-grid__cell--empty" aria-hidden="true">
+          <div class="kor-grid__img-wrap kor-grid__img-wrap--empty"></div>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  {%- if extra_count > 0 -%}
+    <a href="{{ card_url }}" class="kor-badge" aria-label="{{ 'sections.order_again.more_products' | t: count: extra_count }}">
+      +{{ extra_count }}
+    </a>
+  {%- endif -%}
+</div>

@@ -1181,3 +1181,25 @@
     AccountScreen.init();
   });
 })();
+
+(function () {
+  'use strict';
+
+  function markReturnHome(href) {
+    if (!href) return;
+    if (
+      href.indexOf('customer_authentication') !== -1 ||
+      href.indexOf('/account/login') !== -1
+    ) {
+      try {
+        sessionStorage.setItem('karthikaReturnHome', '1');
+      } catch (err) {}
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest('a[href], .karthika-login-home-link');
+    if (!link) return;
+    markReturnHome(link.getAttribute('href') || '');
+  });
+})();

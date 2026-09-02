@@ -2,6 +2,24 @@
 <html class="js" lang="{{ request.locale.iso_code }}">
   <head>
     <meta charset="utf-8">
+    {%- liquid
+      assign karthika_home_url = routes.root_url | default: '/'
+      if karthika_home_url == blank
+        assign karthika_home_url = '/'
+      endif
+      assign karthika_redirect_frontpage = false
+      if template.name == 'collection' and collection.handle == 'frontpage' and request.design_mode != true
+        if request.path == collection.url and collection.url != karthika_home_url and request.path != karthika_home_url
+          assign karthika_redirect_frontpage = true
+        endif
+      endif
+    -%}
+    {%- if karthika_redirect_frontpage -%}
+      <meta http-equiv="refresh" content="0;url={{ karthika_home_url }}">
+      <script>
+        location.replace({{ karthika_home_url | json }});
+      </script>
+    {%- endif -%}
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="">

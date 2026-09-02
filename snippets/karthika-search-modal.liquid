@@ -413,7 +413,7 @@
         </span>
       </a>
 
-      <a href="{% if customer %}{{ routes.account_url }}{% else %}#karthika-account-screen{% endif %}" class="karthika-nav-item karthika-account-trigger" data-account-href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" data-customer-state="{% if customer %}signed-in{% else %}guest{% endif %}" aria-label="Account">
+      <a href="{% if customer %}{{ routes.account_url }}{% else %}#karthika-account-screen{% endif %}" class="karthika-nav-item karthika-account-trigger" data-account-href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{% render 'karthika-login-home' %}{%- endif -%}" data-customer-state="{% if customer %}signed-in{% else %}guest{% endif %}" aria-label="Account">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         <span>Account</span>
       </a>

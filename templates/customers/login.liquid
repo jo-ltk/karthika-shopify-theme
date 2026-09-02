@@ -1,3 +1,8 @@
+{%- if customer -%}
+  <script>
+    window.location.replace({{ routes.root_url | default: '/' | json }});
+  </script>
+{%- endif -%}
 <div class="karthika-auth-page">
   <div class="karthika-auth-hero">
     <a class="karthika-auth-back" href="{{ routes.root_url }}" aria-label="Back to home">&larr;</a>
@@ -11,6 +16,7 @@
     <h1 id="KarthikaLoginTitle">Welcome back</h1>
     <p>Log in to view your orders and saved addresses.</p>
     {% form 'customer_login', class: 'karthika-auth-form' %}
+      {% render 'karthika-login-home', mode: 'fields' %}
       {% if form.errors %}<div class="karthika-form-message" role="alert">{{ form.errors | default_errors }}</div>{% endif %}
       <label for="CustomerEmail">Email address</label>
       <input id="CustomerEmail" type="email" name="customer[email]" autocomplete="email" required>

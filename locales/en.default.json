@@ -378,6 +378,17 @@
       "fax_label": "Fax",
       "email_label": "Email"
     },
+    "order_again": {
+      "title": "Order again",
+      "heading_named": "{{ name }}, order again",
+      "guest_subtext": "Sign in to reorder your favourites.",
+      "guest_button": "Sign in",
+      "see_all": "See all",
+      "shop_category": "Shop {{ name }}",
+      "more_products": "{{ count }} more products",
+      "favourites": "Favourites",
+      "editor_hidden_hint": "Hidden for signed-in customers with no previous orders. Guests see a sign-in poster."
+    },
     "featured_blog": {
       "view_all": "View all",
       "onboarding_title": "Blog post",

@@ -1,0 +1,49 @@
+{% doc %}
+  Customer login helpers that send shoppers to the main homepage after sign-in,
+  instead of the default "Home page" collection listing.
+
+  @param {string} [mode] - `url` (default) prints the login href. `fields` prints hidden form inputs.
+
+  @example
+  {% render 'karthika-login-home' %}
+  {% render 'karthika-login-home', mode: 'fields' %}
+{% enddoc %}
+{%- liquid
+  assign home_path = routes.root_url | default: '/'
+  if home_path == blank
+    assign home_path = '/'
+  endif
+  assign encoded_home = home_path | url_encode
+  assign storefront_login = routes.storefront_login_url | default: ''
+-%}
+{%- if mode == 'fields' -%}
+<input type="hidden" name="checkout_url" value="{{ home_path | escape }}">
+<input type="hidden" name="return_to" value="{{ home_path | escape }}">
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var homePath = {{ home_path | json }};
+    document.querySelectorAll('form').forEach(function (form) {
+      var action = form.getAttribute('action') || '';
+      if (action.indexOf('/account') === -1) return;
+      ['checkout_url', 'return_to'].forEach(function (name) {
+        var inputs = form.querySelectorAll('input[name="' + name + '"]');
+        if (!inputs.length) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = name;
+          input.value = homePath;
+          form.appendChild(input);
+          return;
+        }
+        inputs.forEach(function (input) {
+          input.value = homePath;
+        });
+      });
+    });
+  });
+</script>
+{%- elsif storefront_login contains 'customer_authentication' -%}
+/customer_authentication/login?return_to={{ encoded_home }}
+{%- else -%}
+{{ routes.account_login_url }}?return_to={{ encoded_home }}
+{%- endif -%}

@@ -1,11 +1,12 @@
 <div class="karthika-auth-page">
   <div class="karthika-auth-hero karthika-auth-hero--compact">
-    <a class="karthika-auth-back" href="{{ routes.account_login_url }}" aria-label="Back to login">&larr;</a>
+    <a class="karthika-auth-back" href="{% render 'karthika-login-home' %}" aria-label="Back to login">&larr;</a>
     <div class="karthika-auth-brand">{% render 'karthika-logo', class: 'karthika-logo--auth', loading: 'eager' %}</div>
   </div>
   <section class="karthika-auth-panel" aria-labelledby="KarthikaRegisterTitle">
     <h1 id="KarthikaRegisterTitle">Create your account</h1>
     {% form 'create_customer', class: 'karthika-auth-form' %}
+      {% render 'karthika-login-home', mode: 'fields' %}
       {% if form.errors %}<div class="karthika-form-message" role="alert">{{ form.errors | default_errors }}</div>{% endif %}
       <label for="RegisterFirstName">First name</label><input id="RegisterFirstName" type="text" name="customer[first_name]" autocomplete="given-name">
       <label for="RegisterLastName">Last name</label><input id="RegisterLastName" type="text" name="customer[last_name]" autocomplete="family-name">
@@ -13,6 +14,6 @@
       <label for="RegisterPassword">Password</label><input id="RegisterPassword" type="password" name="customer[password]" autocomplete="new-password" required>
       <button class="karthika-primary-button" type="submit">Create account</button>
     {% endform %}
-    <a class="karthika-auth-text-link" href="{{ routes.account_login_url }}">Already have an account? Login</a>
+    <a class="karthika-auth-text-link" href="{% render 'karthika-login-home' %}">Already have an account? Login</a>
   </section>
 </div>

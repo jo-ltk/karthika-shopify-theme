@@ -93,7 +93,7 @@
       <a class="karthika-desktop-header__cart" href="{{ routes.cart_url }}" aria-label="Cart ({{ cart_count }} items)">
         <span aria-hidden="true">&#128722;</span><b>{{ cart_count }}</b>
       </a>
-      <a class="karthika-desktop-header__account" href="{{ routes.account_url }}"><span aria-hidden="true">&#128100;</span> Account</a>
+      <a class="karthika-desktop-header__account" href="{% if customer %}{{ routes.account_url }}{% else %}{% render 'karthika-login-home' %}{% endif %}"><span aria-hidden="true">&#128100;</span> Account</a>
     </div>
   </div>
 </div>
@@ -133,7 +133,7 @@
         {% endif %}
       </a>
       {% else %}
-      <a class="karthika-header-account karthika-account-trigger" href="#karthika-account-screen" data-account-href="{{ routes.account_login_url }}" data-customer-state="guest" aria-label="Account" aria-haspopup="dialog">
+      <a class="karthika-header-account karthika-account-trigger" href="#karthika-account-screen" data-account-href="{% render 'karthika-login-home' %}" data-customer-state="guest" aria-label="Account" aria-haspopup="dialog">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="12" cy="8" r="4"></circle>
           <path d="M4 21a8 8 0 0 1 16 0"></path>

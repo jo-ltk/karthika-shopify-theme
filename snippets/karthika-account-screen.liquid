@@ -5,8 +5,11 @@
   account option rows, and app version footer.
 {%- endcomment -%}
 
+{%- capture login_url -%}
+  {% render 'karthika-login-home' %}
+{%- endcapture -%}
 {%- liquid
-  assign login_url = routes.account_login_url
+  assign login_url = login_url | strip
   assign account_url = routes.account_url
   assign target_url = login_url
   if customer
@@ -47,7 +50,7 @@
   <!-- White login panel -->
   <div class="kas-panel">
 
-    <a href="{{ target_url }}" class="kas-login-btn" id="kas-login-btn">
+    <a href="{{ target_url }}" class="kas-login-btn{% unless customer %} karthika-login-home-link{% endunless %}" id="kas-login-btn">
       {%- if customer -%}My Account{%- else -%}Login{%- endif -%}
     </a>
 
