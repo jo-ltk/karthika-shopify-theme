@@ -19,59 +19,298 @@
     })();
   </script>
 {%- endunless -%}
-<div class="karthika-account-page">
-  <header class="karthika-account-page__header">
-    <a class="karthika-account-page__back" href="{{ routes.root_url }}" aria-label="Back to home">&larr;</a>
-    <div><p>My account</p><h1>Karthika Account</h1></div>
+
+{%- liquid
+  assign has_orders = false
+  if customer.orders_count > 0
+    assign has_orders = true
+  endif
+
+  assign avatar_initial = customer.first_name | default: customer.email | slice: 0
+  assign display_name = customer.name | default: customer.email
+  assign default_address = customer.default_address
+
+  assign storefront_login = routes.storefront_login_url | default: ''
+  assign new_customer_accounts = false
+  if storefront_login contains 'customer_authentication'
+    assign new_customer_accounts = true
+  endif
+-%}
+
+<div class="kap" data-kap>
+  <header class="kap-header">
+    <div class="kap-header__text">
+      <h1 class="kap-header__title">{{ shop.name }}</h1>
+      <p class="kap-header__subtitle">Welcome back! <span aria-hidden="true">&#128075;</span></p>
+    </div>
+    <span class="kap-avatar kap-avatar--sm" aria-hidden="true">{{ avatar_initial }}</span>
   </header>
 
-  <section class="karthika-profile-card" aria-labelledby="KarthikaProfileTitle">
-    <span class="karthika-profile-card__avatar" aria-hidden="true">{{ customer.first_name | default: customer.email | slice: 0 }}</span>
-    <div class="karthika-profile-card__details">
-      <h2 id="KarthikaProfileTitle">{{ customer.name | default: customer.email }}</h2>
-      <p>{{ customer.email }}</p>
-      {% if customer.phone != blank %}<p>{{ customer.phone }}</p>{% endif %}
+  {%- if has_orders -%}
+    <div class="kap-tabs" role="tablist" aria-label="Account sections">
+      <button
+        type="button"
+        class="kap-tab"
+        role="tab"
+        id="kap-tab-orders"
+        data-kap-tab="orders"
+        aria-controls="kap-panel-orders"
+        aria-selected="false"
+      >
+        Orders
+      </button>
+      <button
+        type="button"
+        class="kap-tab is-active"
+        role="tab"
+        id="kap-tab-profile"
+        data-kap-tab="profile"
+        aria-controls="kap-panel-profile"
+        aria-selected="true"
+      >
+        Profile
+      </button>
     </div>
-    <span class="karthika-profile-card__edit" aria-disabled="true" title="Profile editing is not available in this Shopify storefront">Edit profile</span>
-  </section>
+  {%- endif -%}
 
-  <section class="karthika-account-section" aria-labelledby="KarthikaOrdersTitle">
-    <div class="karthika-account-section__heading"><h2 id="KarthikaOrdersTitle">My Orders</h2>{% if customer.orders_count > 0 %}<a href="#KarthikaOrderList">View all</a>{% endif %}</div>
-    {% paginate customer.orders by 5 %}
-      <div id="KarthikaOrderList" class="karthika-order-list">
-        {% for order in customer.orders %}
-          <article class="karthika-order-card">
-            <div><strong>{{ order.name }}</strong><span>{{ order.created_at | date: '%d %b %Y' }}</span></div>
-            <div>
-              <span>{{ order.total_price | money }}</span>
-              <span class="karthika-order-card__status">{{ order.fulfillment_status_label | default: order.financial_status }}</span>
-              {%- for attribute in order.note_attributes -%}
-                {%- if attribute.first == 'Delivery type' and attribute.last == 'Gift' -%}
-                  <span class="karthika-order-card__status">{{ 'customer.order.delivery_gift' | t }}</span>
-                {%- endif -%}
-              {%- endfor -%}
-            </div>
-            <a href="{{ order.customer_url }}">View order <span aria-hidden="true">&rarr;</span></a>
-          </article>
-        {% else %}
-          <p class="karthika-empty-state">Your completed orders will appear here.</p>
-        {% endfor %}
+  <div class="kap-panel" id="kap-panel-profile" role="tabpanel" aria-labelledby="kap-tab-profile" data-kap-panel="profile">
+    <section class="kap-card kap-profile" aria-labelledby="kap-profile-name">
+      <span class="kap-avatar" aria-hidden="true">{{ avatar_initial }}</span>
+      <div class="kap-profile__details">
+        <h2 class="kap-profile__name" id="kap-profile-name">{{ display_name }}</h2>
+        {%- if customer.email != blank -%}<p>{{ customer.email }}</p>{%- endif -%}
+        {%- if customer.phone != blank -%}
+          <p>{{ customer.phone }}</p>
+        {%- elsif default_address.phone != blank -%}
+          <p>{{ default_address.phone }}</p>
+        {%- endif -%}
       </div>
-      {% if paginate.pages > 1 %}<div class="karthika-account-pagination">{{ paginate | default_pagination }}</div>{% endif %}
-    {% endpaginate %}
-  </section>
+      {%- if new_customer_accounts -%}
+        <a class="kap-btn kap-btn--soft kap-profile__edit" href="{{ routes.account_url }}">
+          {%- render 'karthika-account-icon', icon: 'pencil' -%}
+          <span>Edit profile</span>
+        </a>
+      {%- else -%}
+        <button type="button" class="kap-btn kap-btn--soft kap-profile__edit" data-kap-sheet-open="kap-sheet-profile">
+          {%- render 'karthika-account-icon', icon: 'pencil' -%}
+          <span>Edit profile</span>
+        </button>
+      {%- endif -%}
+    </section>
 
-  <section class="karthika-account-section" aria-labelledby="KarthikaAccountToolsTitle">
-    <div class="karthika-account-section__heading"><h2 id="KarthikaAccountToolsTitle">Account</h2></div>
-    <div class="karthika-account-menu">
-      <a href="{{ routes.account_addresses_url }}" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-map-pin.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Saved Addresses</strong><small>Manage delivery addresses</small></span><b aria-hidden="true">&rsaquo;</b></a>
-      <a href="{{ routes.all_products_collection_url }}" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-price-tag.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Offers &amp; Coupons</strong><small>Browse current store offers</small></span><b aria-hidden="true">&rsaquo;</b></a>
-      <a href="/pages/contact" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-chat-bubble.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Help &amp; Support</strong><small>Contact the Karthika team</small></span><b aria-hidden="true">&rsaquo;</b></a>
-      <a href="/policies/privacy-policy" class="karthika-account-menu__row"><span class="karthika-account-menu__icon"><img src="{{ 'icon-lock.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Privacy &amp; Security</strong><small>Read our privacy policy</small></span><b aria-hidden="true">&rsaquo;</b></a>
-      <div class="karthika-account-menu__row is-unavailable" aria-disabled="true"><span class="karthika-account-menu__icon"><img src="{{ 'icon-heart.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Wishlist</strong><small>Not available yet</small></span></div>
-      <div class="karthika-account-menu__row is-unavailable" aria-disabled="true"><span class="karthika-account-menu__icon"><img src="{{ 'icon-cart.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Payment Methods</strong><small>Managed securely at checkout</small></span></div>
-      <div class="karthika-account-menu__row is-unavailable" aria-disabled="true"><span class="karthika-account-menu__icon"><img src="{{ 'icon-star.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Karthika Rewards</strong><small>Not available yet</small></span></div>
-      <a href="{{ routes.account_logout_url }}" class="karthika-account-menu__row karthika-account-menu__row--logout"><span class="karthika-account-menu__icon"><img src="{{ 'icon-return.svg' | asset_url }}" alt="" width="17" height="17"></span><span><strong>Logout</strong><small>Sign out of this device</small></span><b aria-hidden="true">&rsaquo;</b></a>
+    {%- if has_orders -%}
+      <section class="kap-section" aria-labelledby="kap-recent-orders-title">
+        <div class="kap-section__head">
+          <h2 class="kap-section__title" id="kap-recent-orders-title">Recent Orders</h2>
+          <button type="button" class="kap-section__link" data-kap-tab="orders">
+            View all orders <span aria-hidden="true">&rsaquo;</span>
+          </button>
+        </div>
+        <div class="kap-order-list">
+          {%- for order in customer.orders limit: 2 -%}
+            {%- render 'karthika-account-order-card', order: order -%}
+          {%- endfor -%}
+        </div>
+      </section>
+    {%- endif -%}
+
+    <section class="kap-section" aria-labelledby="kap-quick-actions-title">
+      <div class="kap-section__head">
+        <h2 class="kap-section__title" id="kap-quick-actions-title">Quick Actions</h2>
+      </div>
+      <div class="kap-actions">
+        {%- if has_orders -%}
+          <button type="button" class="kap-action" data-kap-tab="orders">
+            {%- render 'karthika-account-icon', icon: 'bag' -%}
+            <span>My Orders</span>
+          </button>
+        {%- else -%}
+          <a class="kap-action" href="{{ routes.all_products_collection_url }}">
+            {%- render 'karthika-account-icon', icon: 'bag' -%}
+            <span>Start shopping</span>
+          </a>
+        {%- endif -%}
+
+        <a class="kap-action" href="{{ routes.account_addresses_url }}">
+          {%- render 'karthika-account-icon', icon: 'pin' -%}
+          <span>Addresses</span>
+        </a>
+
+        <div class="kap-action is-unavailable" aria-disabled="true" title="Wishlist is not available yet">
+          {%- render 'karthika-account-icon', icon: 'heart' -%}
+          <span>Wishlist</span>
+        </div>
+
+        <button type="button" class="kap-action" data-kap-sheet-open="kap-sheet-settings">
+          {%- render 'karthika-account-icon', icon: 'gear' -%}
+          <span>Account<br>Settings</span>
+        </button>
+      </div>
+    </section>
+
+    {%- if default_address != blank -%}
+      <section class="kap-card kap-address" aria-labelledby="kap-address-title">
+        <span class="kap-address__icon" aria-hidden="true">
+          {%- render 'karthika-account-icon', icon: 'home' -%}
+        </span>
+        <div class="kap-address__details">
+          <h2 class="kap-address__title" id="kap-address-title">Default Address</h2>
+          {%- liquid
+            assign street = default_address.address1
+            if default_address.address2 != blank
+              assign street = street | append: ', ' | append: default_address.address2
+            endif
+            assign locality_parts = ''
+            if default_address.city != blank
+              assign locality_parts = locality_parts | append: default_address.city | append: '|'
+            endif
+            assign region = default_address.province | default: ''
+            if default_address.zip != blank
+              assign region = region | append: ' ' | append: default_address.zip | strip
+            endif
+            if region != blank
+              assign locality_parts = locality_parts | append: region | append: '|'
+            endif
+            assign locality = locality_parts | split: '|' | join: ', '
+          -%}
+          {%- if street != blank -%}<p>{{ street }}</p>{%- endif -%}
+          {%- if locality != blank -%}<p>{{ locality }}</p>{%- endif -%}
+          {%- if default_address.country != blank -%}<p>{{ default_address.country }}</p>{%- endif -%}
+          {%- if default_address.phone != blank -%}<p>{{ default_address.phone }}</p>{%- endif -%}
+        </div>
+        <a class="kap-btn kap-btn--outline kap-address__manage" href="{{ routes.account_addresses_url }}">Manage</a>
+      </section>
+    {%- endif -%}
+
+    <a class="kap-card kap-privacy" href="/policies/privacy-policy">
+      <span class="kap-privacy__icon" aria-hidden="true">
+        {%- render 'karthika-account-icon', icon: 'shield' -%}
+      </span>
+      <span class="kap-privacy__text">
+        <strong>Your privacy is important to us</strong>
+        <small>We'll never share your details with anyone.</small>
+      </span>
+      <span class="kap-privacy__chevron" aria-hidden="true">
+        {%- render 'karthika-account-icon', icon: 'chevron' -%}
+      </span>
+    </a>
+
+    <p class="kap-footer-link"><a href="/policies/privacy-policy">Privacy policy</a></p>
+  </div>
+
+  {%- if has_orders -%}
+    <div
+      class="kap-panel"
+      id="kap-panel-orders"
+      role="tabpanel"
+      aria-labelledby="kap-tab-orders"
+      data-kap-panel="orders"
+      hidden
+    >
+      <section class="kap-section" aria-labelledby="kap-all-orders-title">
+        <div class="kap-section__head">
+          <h2 class="kap-section__title" id="kap-all-orders-title">All Orders</h2>
+          <span class="kap-section__count">{{ customer.orders_count }}</span>
+        </div>
+        {%- paginate customer.orders by 5 -%}
+          <div class="kap-order-list">
+            {%- for order in customer.orders -%}
+              {%- render 'karthika-account-order-card', order: order -%}
+            {%- endfor -%}
+          </div>
+          {%- if paginate.pages > 1 -%}
+            <div class="kap-pagination">{{ paginate | default_pagination }}</div>
+          {%- endif -%}
+        {%- endpaginate -%}
+      </section>
+
+      <p class="kap-footer-link"><a href="/policies/privacy-policy">Privacy policy</a></p>
     </div>
-  </section>
+  {%- endif -%}
 </div>
+
+{%- comment -%} Account settings sheet: carries every menu row the redesign displaces. {%- endcomment -%}
+<div class="kap-sheet" id="kap-sheet-settings" data-kap-sheet hidden>
+  <div class="kap-sheet__backdrop" data-kap-sheet-close></div>
+  <div class="kap-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="kap-sheet-settings-title">
+    <div class="kap-sheet__head">
+      <h2 id="kap-sheet-settings-title">Account Settings</h2>
+      <button type="button" class="kap-sheet__close" data-kap-sheet-close aria-label="Close">&times;</button>
+    </div>
+    <div class="kap-sheet__body">
+      <div class="kap-menu">
+        <a href="{{ routes.all_products_collection_url }}" class="kap-menu__row">
+          <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'tag' -%}</span>
+          <span><strong>Offers &amp; Coupons</strong><small>Browse current store offers</small></span>
+          <b aria-hidden="true">&rsaquo;</b>
+        </a>
+        <a href="/pages/contact" class="kap-menu__row">
+          <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'chat' -%}</span>
+          <span><strong>Help &amp; Support</strong><small>Contact the Karthika team</small></span>
+          <b aria-hidden="true">&rsaquo;</b>
+        </a>
+        <a href="/policies/privacy-policy" class="kap-menu__row">
+          <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'lock' -%}</span>
+          <span><strong>Privacy &amp; Security</strong><small>Read our privacy policy</small></span>
+          <b aria-hidden="true">&rsaquo;</b>
+        </a>
+        <div class="kap-menu__row is-unavailable" aria-disabled="true">
+          <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'card' -%}</span>
+          <span><strong>Payment Methods</strong><small>Managed securely at checkout</small></span>
+        </div>
+        <div class="kap-menu__row is-unavailable" aria-disabled="true">
+          <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'star' -%}</span>
+          <span><strong>Karthika Rewards</strong><small>Not available yet</small></span>
+        </div>
+        <a href="{{ routes.account_logout_url }}" class="kap-menu__row kap-menu__row--logout">
+          <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'logout' -%}</span>
+          <span><strong>Logout</strong><small>Sign out of this device</small></span>
+          <b aria-hidden="true">&rsaquo;</b>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- unless new_customer_accounts -%}
+  <div class="kap-sheet" id="kap-sheet-profile" data-kap-sheet hidden>
+    <div class="kap-sheet__backdrop" data-kap-sheet-close></div>
+    <div class="kap-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="kap-sheet-profile-title">
+      <div class="kap-sheet__head">
+        <h2 id="kap-sheet-profile-title">Edit profile</h2>
+        <button type="button" class="kap-sheet__close" data-kap-sheet-close aria-label="Close">&times;</button>
+      </div>
+      <div class="kap-sheet__body">
+        <div class="kap-readonly">
+          <span>Email</span>
+          <strong>{{ customer.email }}</strong>
+          <small>Managed by Shopify &mdash; change it from the account sign-in flow.</small>
+        </div>
+        {%- liquid
+          assign profile_address = default_address
+          if profile_address == blank
+            assign profile_address = customer.new_address
+          endif
+        -%}
+        {%- form 'customer_address', profile_address -%}
+          {%- render 'karthika-address-fields', address: profile_address, form_id: 'Profile' -%}
+          <div class="kap-sheet__actions">
+            <button class="kap-btn kap-btn--primary" type="submit">Save changes</button>
+            <button class="kap-btn kap-btn--outline" type="button" data-kap-sheet-close>Cancel</button>
+          </div>
+        {%- endform -%}
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.Shopify && Shopify.CountryProvinceSelector) {
+        new Shopify.CountryProvinceSelector('AddressCountry_Profile', 'AddressProvince_Profile', {
+          hideElement: 'AddressProvinceContainer_Profile',
+        });
+      }
+    });
+  </script>
+{%- endunless -%}

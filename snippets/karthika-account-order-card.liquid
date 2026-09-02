@@ -1,0 +1,110 @@
+{% doc %}
+  Renders one order card for the account profile page.
+
+  @param {object} order - The customer order to render
+  @example
+  {% render 'karthika-account-order-card', order: order %}
+{% enddoc %}
+
+{%- liquid
+  assign thumb_1 = ''
+  assign thumb_2 = ''
+  assign thumb_alt_1 = ''
+  assign thumb_alt_2 = ''
+  assign thumb_slot = 0
+  assign buy_tokens = ''
+  assign item_total = 0
+
+  for item in order.line_items
+    assign item_total = item_total | plus: item.quantity
+
+    unless item.gift_card
+      if item.variant != blank and item.variant.available
+        assign buy_tokens = buy_tokens | append: '{"id":' | append: item.variant.id | append: ',"quantity":' | append: item.quantity | append: '}|'
+      endif
+    endunless
+
+    if thumb_slot < 2
+      assign media = item.image
+      if media == blank
+        assign media = item.product.featured_media
+      endif
+      if media != blank
+        assign thumb_slot = thumb_slot | plus: 1
+        assign media_url = media | image_url: width: 220
+        assign media_alt = item.product.title | default: item.title
+        if thumb_slot == 1
+          assign thumb_1 = media_url
+          assign thumb_alt_1 = media_alt
+        else
+          assign thumb_2 = media_url
+          assign thumb_alt_2 = media_alt
+        endif
+      endif
+    endif
+  endfor
+
+  assign buy_json = ''
+  if buy_tokens != blank
+    assign buy_parts = buy_tokens | split: '|'
+    assign buy_json = buy_parts | join: ','
+  endif
+
+  assign status_label = order.fulfillment_status_label | default: order.financial_status_label
+  if order.cancelled_at != blank
+    assign status_label = 'Cancelled'
+  endif
+
+  assign order_date = order.created_at | date: '%b %-d, %Y'
+  assign order_time = order.created_at | date: '%-l:%M %p'
+-%}
+
+<article class="kap-order">
+  {%- if thumb_1 != blank -%}
+    <div class="kap-order__thumbs">
+      <span class="kap-order__thumb">
+        <img src="{{ thumb_1 }}" alt="{{ thumb_alt_1 | escape }}" width="110" height="110" loading="lazy">
+      </span>
+      {%- if thumb_2 != blank -%}
+        <span class="kap-order__thumb">
+          <img src="{{ thumb_2 }}" alt="{{ thumb_alt_2 | escape }}" width="110" height="110" loading="lazy">
+        </span>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="kap-order__body">
+    <p class="kap-order__badges">
+      {%- if status_label != blank -%}
+        <span class="kap-order__status">{{ status_label }}</span>
+      {%- endif -%}
+      {%- for attribute in order.note_attributes -%}
+        {%- if attribute.first == 'Delivery type' and attribute.last == 'Gift' -%}
+          <span class="kap-order__status kap-order__status--gift">{{ 'customer.order.delivery_gift' | t }}</span>
+        {%- endif -%}
+      {%- endfor -%}
+    </p>
+    <strong class="kap-order__name">Order {{ order.name }}</strong>
+    <span class="kap-order__meta">{{ order_date }} &middot; {{ order_time }}</span>
+    <span class="kap-order__total">{{ order.total_price | money_with_currency }}</span>
+  </div>
+
+  <div class="kap-order__actions">
+    <a class="kap-order__open" href="{{ order.customer_url }}" aria-label="View details for order {{ order.name }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+        <polyline points="9 6 15 12 9 18"></polyline>
+      </svg>
+    </a>
+    {%- if buy_json != blank -%}
+      <button
+        type="button"
+        class="kap-order__buy"
+        data-kap-buy-again
+        data-kap-order-items='[{{ buy_json }}]'
+        data-kap-order-name="{{ order.name | escape }}"
+      >
+        <span class="kap-order__buy-label">Buy again</span>
+      </button>
+    {%- endif -%}
+  </div>
+</article>

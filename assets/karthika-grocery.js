@@ -1203,3 +1203,258 @@
     markReturnHome(link.getAttribute('href') || '');
   });
 })();
+
+/* ==========================================================================
+   Karthika Account Profile - Orders/Profile tabs, Buy again, bottom sheets
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  const TAB_STORAGE_KEY = 'karthikaAccountTab';
+  const FOCUSABLE =
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])';
+
+  const AccountProfileManager = {
+    root: null,
+    _openSheet: null,
+    _sheetOpenedBy: null,
+
+    init() {
+      this.root = document.querySelector('[data-kap]');
+      this.bindSheets();
+      if (!this.root) return;
+      this.bindTabs();
+      this.bindBuyAgain();
+      this.restoreTab();
+    },
+
+    /* ---- Tabs ---- */
+
+    bindTabs() {
+      this.root.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-kap-tab]');
+        if (!trigger) return;
+        event.preventDefault();
+        this.showTab(trigger.dataset.kapTab, true);
+      });
+    },
+
+    restoreTab() {
+      const hash = (window.location.hash || '').replace('#', '');
+      const query = new URLSearchParams(window.location.search).get('tab');
+      let stored = null;
+      try {
+        stored = sessionStorage.getItem(TAB_STORAGE_KEY);
+      } catch (err) {}
+
+      const requested = hash === 'orders' || hash === 'profile' ? hash : query || stored;
+      if (requested === 'orders') this.showTab('orders', false);
+    },
+
+    showTab(name, scrollIntoView) {
+      if (!name) return;
+
+      const panels = this.root.querySelectorAll('[data-kap-panel]');
+      let matched = false;
+      panels.forEach((panel) => {
+        const isMatch = panel.dataset.kapPanel === name;
+        if (isMatch) matched = true;
+        panel.toggleAttribute('hidden', !isMatch);
+      });
+      if (!matched) return;
+
+      this.root.querySelectorAll('.kap-tab').forEach((tab) => {
+        const isMatch = tab.dataset.kapTab === name;
+        tab.classList.toggle('is-active', isMatch);
+        tab.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+      });
+
+      try {
+        sessionStorage.setItem(TAB_STORAGE_KEY, name);
+      } catch (err) {}
+
+      if (scrollIntoView) {
+        const header = this.root.querySelector('.kap-tabs') || this.root;
+        header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    },
+
+    /* ---- Buy again ---- */
+
+    bindBuyAgain() {
+      this.root.addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-kap-buy-again]');
+        if (!btn) return;
+        event.preventDefault();
+        this.buyAgain(btn);
+      });
+    },
+
+    async buyAgain(btn) {
+      if (btn.disabled) return;
+
+      let items = [];
+      try {
+        items = JSON.parse(btn.dataset.kapOrderItems || '[]');
+      } catch (err) {}
+      items = items.filter((item) => item && item.id);
+
+      const label = btn.querySelector('.kap-order__buy-label') || btn;
+      const originalText = label.textContent;
+
+      if (!items.length) {
+        label.textContent = 'Unavailable';
+        setTimeout(() => {
+          label.textContent = originalText;
+        }, 2000);
+        return;
+      }
+
+      btn.disabled = true;
+      label.textContent = 'Adding\u2026';
+
+      const root = window.Shopify?.routes?.root || window.routes?.root || '/';
+      const base = root.endsWith('/') ? root : root + '/';
+      let successCount = 0;
+      const addedKeysNewestFirst = [];
+
+      for (const item of items) {
+        try {
+          const formData = new FormData();
+          formData.append('id', String(item.id));
+          formData.append('quantity', String(parseInt(item.quantity, 10) || 1));
+
+          const res = await fetch(`${base}cart/add.js`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (res.ok) {
+            successCount++;
+            try {
+              const added = await res.json();
+              if (added?.key) addedKeysNewestFirst.unshift(added.key);
+            } catch (err) {}
+          }
+        } catch (err) {}
+      }
+
+      if (addedKeysNewestFirst.length && window.CartItemOrder?.promoteKeys) {
+        try {
+          await window.CartItemOrder.promoteKeys(addedKeysNewestFirst);
+        } catch (err) {}
+      }
+
+      if (window.Karthika?.Cart?.refreshCartState) {
+        try {
+          await window.Karthika.Cart.refreshCartState(false);
+        } catch (err) {}
+      }
+
+      if (!successCount) {
+        btn.disabled = false;
+        label.textContent = 'Try again';
+        setTimeout(() => {
+          label.textContent = originalText;
+        }, 2200);
+        return;
+      }
+
+      btn.classList.add('is-done');
+      label.textContent = `${successCount} added`;
+
+      setTimeout(() => {
+        if (window.Karthika?.Cart?.openCartDrawer) window.Karthika.Cart.openCartDrawer();
+        else window.location.href = window.routes?.cart_url || '/cart';
+      }, 650);
+    },
+
+    /* ---- Bottom sheets ---- */
+
+    bindSheets() {
+      document.addEventListener('click', (event) => {
+        const opener = event.target.closest('[data-kap-sheet-open]');
+        if (opener) {
+          event.preventDefault();
+          this.openSheet(document.getElementById(opener.dataset.kapSheetOpen), opener);
+          return;
+        }
+
+        const closer = event.target.closest('[data-kap-sheet-close]');
+        if (closer) {
+          event.preventDefault();
+          this.closeSheet();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (!this._openSheet) return;
+        if (event.key === 'Escape') {
+          this.closeSheet();
+          return;
+        }
+        if (event.key === 'Tab') this.trapFocus(event);
+      });
+    },
+
+    openSheet(sheet, opener) {
+      if (!sheet) return;
+      this._openSheet = sheet;
+      this._sheetOpenedBy = opener || null;
+      sheet.removeAttribute('hidden');
+      void sheet.offsetWidth;
+      sheet.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+
+      const first = sheet.querySelector(FOCUSABLE);
+      if (first) first.focus();
+    },
+
+    closeSheet() {
+      const sheet = this._openSheet;
+      if (!sheet) return;
+      this._openSheet = null;
+      sheet.classList.remove('is-open');
+      document.body.style.overflow = '';
+
+      let settled = false;
+      const finalise = () => {
+        if (settled) return;
+        settled = true;
+        sheet.setAttribute('hidden', '');
+        sheet.removeEventListener('transitionend', finalise);
+      };
+      sheet.addEventListener('transitionend', finalise);
+      setTimeout(finalise, 400);
+
+      const returnTarget = this._sheetOpenedBy;
+      this._sheetOpenedBy = null;
+      if (returnTarget) returnTarget.focus();
+    },
+
+    trapFocus(event) {
+      const focusable = Array.from(this._openSheet.querySelectorAll(FOCUSABLE)).filter(
+        (el) => el.offsetParent !== null
+      );
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    },
+  };
+
+  window.Karthika = window.Karthika || {};
+  window.Karthika.AccountProfile = AccountProfileManager;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    AccountProfileManager.init();
+  });
+})();
