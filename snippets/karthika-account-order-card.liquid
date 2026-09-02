@@ -13,11 +13,8 @@
   assign thumb_alt_2 = ''
   assign thumb_slot = 0
   assign buy_tokens = ''
-  assign item_total = 0
 
   for item in order.line_items
-    assign item_total = item_total | plus: item.quantity
-
     unless item.gift_card
       if item.variant != blank and item.variant.available
         assign buy_tokens = buy_tokens | append: '{"id":' | append: item.variant.id | append: ',"quantity":' | append: item.quantity | append: '}|'
