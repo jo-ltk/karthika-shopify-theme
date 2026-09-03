@@ -1,0 +1,24 @@
+{%- comment -%}
+  Temporary food placeholder by product type.
+  Easy to remove later: delete this snippet (and stop calling it).
+  Uses Lorem Flickr grocery/food images with a deterministic lock from the
+  real Shopify type — no local assets, no hardcoded category→image map.
+  Accepts: product_type (string)
+  Outputs: image URL (no wrapping quotes)
+{%- endcomment -%}
+{%- liquid
+  assign type_key = product_type | default: '' | strip | downcase
+  if type_key == blank
+    assign type_key = 'product'
+  endif
+
+  assign type_handle = type_key | handleize
+  if type_handle == blank
+    assign type_handle = 'product'
+  endif
+
+  assign lock = type_handle.size | times: 97
+  assign lock = lock | plus: type_key.size | times: 13
+  assign lock = lock | modulo: 9000 | plus: 100
+-%}
+https://loremflickr.com/600/600/grocery,food,vegetables,fruits/all?lock={{ lock }}

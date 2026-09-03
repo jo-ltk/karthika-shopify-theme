@@ -1,53 +1,125 @@
 {{ 'karthika-grocery.css' | asset_url | stylesheet_tag }}
 
-{%- liquid
-  -%}
-
 {%- comment -%}
-  Sidebar categories with curated Unsplash CDN grocery images matching the reference UI
+  Karthika /collections browser — live Shopify catalog only.
+  Categories come from real collections (when present) or product types.
+  Products load via collection.kcb2-json alternate template (paginated).
+  Temporary placeholders: Lorem Flickr food/grocery images seeded by product type (snippet karthika-type-placeholder).
 {%- endcomment -%}
 
-{%- assign sidebar_handles = 'dairy-eggs,bread-buns,paneer-tofu,cheese,eggs,top-deals,fresh-fruits,vegetables,rice-grains,spices-masala,dals-pulses,atta-flours,indian-snacks,frozen-foods,beverages,household' | split: ',' -%}
+{%- liquid
+  assign catalog_mode = 'types'
+  assign custom_collection_count = 0
 
-{%- assign sidebar_labels = 'Milk,Bread and Buns,Paneer and Tofu,Cheese,Eggs,Top Deals,Fresh Fruits,Vegetables,Rice & Grains,Spices & Masala,Dals & Pulses,Atta & Flours,Indian Snacks,Frozen Foods,Beverages,Household' | split: ',' -%}
+  for col in collections
+    unless col.handle == 'all' or col.handle == 'frontpage'
+      if col.all_products_count > 0
+        assign custom_collection_count = custom_collection_count | plus: 1
+      endif
+    endunless
+  endfor
 
-{%- assign sidebar_imgs = 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1509440159596-0249088772ff?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1540420773420-3366772f4999?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1586201375761-83865001e31c?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1509440159596-0249088772ff?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1621447504864-d8686e12698c?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1513104890138-7c749659a591?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=160&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=160&auto=format&fit=crop&q=80' | split: ',' -%}
+  if custom_collection_count > 0
+    assign catalog_mode = 'collections'
+  endif
 
-<section class="kcb2" id="KCB2Page" data-section-id="{{ section.id }}" aria-label="Browse categories">
+  assign money_format = shop.money_format
+  assign initial_title = section.settings.title
+-%}
 
-  {%- comment -%} ── MAIN LAYOUT: Sidebar + Content ── {%- endcomment -%}
+<section
+  class="kcb2"
+  id="KCB2Page"
+  data-section-id="{{ section.id }}"
+  data-catalog-mode="{{ catalog_mode }}"
+  data-root="{{ routes.root_url }}"
+  data-money-format="{{ money_format | escape }}"
+  data-search-url="{{ routes.search_url }}"
+  data-all-url="{{ routes.all_products_collection_url }}"
+  aria-label="Browse categories"
+>
   <div class="kcb2-layout">
-
-    {%- comment -%} ── LEFT SIDEBAR ── {%- endcomment -%}
     <aside class="kcb2-sidebar" aria-label="Product categories">
-      <nav class="kcb2-cat-list">
-        {%- for handle in sidebar_handles -%}
-          {%- assign label = sidebar_labels[forloop.index0] -%}
-          {%- assign img_url = sidebar_imgs[forloop.index0] -%}
-          <button
-            type="button"
-            class="kcb2-cat-item{% if forloop.first %} is-active{% endif %}"
-            data-handle="{{ handle }}"
-            data-label="{{ label | escape }}"
-            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
-          >
-            <div class="kcb2-cat-img-wrap">
-              <img src="{{ img_url }}" alt="{{ label | escape }}" width="52" height="52" loading="lazy" onerror="this.style.display='none'">
-            </div>
-            <span class="kcb2-cat-label">{{ label }}</span>
-          </button>
-        {%- endfor -%}
+      <nav class="kcb2-cat-list" id="KCB2CatList">
+        {%- if catalog_mode == 'collections' -%}
+          {%- assign first_set = false -%}
+          {%- for col in collections -%}
+            {%- unless col.handle == 'all' or col.handle == 'frontpage' -%}
+              {%- if col.all_products_count > 0 -%}
+                {%- liquid
+                  assign is_active = false
+                  unless first_set
+                    assign is_active = true
+                    assign first_set = true
+                    assign initial_title = col.title
+                  endunless
+                  if col.featured_image
+                    assign cat_img = col.featured_image | image_url: width: 160
+                  else
+                    capture cat_img
+                      render 'karthika-type-placeholder', product_type: col.title
+                    endcapture
+                    assign cat_img = cat_img | strip
+                  endif
+                -%}
+                <button
+                  type="button"
+                  class="kcb2-cat-item{% if is_active %} is-active{% endif %}"
+                  data-kind="collection"
+                  data-handle="{{ col.handle | escape }}"
+                  data-label="{{ col.title | escape }}"
+                  data-count="{{ col.all_products_count }}"
+                  aria-pressed="{% if is_active %}true{% else %}false{% endif %}"
+                >
+                  <div class="kcb2-cat-img-wrap">
+                    <img src="{{ cat_img }}" alt="" width="52" height="52" loading="lazy">
+                  </div>
+                  <span class="kcb2-cat-label">{{ col.title | escape }}</span>
+                </button>
+              {%- endif -%}
+            {%- endunless -%}
+          {%- endfor -%}
+        {%- else -%}
+          {%- assign first_set = false -%}
+          {%- for product_type in collections.all.all_types -%}
+            {%- if product_type != blank -%}
+              {%- liquid
+                assign is_active = false
+                unless first_set
+                  assign is_active = true
+                  assign first_set = true
+                  assign initial_title = product_type
+                endunless
+                capture cat_img
+                  render 'karthika-type-placeholder', product_type: product_type
+                endcapture
+                assign cat_img = cat_img | strip
+              -%}
+              <button
+                type="button"
+                class="kcb2-cat-item{% if is_active %} is-active{% endif %}"
+                data-kind="type"
+                data-handle="{{ product_type | handleize | escape }}"
+                data-type="{{ product_type | escape }}"
+                data-label="{{ product_type | escape }}"
+                aria-pressed="{% if is_active %}true{% else %}false{% endif %}"
+              >
+                <div class="kcb2-cat-img-wrap">
+                  <img src="{{ cat_img }}" alt="" width="52" height="52" loading="lazy">
+                </div>
+                <span class="kcb2-cat-label">{{ product_type | escape }}</span>
+              </button>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
       </nav>
     </aside>
 
-    {%- comment -%} ── RIGHT CONTENT PANEL ── {%- endcomment -%}
     <main class="kcb2-main" id="KCB2Main" aria-live="polite" aria-label="Products">
-
-      {%- comment -%} ── TOP NAVIGATION BAR (Matching reference header) ── {%- endcomment -%}
       <div class="kcb2-top-bar">
         <div class="kcb2-top-bar__left">
           {% render 'karthika-back-button' %}
-          <h1 class="kcb2-page-title" id="KCB2Title">Dairy, Bread and Eggs</h1>
+          <h1 class="kcb2-page-title" id="KCB2Title">{{ initial_title | default: section.settings.title | escape }}</h1>
         </div>
         <a href="{{ routes.search_url }}" class="kcb2-search-btn karthika-search-bar-trigger" aria-label="Search">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -57,62 +129,63 @@
         </a>
       </div>
 
-      {%- comment -%} ── SECONDARY FILTER CONTROLS (Sort By, Brand, Type pills) ── {%- endcomment -%}
       <div class="kcb2-filter-strip" role="group" aria-label="Filter and Sort">
         <div class="kcb2-filter-scroll karthika-hide-scrollbar">
+          <div class="kcb2-dropdown" id="KCB2SortDropdown">
+            <button type="button" class="kcb2-pill-btn" id="KCB2SortBtn" aria-haspopup="listbox" aria-expanded="false">
+              <span id="KCB2SortLabel">Sort By</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <ul class="kcb2-dropdown-menu" id="KCB2SortMenu" role="listbox" aria-label="Sort products" hidden>
+              <li class="kcb2-dropdown-item is-selected" data-sort="manual" role="option" aria-selected="true" tabindex="0">Featured</li>
+              <li class="kcb2-dropdown-item" data-sort="best-selling" role="option" aria-selected="false" tabindex="0">Best selling</li>
+              <li class="kcb2-dropdown-item" data-sort="price-ascending" role="option" aria-selected="false" tabindex="0">Price: Low to High</li>
+              <li class="kcb2-dropdown-item" data-sort="price-descending" role="option" aria-selected="false" tabindex="0">Price: High to Low</li>
+              <li class="kcb2-dropdown-item" data-sort="title-ascending" role="option" aria-selected="false" tabindex="0">Name: A–Z</li>
+              <li class="kcb2-dropdown-item" data-sort="title-descending" role="option" aria-selected="false" tabindex="0">Name: Z–A</li>
+            </ul>
+          </div>
 
-        <!-- Sort By Dropdown Pill -->
-        <div class="kcb2-dropdown" id="KCB2SortDropdown">
-          <button type="button" class="kcb2-pill-btn" id="KCB2SortBtn" aria-haspopup="listbox" aria-expanded="false">
-            <span id="KCB2SortLabel">Sort By</span>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <ul class="kcb2-dropdown-menu" id="KCB2SortMenu" role="listbox" aria-label="Sort products" hidden>
-            <li class="kcb2-dropdown-item is-selected" data-sort="default" role="option" aria-selected="true" tabindex="0">Relevance</li>
-            <li class="kcb2-dropdown-item" data-sort="price-asc" role="option" aria-selected="false" tabindex="0">Price: Low to High</li>
-            <li class="kcb2-dropdown-item" data-sort="price-desc" role="option" aria-selected="false" tabindex="0">Price: High to Low</li>
-            <li class="kcb2-dropdown-item" data-sort="title-asc" role="option" aria-selected="false" tabindex="0">Name: A–Z</li>
-          </ul>
+          <div class="kcb2-dropdown" id="KCB2BrandDropdown">
+            <button type="button" class="kcb2-pill-btn" id="KCB2BrandBtn" aria-haspopup="listbox" aria-expanded="false">
+              <span id="KCB2BrandLabel">Brand</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <ul class="kcb2-dropdown-menu" id="KCB2BrandMenu" role="listbox" aria-label="Filter by brand" hidden></ul>
+          </div>
+
+          <div class="kcb2-dropdown" id="KCB2TypeDropdown">
+            <button type="button" class="kcb2-pill-btn" id="KCB2TypeBtn" aria-haspopup="listbox" aria-expanded="false">
+              <span id="KCB2TypeLabel">Type</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <ul class="kcb2-dropdown-menu" id="KCB2TypeMenu" role="listbox" aria-label="Filter by type" hidden></ul>
+          </div>
+
+          <div class="kcb2-dropdown" id="KCB2AvailDropdown">
+            <button type="button" class="kcb2-pill-btn" id="KCB2AvailBtn" aria-haspopup="listbox" aria-expanded="false">
+              <span id="KCB2AvailLabel">Availability</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <ul class="kcb2-dropdown-menu" id="KCB2AvailMenu" role="listbox" aria-label="Filter by availability" hidden>
+              <li class="kcb2-dropdown-item is-selected" data-avail="all" role="option" aria-selected="true" tabindex="0">All</li>
+              <li class="kcb2-dropdown-item" data-avail="in_stock" role="option" aria-selected="false" tabindex="0">In stock</li>
+              <li class="kcb2-dropdown-item" data-avail="sold_out" role="option" aria-selected="false" tabindex="0">Sold out</li>
+            </ul>
+          </div>
+
+          <div class="kcb2-dropdown" id="KCB2PriceDropdown">
+            <button type="button" class="kcb2-pill-btn" id="KCB2PriceBtn" aria-haspopup="listbox" aria-expanded="false">
+              <span id="KCB2PriceLabel">Price</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <ul class="kcb2-dropdown-menu" id="KCB2PriceMenu" role="listbox" aria-label="Filter by price" hidden></ul>
+          </div>
         </div>
+      </div>
 
-        <!-- Brand Dropdown Pill -->
-        <div class="kcb2-dropdown" id="KCB2BrandDropdown">
-          <button type="button" class="kcb2-pill-btn" id="KCB2BrandBtn" aria-haspopup="listbox" aria-expanded="false">
-            <span id="KCB2BrandLabel">Brand</span>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <ul class="kcb2-dropdown-menu" id="KCB2BrandMenu" role="listbox" aria-label="Filter by brand" hidden></ul>
-        </div>
+      <p class="kcb2-count" id="KCB2Count" hidden></p>
 
-        <!-- Subcategory/Type Dropdown Pill -->
-        <div class="kcb2-dropdown" id="KCB2TypeDropdown">
-          <button type="button" class="kcb2-pill-btn" id="KCB2TypeBtn" aria-haspopup="listbox" aria-expanded="false">
-            <span id="KCB2TypeLabel">Type</span>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <ul class="kcb2-dropdown-menu" id="KCB2TypeMenu" role="listbox" aria-label="Filter by type" hidden></ul>
-        </div>
-
-        <!-- Pack Size Pill -->
-        <div class="kcb2-dropdown" id="KCB2PackDropdown">
-          <button type="button" class="kcb2-pill-btn" id="KCB2PackBtn" aria-haspopup="listbox" aria-expanded="false">
-            <span id="KCB2PackLabel">Pack Size</span>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <ul class="kcb2-dropdown-menu" id="KCB2PackMenu" role="listbox" aria-label="Filter by pack size" hidden></ul>
-        </div>
-        </div><!-- /.kcb2-filter-scroll -->
-      </div><!-- /.kcb2-filter-strip -->
-
-      {%- comment -%} ── PRODUCTS GRID ── {%- endcomment -%}
       <div class="kcb2-products" id="KCB2Products">
         <div class="kcb2-loading" id="KCB2Loading" aria-label="Loading products" style="display:none">
           <span class="kcb2-spinner" aria-hidden="true"></span>
@@ -120,14 +193,16 @@
         </div>
       </div>
 
-      {%- comment -%} Empty state {%- endcomment -%}
+      <div class="kcb2-load-more-wrap" id="KCB2LoadMoreWrap" hidden>
+        <button type="button" class="kcb2-empty-btn" id="KCB2LoadMore">Load more</button>
+      </div>
+
       <div class="kcb2-empty" id="KCB2Empty" style="display:none">
         <p class="kcb2-empty-icon" aria-hidden="true">🛒</p>
         <h2>No products found</h2>
         <p>Try selecting a different category or clearing the filter.</p>
         <a href="{{ routes.all_products_collection_url }}" class="kcb2-empty-btn">Browse all products</a>
       </div>
-
     </main>
   </div>
 </section>
@@ -136,575 +211,302 @@
 (function () {
   'use strict';
 
-  /* ── Configuration ─────────────────────────────────────────────────────── */
-  var ROOT = window.Shopify && window.Shopify.routes && window.Shopify.routes.root
-    ? window.Shopify.routes.root
-    : (window.routes && window.routes.root ? window.routes.root : '/');
-  if (!ROOT.endsWith('/')) ROOT += '/';
-
-  /* ── Liquid Store Products Data ── */
-  var LIQUID_STORE_PRODUCTS = [
-    {%- for collection in collections -%}
-      {%- for product in collection.products -%}
-        {
-          id: {{ product.id | json }},
-          title: {{ product.title | json }},
-          handle: {{ product.handle | json }},
-          vendor: {{ product.vendor | json }},
-          product_type: {{ product.type | default: product.product_type | json }},
-          tags: {{ product.tags | json }},
-          collection_handle: {{ collection.handle | json }},
-          collection_title: {{ collection.title | json }},
-          variants: [
-            {%- for variant in product.variants -%}
-              {
-                id: {{ variant.id | json }},
-                title: {{ variant.title | json }},
-                price: {{ variant.price | divided_by: 100.0 | json }},
-                compare_at_price: {% if variant.compare_at_price %}{{ variant.compare_at_price | divided_by: 100.0 | json }}{% else %}null{% endif %},
-                available: {{ variant.available | json }},
-                grams: {{ variant.grams | json }}
-              }{% unless forloop.last %},{% endunless %}
-            {%- endfor -%}
-          ],
-          images: [
-            {%- for image in product.images -%}
-              { src: {{ image | image_url: width: 600 | json }} }{% unless forloop.last %},{% endunless %}
-            {%- endfor -%}
-          ]
-        },
-      {%- endfor -%}
-    {%- endfor -%}
-    {%- if collections.all and collections.all.products.size > 0 -%}
-      {%- for product in collections.all.products -%}
-        {
-          id: {{ product.id | json }},
-          title: {{ product.title | json }},
-          handle: {{ product.handle | json }},
-          vendor: {{ product.vendor | json }},
-          product_type: {{ product.type | default: product.product_type | json }},
-          tags: {{ product.tags | json }},
-          collection_handle: "all",
-          collection_title: "All Products",
-          variants: [
-            {%- for variant in product.variants -%}
-              {
-                id: {{ variant.id | json }},
-                title: {{ variant.title | json }},
-                price: {{ variant.price | divided_by: 100.0 | json }},
-                compare_at_price: {% if variant.compare_at_price %}{{ variant.compare_at_price | divided_by: 100.0 | json }}{% else %}null{% endif %},
-                available: {{ variant.available | json }},
-                grams: {{ variant.grams | json }}
-              }{% unless forloop.last %},{% endunless %}
-            {%- endfor -%}
-          ],
-          images: [
-            {%- for image in product.images -%}
-              { src: {{ image | image_url: width: 600 | json }} }{% unless forloop.last %},{% endunless %}
-            {%- endfor -%}
-          ]
-        }{% unless forloop.last %},{% endunless %}
-      {%- endfor -%}
-    {%- endif -%}
-  ];
-
-  // Deduplicate products by id
-  var STORE_PRODUCT_MAP = {};
-  var UNIQUE_STORE_PRODUCTS = [];
-  LIQUID_STORE_PRODUCTS.forEach(function(p) {
-    if (p && p.id && !STORE_PRODUCT_MAP[p.id]) {
-      STORE_PRODUCT_MAP[p.id] = true;
-      UNIQUE_STORE_PRODUCTS.push(p);
-    }
-  });
-
-  /* ── Rich fallback dummy catalog if store is brand new/empty ───────────── */
-  var DUMMY_PRODUCTS = [
-    {
-      id: 9001,
-      title: "Milma Prime Pasteurized Homogenized Toned Milk",
-      handle: "milma-prime-pasteurized-milk",
-      vendor: "Milma",
-      product_type: "Milk",
-      tags: ["Milk", "Dairy", "Bestseller", "Toned Milk"],
-      variants: [{
-        id: 900101,
-        title: "500 ml",
-        price: "28.00",
-        compare_at_price: "32.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9002,
-      title: "Muralya Homogenized Toned Fortified Milk Sachet",
-      handle: "muralya-homogenized-toned-milk",
-      vendor: "Muralya",
-      product_type: "Milk",
-      tags: ["Milk", "Dairy", "Bestseller", "Toned Milk"],
-      variants: [{
-        id: 900201,
-        title: "450 ml",
-        price: "27.00",
-        compare_at_price: "29.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9003,
-      title: "Amul Taaza Toned Milk Tetra Pack",
-      handle: "amul-taaza-toned-milk",
-      vendor: "Amul",
-      product_type: "Milk",
-      tags: ["Milk", "Dairy", "Toned Milk"],
-      variants: [{
-        id: 900301,
-        title: "1 Ltr",
-        price: "77.00",
-        compare_at_price: "82.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1527153857715-3908f2bae5e8?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9004,
-      title: "Muralya Fresh Bottled Toned Milk",
-      handle: "muralya-bottled-toned-milk",
-      vendor: "Muralya",
-      product_type: "Milk",
-      tags: ["Milk", "Dairy", "Bottled Milk"],
-      variants: [{
-        id: 900401,
-        title: "1 Ltr",
-        price: "68.00",
-        compare_at_price: "75.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9005,
-      title: "Fresh White Sliced Sandwich Bread",
-      handle: "fresh-white-sliced-bread",
-      vendor: "Modern",
-      product_type: "Bread and Buns",
-      tags: ["Bread", "Buns", "Bakery"],
-      variants: [{
-        id: 900501,
-        title: "400g",
-        price: "45.00",
-        compare_at_price: "50.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9006,
-      title: "100% Whole Wheat Brown Bread",
-      handle: "whole-wheat-brown-bread",
-      vendor: "Britannia",
-      product_type: "Bread and Buns",
-      tags: ["Bread", "Whole Wheat", "Brown Bread"],
-      variants: [{
-        id: 900601,
-        title: "400g",
-        price: "55.00",
-        compare_at_price: "60.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9007,
-      title: "Fresh Malai Paneer Cubes",
-      handle: "fresh-malai-paneer",
-      vendor: "Amul",
-      product_type: "Paneer and Tofu",
-      tags: ["Paneer", "Tofu", "Dairy", "Fresh Paneer"],
-      variants: [{
-        id: 900701,
-        title: "200g",
-        price: "90.00",
-        compare_at_price: "105.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9008,
-      title: "Organic Soya Tofu Block",
-      handle: "organic-soya-tofu",
-      vendor: "Urban Platter",
-      product_type: "Paneer and Tofu",
-      tags: ["Tofu", "Vegan", "Organic"],
-      variants: [{
-        id: 900801,
-        title: "200g",
-        price: "85.00",
-        compare_at_price: "95.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9009,
-      title: "Amul Processed Cheese Slices Pack",
-      handle: "amul-cheese-slices",
-      vendor: "Amul",
-      product_type: "Cheese",
-      tags: ["Cheese", "Dairy", "Cheese Slices"],
-      variants: [{
-        id: 900901,
-        title: "200g (10 Slices)",
-        price: "140.00",
-        compare_at_price: "155.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9010,
-      title: "Farm Fresh White Eggs Tray",
-      handle: "farm-fresh-white-eggs",
-      vendor: "Eggoz",
-      product_type: "Eggs",
-      tags: ["Eggs", "Dairy", "Poultry"],
-      variants: [{
-        id: 901001,
-        title: "Pack of 6",
-        price: "52.00",
-        compare_at_price: "60.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9011,
-      title: "Fresh Alphonso Mangoes",
-      handle: "fresh-alphonso-mangoes",
-      vendor: "Karthika Fresh",
-      product_type: "Fresh Fruits",
-      tags: ["Fruits", "Fresh", "Mango"],
-      variants: [{
-        id: 901101,
-        title: "1 kg",
-        price: "180.00",
-        compare_at_price: "220.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9012,
-      title: "Fresh Crisp Red Apples",
-      handle: "fresh-crisp-red-apples",
-      vendor: "Karthika Fresh",
-      product_type: "Fresh Fruits",
-      tags: ["Fruits", "Fresh", "Apples"],
-      variants: [{
-        id: 901201,
-        title: "1 kg",
-        price: "160.00",
-        compare_at_price: "190.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9013,
-      title: "Fresh Vine Red Tomatoes",
-      handle: "fresh-vine-red-tomatoes",
-      vendor: "Karthika Fresh",
-      product_type: "Vegetables",
-      tags: ["Vegetables", "Fresh Produce", "Tomatoes"],
-      variants: [{
-        id: 901301,
-        title: "1 kg",
-        price: "40.00",
-        compare_at_price: "50.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9014,
-      title: "Crisp Green Broccoli Florets",
-      handle: "fresh-green-broccoli",
-      vendor: "Karthika Fresh",
-      product_type: "Vegetables",
-      tags: ["Vegetables", "Fresh Produce", "Broccoli"],
-      variants: [{
-        id: 901401,
-        title: "500g",
-        price: "70.00",
-        compare_at_price: "85.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9015,
-      title: "Kerala Matta Long Grain Rice",
-      handle: "kerala-matta-rice-5kg",
-      vendor: "Double Horse",
-      product_type: "Rice & Grains",
-      tags: ["Rice", "Grains", "Kerala"],
-      variants: [{
-        id: 901501,
-        title: "5 kg",
-        price: "340.00",
-        compare_at_price: "380.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9016,
-      title: "Premium Organic Black Pepper",
-      handle: "premium-black-pepper",
-      vendor: "Eastern",
-      product_type: "Spices & Masala",
-      tags: ["Spices", "Masala", "Kerala"],
-      variants: [{
-        id: 901601,
-        title: "100g",
-        price: "95.00",
-        compare_at_price: "115.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9017,
-      title: "Kerala Crispy Banana Chips",
-      handle: "kerala-banana-chips-pack",
-      vendor: "Karthika Bakery",
-      product_type: "Indian Snacks",
-      tags: ["Snacks", "Kerala", "Banana Chips"],
-      variants: [{
-        id: 901701,
-        title: "250g",
-        price: "95.00",
-        compare_at_price: "110.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1621447504864-d8686e12698c?w=600&auto=format&fit=crop&q=80" }]
-    },
-    {
-      id: 9018,
-      title: "Natural Tender Coconut Water",
-      handle: "tender-coconut-water",
-      vendor: "Karthika Fresh",
-      product_type: "Beverages",
-      tags: ["Beverages", "Drinks", "Coconut"],
-      variants: [{
-        id: 901801,
-        title: "1 pc",
-        price: "50.00",
-        compare_at_price: "60.00",
-        available: true
-      }],
-      images: [{ src: "https://images.unsplash.com/photo-1550828520-4cb496926fc9?w=600&auto=format&fit=crop&q=80" }]
-    }
-  ];
-
-  /* ── DOM refs ───────────────────────────────────────────────────────────── */
-  var page          = document.getElementById('KCB2Page');
+  var page = document.getElementById('KCB2Page');
   if (!page) return;
 
-  var titleEl       = document.getElementById('KCB2Title');
-  var countEl       = document.getElementById('KCB2Count');
-  var productsEl    = document.getElementById('KCB2Products');
-  var loadingEl     = document.getElementById('KCB2Loading');
-  var emptyEl       = document.getElementById('KCB2Empty');
-  var brandMenuEl   = document.getElementById('KCB2BrandMenu');
-  var brandBtnEl    = document.getElementById('KCB2BrandBtn');
-  var brandLabelEl  = document.getElementById('KCB2BrandLabel');
-  var sortBtnEl     = document.getElementById('KCB2SortBtn');
-  var sortLabelEl   = document.getElementById('KCB2SortLabel');
-  var sortMenuEl    = document.getElementById('KCB2SortMenu');
-  var typeBtnEl     = document.getElementById('KCB2TypeBtn');
-  var typeLabelEl   = document.getElementById('KCB2TypeLabel');
-  var typeMenuEl    = document.getElementById('KCB2TypeMenu');
-  var packBtnEl     = document.getElementById('KCB2PackBtn');
-  var packLabelEl   = document.getElementById('KCB2PackLabel');
-  var packMenuEl    = document.getElementById('KCB2PackMenu');
+  var ROOT = page.dataset.root || '/';
+  if (ROOT.slice(-1) !== '/') ROOT += '/';
 
-  /* ── State ─────────────────────────────────────────────────────────────── */
+  var moneyFormat = page.dataset.moneyFormat || {{ shop.money_format | json }};
+
+  var titleEl = document.getElementById('KCB2Title');
+  var countEl = document.getElementById('KCB2Count');
+  var productsEl = document.getElementById('KCB2Products');
+  var loadingEl = document.getElementById('KCB2Loading');
+  var emptyEl = document.getElementById('KCB2Empty');
+  var loadMoreWrap = document.getElementById('KCB2LoadMoreWrap');
+  var loadMoreBtn = document.getElementById('KCB2LoadMore');
+
+  var brandMenuEl = document.getElementById('KCB2BrandMenu');
+  var brandBtnEl = document.getElementById('KCB2BrandBtn');
+  var brandLabelEl = document.getElementById('KCB2BrandLabel');
+  var sortBtnEl = document.getElementById('KCB2SortBtn');
+  var sortLabelEl = document.getElementById('KCB2SortLabel');
+  var sortMenuEl = document.getElementById('KCB2SortMenu');
+  var typeBtnEl = document.getElementById('KCB2TypeBtn');
+  var typeLabelEl = document.getElementById('KCB2TypeLabel');
+  var typeMenuEl = document.getElementById('KCB2TypeMenu');
+  var availBtnEl = document.getElementById('KCB2AvailBtn');
+  var availLabelEl = document.getElementById('KCB2AvailLabel');
+  var availMenuEl = document.getElementById('KCB2AvailMenu');
+  var priceBtnEl = document.getElementById('KCB2PriceBtn');
+  var priceLabelEl = document.getElementById('KCB2PriceLabel');
+  var priceMenuEl = document.getElementById('KCB2PriceMenu');
+
   var state = {
-    handle: 'dairy-eggs',
+    kind: 'collection',
+    handle: '',
+    type: '',
+    label: '',
     products: [],
     filteredProducts: [],
+    seenIds: {},
     activeBrand: 'all',
     activeType: 'all',
-    activePack: 'all',
-    activeSort: 'default',
-    loading: false
+    activeAvail: 'all',
+    activePrice: 'all',
+    activeSort: 'manual',
+    page: 1,
+    pages: 1,
+    productsCount: 0,
+    loading: false,
+    vendors: [],
+    types: []
   };
 
-  /* ── Fetch products with instant store data integration ── */
-  var cachedAllProducts = null;
+  function placeholderForType(type) {
+    var raw = String(type || 'product').trim().toLowerCase() || 'product';
+    var handle = raw.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'product';
+    var lock = ((handle.length * 97) + (raw.length * 13)) % 9000 + 100;
+    return 'https://loremflickr.com/600/600/grocery,food,vegetables,fruits/all?lock=' + lock;
+  }
 
-  var HANDLE_KEYWORDS = {
-    'dairy-eggs':    ['dairy', 'milk', 'egg', 'paneer', 'butter', 'cheese', 'ghee', 'yogurt', 'bread', 'bun', 'curd'],
-    'bread-buns':    ['bread', 'bun', 'bakery', 'sliced', 'sandwich', 'pav', 'toast'],
-    'paneer-tofu':   ['paneer', 'tofu', 'curd', 'soya'],
-    'cheese':        ['cheese', 'slice', 'mozzarella', 'cheddar', 'spread'],
-    'eggs':          ['egg', 'poultry', 'tray', 'white egg', 'country egg'],
-    'top-deals':     ['deal', 'offer', 'bestseller', 'special', 'prime', 'popular', 'discount'],
-    'fresh-fruits':  ['fruit', 'mango', 'orange', 'grape', 'banana', 'apple', 'avocado', 'fresh fruits', 'berry', 'watermelon', 'papaya'],
-    'vegetables':    ['vegetable', 'tomato', 'potato', 'onion', 'pepper', 'broccoli', 'fresh produce', 'carrot', 'beans', 'spinach', 'ginger', 'garlic'],
-    'rice-grains':   ['rice', 'basmati', 'matta', 'grain', 'staples', 'millet', 'quinoa', 'poha', 'raw rice'],
-    'spices-masala': ['spice', 'pepper', 'turmeric', 'masala', 'chilli', 'powder', 'coriander', 'cardamom', 'clove', 'cinnamon', 'garam masala'],
-    'dals-pulses':   ['dal', 'pulse', 'toor', 'moong', 'chana', 'rajma', 'urad', 'lentil', 'gram'],
-    'atta-flours':   ['atta', 'flour', 'wheat', 'besan', 'ragi', 'appam', 'puttu', 'maida', 'rice powder'],
-    'indian-snacks': ['snack', 'mixture', 'chips', 'murukku', 'biscuit', 'namkeen', 'kerala', 'cookies', 'crackers'],
-    'frozen-foods':  ['frozen', 'parotta', 'chapati', 'ready to eat', 'peas', 'nuggets', 'fries'],
-    'beverages':     ['beverage', 'drink', 'coconut', 'tea', 'coffee', 'juice', 'water', 'soda', 'syrup', 'squash'],
-    'household':     ['clean', 'household', 'tissue', 'wash', 'detergent', 'soap', 'dishwash', 'cleaner']
-  };
+  function formatMoney(cents) {
+    var amount = (Number(cents) || 0) / 100;
+    var formatted = amount.toFixed(2);
+    var withCommas = formatted.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    var value = moneyFormat
+      .replace(/\{\{\s*amount\s*\}\}/g, withCommas)
+      .replace(/\{\{\s*amount_no_decimals\s*\}\}/g, Math.round(amount).toString())
+      .replace(/\{\{\s*amount_with_comma_separator\s*\}\}/g, withCommas.replace('.', ',').replace(/,(?=\d{3})/g, '.'))
+      .replace(/\{\{\s*amount_no_decimals_with_comma_separator\s*\}\}/g, Math.round(amount).toString());
+    if (window.Shopify && typeof window.Shopify.formatMoney === 'function') {
+      try { return window.Shopify.formatMoney(cents, moneyFormat); } catch (e) { /* fall through */ }
+    }
+    return value;
+  }
 
-  function fetchProducts(handle, cb) {
-    if (cachedAllProducts) {
-      filterByHandle(cachedAllProducts, handle, cb);
-      return;
+  function escHtml(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function buildFetchUrl(pageNum) {
+    var sort = state.activeSort || 'manual';
+    var params = 'view=kcb2-json&page=' + encodeURIComponent(pageNum) + '&sort_by=' + encodeURIComponent(sort);
+    if (state.kind === 'type') {
+      return ROOT + 'collections/types?' + params + '&q=' + encodeURIComponent(state.type || '');
+    }
+    return ROOT + 'collections/' + encodeURIComponent(state.handle) + '?' + params;
+  }
+
+  function normalizeProduct(p) {
+    if (!p || !p.id) return null;
+    var variants = p.variants || [];
+    var variant = variants[0] || {};
+    var available = typeof p.available === 'boolean'
+      ? p.available
+      : variants.some(function (v) { return v && v.available; });
+    return {
+      id: p.id,
+      title: p.title || '',
+      handle: p.handle || '',
+      url: p.url || (ROOT + 'products/' + (p.handle || '')),
+      vendor: p.vendor || '',
+      type: p.type || p.product_type || '',
+      tags: p.tags || [],
+      available: available,
+      price: typeof p.price === 'number' ? p.price : (variant.price || 0),
+      compare_at_price: p.compare_at_price || variant.compare_at_price || 0,
+      featured_image: p.featured_image || (p.images && p.images[0] && (p.images[0].src || p.images[0])) || null,
+      variants: variants
+    };
+  }
+
+  function fetchPage(pageNum, append) {
+    state.loading = true;
+    if (!append) {
+      if (loadingEl) loadingEl.style.display = 'flex';
+      if (emptyEl) emptyEl.style.display = 'none';
+      if (loadMoreWrap) loadMoreWrap.hidden = true;
+      Array.from(productsEl.querySelectorAll('.kcb2-grid')).forEach(function (g) { g.remove(); });
     }
 
-    // Combine store products first, falling back to dummy products if store has no products
-    var initialCatalog = UNIQUE_STORE_PRODUCTS.length > 0 ? UNIQUE_STORE_PRODUCTS : DUMMY_PRODUCTS;
-    cachedAllProducts = initialCatalog;
-    filterByHandle(cachedAllProducts, handle, cb);
+    return fetch(buildFetchUrl(pageNum), { credentials: 'same-origin' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(function (text) {
+        var data = JSON.parse(text.trim());
+        var incoming = (data.products || []).map(normalizeProduct).filter(Boolean);
+        var unique = [];
+        incoming.forEach(function (p) {
+          if (state.seenIds[p.id]) return;
+          state.seenIds[p.id] = true;
+          unique.push(p);
+        });
 
-    /* Fetch real products via Shopify /products.json in the background and update cache */
-    try {
-      fetch(ROOT + 'products.json?limit=250')
-        .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
-        .then(function(data) {
-          var storeProds = data.products || [];
-          if (storeProds.length > 0) {
-            var combinedMap = {};
-            var merged = [];
-            storeProds.forEach(function(p) {
-              if (p && p.id && !combinedMap[p.id]) {
-                combinedMap[p.id] = true;
-                merged.push(p);
-              }
-            });
-            UNIQUE_STORE_PRODUCTS.forEach(function(p) {
-              if (p && p.id && !combinedMap[p.id]) {
-                combinedMap[p.id] = true;
-                merged.push(p);
-              }
-            });
-            cachedAllProducts = merged.length > 0 ? merged : DUMMY_PRODUCTS;
-            filterByHandle(cachedAllProducts, state.handle, function(err, refreshed) {
-              if (refreshed && refreshed.length > 0) {
-                state.products = refreshed;
-                buildDropdownMenus(refreshed);
-                applyFilters();
-              }
-            });
-          }
-        })
-        .catch(function() { /* keep existing cache */ });
-    } catch(e) { /* fetch not available */ }
+        if (append) {
+          state.products = state.products.concat(unique);
+        } else {
+          state.products = unique;
+        }
+
+        state.page = (data.pagination && data.pagination.current_page) || pageNum;
+        state.pages = (data.pagination && data.pagination.pages) || 1;
+        state.productsCount = (data.collection && data.collection.products_count) || state.products.length;
+
+        if (data.collection) {
+          if (Array.isArray(data.collection.all_vendors)) state.vendors = data.collection.all_vendors.slice();
+          if (Array.isArray(data.collection.all_types)) state.types = data.collection.all_types.filter(Boolean);
+        }
+
+        buildDropdownMenus();
+        applyFilters();
+        updateLoadMore();
+      })
+      .catch(function () {
+        if (!append && state.products.length === 0) {
+          if (loadingEl) loadingEl.style.display = 'none';
+          if (emptyEl) emptyEl.style.display = 'block';
+        }
+      })
+      .then(function () {
+        state.loading = false;
+        if (loadingEl) loadingEl.style.display = 'none';
+      });
   }
 
-  function filterByHandle(all, handle, cb) {
-    var kwList = HANDLE_KEYWORDS[handle] || [handle.replace(/-/g, ' ')];
-    var matched = all.filter(function(p) {
-      var str = ((p.title || '') + ' ' + (p.product_type || '') + ' ' + ((p.tags || []).join(' ')) + ' ' + (p.handle || '') + ' ' + (p.collection_handle || '') + ' ' + (p.collection_title || '')).toLowerCase();
-      return kwList.some(function(kw) { return str.indexOf(kw.toLowerCase()) !== -1; });
-    });
+  function updateLoadMore() {
+    if (!loadMoreWrap) return;
+    var hasMore = state.page < state.pages;
+    loadMoreWrap.hidden = !hasMore;
+  }
 
-    if (matched.length > 0) {
-      cb(null, matched);
-    } else if (all.length > 0) {
-      // If no direct keyword match in this category, show catalog products so user has items to view & purchase
-      cb(null, all.slice(0, 8));
-    } else {
-      cb(null, DUMMY_PRODUCTS.slice(0, 6));
+  function priceOf(p) {
+    if (p.variants && p.variants[0] && typeof p.variants[0].price === 'number') return p.variants[0].price;
+    return Number(p.price) || 0;
+  }
+
+  function buildPriceBuckets(products) {
+    var prices = products.map(priceOf).filter(function (n) { return n > 0; });
+    if (!prices.length) return [];
+    var min = Math.min.apply(null, prices);
+    var max = Math.max.apply(null, prices);
+    if (min === max) {
+      return [{ id: 'eq', label: formatMoney(min), min: min, max: max }];
+    }
+    var step = Math.max(1, Math.ceil((max - min) / 4));
+    var buckets = [];
+    var start = min;
+    for (var i = 0; i < 4 && start <= max; i++) {
+      var end = i === 3 ? max : Math.min(max, start + step - 1);
+      buckets.push({
+        id: start + '-' + end,
+        label: formatMoney(start) + ' – ' + formatMoney(end),
+        min: start,
+        max: end
+      });
+      start = end + 1;
+    }
+    return buckets;
+  }
+
+  function applyFilters() {
+    var products = state.products.slice();
+
+    if (state.activeBrand && state.activeBrand !== 'all') {
+      products = products.filter(function (p) {
+        return (p.vendor || '').toLowerCase() === state.activeBrand.toLowerCase();
+      });
+    }
+
+    if (state.activeType && state.activeType !== 'all') {
+      products = products.filter(function (p) {
+        return (p.type || '').toLowerCase() === state.activeType.toLowerCase();
+      });
+    }
+
+    if (state.activeAvail === 'in_stock') {
+      products = products.filter(function (p) { return !!p.available; });
+    } else if (state.activeAvail === 'sold_out') {
+      products = products.filter(function (p) { return !p.available; });
+    }
+
+    if (state.activePrice && state.activePrice !== 'all') {
+      var parts = String(state.activePrice).split('-');
+      var minP = Number(parts[0]);
+      var maxP = Number(parts[1]);
+      products = products.filter(function (p) {
+        var price = priceOf(p);
+        return price >= minP && price <= maxP;
+      });
+    }
+
+    state.filteredProducts = products;
+    renderProducts(products);
+
+    if (countEl) {
+      var total = state.productsCount || products.length;
+      countEl.hidden = false;
+      countEl.textContent = products.length + ' shown' + (total && total !== products.length ? ' · ' + total + ' in category' : '');
     }
   }
 
-  /* ── Price formatting helper ────────────────────────────────────────────── */
-  function parsePrice(val) {
-    if (!val) return 0;
-    var num = parseFloat(String(val).replace(/[^0-9.]/g, ''));
-    return isNaN(num) ? 0 : num;
-  }
-
-  function formatMoney(num) {
-    var symbol = window.Shopify && window.Shopify.currency && window.Shopify.currency.symbol ? window.Shopify.currency.symbol : '₹';
-    return symbol + Math.round(num);
-  }
-
-  /* ── Render product grid ────────────────────────────────────────────────── */
   function renderProducts(products) {
-    if (!productsEl) return;
-
-    /* Remove old cards */
-    Array.from(productsEl.querySelectorAll('.kcb2-card')).forEach(function(el){ el.remove(); });
+    Array.from(productsEl.querySelectorAll('.kcb2-grid')).forEach(function (el) { el.remove(); });
 
     if (!products || products.length === 0) {
-      if (loadingEl) loadingEl.style.display = 'none';
-      if (emptyEl)   emptyEl.style.display   = 'block';
+      if (emptyEl) emptyEl.style.display = 'block';
       return;
     }
-
-    if (loadingEl) loadingEl.style.display = 'none';
-    if (emptyEl)   emptyEl.style.display   = 'none';
+    if (emptyEl) emptyEl.style.display = 'none';
 
     var grid = document.createElement('div');
     grid.className = 'kcb2-grid';
 
-    products.forEach(function(product) {
+    products.forEach(function (product) {
       var variant = product.variants && product.variants[0] ? product.variants[0] : {};
-      var numPrice = parsePrice(variant.price);
-      var numCompare = parsePrice(variant.compare_at_price);
-
-      var priceFormatted = formatMoney(numPrice);
-      var compareFormatted = numCompare > numPrice ? formatMoney(numCompare) : '';
+      var numPrice = priceOf(product);
+      var numCompare = Number(variant.compare_at_price || product.compare_at_price || 0);
       var savePercent = numCompare > numPrice ? Math.round((numCompare - numPrice) / numCompare * 100) : 0;
-
-      var imgSrc = (product.images && product.images[0] && product.images[0].src)
-        ? product.images[0].src
-        : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80';
-
+      var imgSrc = product.featured_image || placeholderForType(product.type);
       var packLabel = variant.title && variant.title !== 'Default Title'
         ? variant.title
-        : (variant.grams ? variant.grams + 'g' : (product.vendor || '500g'));
-
-      var available = variant.available !== false;
-      var productUrl = ROOT + 'products/' + (product.handle || 'product');
+        : (product.vendor || '');
+      var available = !!product.available;
+      var productUrl = product.url || (ROOT + 'products/' + product.handle);
 
       var card = document.createElement('div');
-      card.className = 'kcb2-card karthika-compact-card';
+      card.className = 'kcb2-card karthika-compact-card' + (available ? '' : ' is-sold-out');
+      card.setAttribute('data-product-id', product.id);
       card.innerHTML = [
         '<div class="karthika-compact-media">',
           savePercent ? '<div class="karthika-card-badge">' + savePercent + '% OFF</div>' : '',
-          '<a href="' + productUrl + '" aria-label="' + escHtml(product.title) + '" tabindex="-1">',
-            '<img src="' + imgSrc + '" alt="' + escHtml(product.title) + '" width="200" height="200" loading="lazy" class="karthika-compact-img" onerror="this.src=\'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80\'">',
-          '</a>',
+          available
+            ? '<a href="' + escHtml(productUrl) + '" aria-label="' + escHtml(product.title) + '" tabindex="-1"><img src="' + escHtml(imgSrc) + '" alt="' + escHtml(product.title) + '" width="200" height="200" loading="lazy" class="karthika-compact-img" data-ph="' + escHtml(placeholderForType(product.type)) + '" onerror="this.onerror=null;this.src=this.getAttribute(\'data-ph\')||\'\'"></a>'
+            : '<span class="kcb2-soldout-media" aria-hidden="true"><img src="' + escHtml(imgSrc) + '" alt="" width="200" height="200" loading="lazy" class="karthika-compact-img" data-ph="' + escHtml(placeholderForType(product.type)) + '" onerror="this.onerror=null;this.src=this.getAttribute(\'data-ph\')||\'\'"></span>',
         '</div>',
         '<div class="karthika-compact-info">',
           '<div class="karthika-card-meta-row">',
             '<span class="karthika-compact-pack">' + escHtml(packLabel) + '</span>',
-            '<span class="karthika-stock-badge"><span class="karthika-stock-dot"></span>' + (available ? 'In stock' : 'Sold out') + '</span>',
-          '</div>',
-          '<a href="' + productUrl + '" class="karthika-compact-title" title="' + escHtml(product.title) + '">' + escHtml(product.title) + '</a>',
-          '<div class="karthika-price-container">',
-            '<div class="karthika-price-main-row">',
-              '<span class="karthika-price-current">' + priceFormatted + '</span>',
-              compareFormatted ? '<span class="karthika-price-original">' + compareFormatted + '</span>' : '',
-              savePercent ? '<span class="karthika-price-discount-tag">-' + savePercent + '%</span>' : '',
-            '</div>',
+            '<span class="karthika-stock-badge' + (available ? '' : ' karthika-stock-badge--out') + '"><span class="karthika-stock-dot"></span>' + (available ? 'In stock' : 'Sold out') + '</span>',
           '</div>',
           available
+            ? '<a href="' + escHtml(productUrl) + '" class="karthika-compact-title" title="' + escHtml(product.title) + '">' + escHtml(product.title) + '</a>'
+            : '<span class="karthika-compact-title" title="' + escHtml(product.title) + '">' + escHtml(product.title) + '</span>',
+          '<div class="karthika-price-container"><div class="karthika-price-main-row">',
+            '<span class="karthika-price-current">' + formatMoney(numPrice) + '</span>',
+            savePercent ? '<span class="karthika-price-original">' + formatMoney(numCompare) + '</span>' : '',
+            savePercent ? '<span class="karthika-price-discount-tag">-' + savePercent + '%</span>' : '',
+          '</div></div>',
+          available
             ? [
-                '<div class="karthika-card-action-bar karthika-stepper" data-variant-id="' + (variant.id || '1') + '" data-product-available="true">',
+                '<div class="karthika-card-action-bar karthika-stepper" data-variant-id="' + escHtml(variant.id || '') + '" data-product-available="true">',
                   '<button type="button" class="karthika-stepper-add-btn" aria-label="Add ' + escHtml(product.title) + ' to cart">',
                     '<span class="karthika-add-btn-icon">+</span>',
                     '<span class="karthika-add-btn-text">ADD</span>',
@@ -725,176 +527,127 @@
 
     productsEl.appendChild(grid);
 
-    /* Re-sync steppers via Karthika global cart manager */
     if (window.Karthika && window.Karthika.Cart) {
       window.Karthika.Cart.syncAllSteppers();
     }
   }
 
-  function escHtml(s) {
-    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  /* ── Apply active filters & sort ──────────────────────────────────────── */
-  function applyFilters() {
-    var products = state.products.slice();
-
-    /* Brand filter */
-    if (state.activeBrand && state.activeBrand !== 'all') {
-      products = products.filter(function(p) {
-        return (p.vendor || '').toLowerCase() === state.activeBrand.toLowerCase();
-      });
-    }
-
-    /* Type filter */
-    if (state.activeType && state.activeType !== 'all') {
-      var tw = state.activeType.toLowerCase();
-      products = products.filter(function(p) {
-        return (p.product_type || '').toLowerCase().indexOf(tw) !== -1
-          || (p.title || '').toLowerCase().indexOf(tw) !== -1
-          || (p.tags || []).some(function(t){ return t.toLowerCase().indexOf(tw) !== -1; });
-      });
-    }
-
-    /* Pack size filter */
-    if (state.activePack && state.activePack !== 'all') {
-      var pw = state.activePack.toLowerCase();
-      products = products.filter(function(p) {
-        var vTitle = (p.variants && p.variants[0] && p.variants[0].title ? p.variants[0].title : '').toLowerCase();
-        return vTitle.indexOf(pw) !== -1 || (p.title || '').toLowerCase().indexOf(pw) !== -1;
-      });
-    }
-
-    /* Sort */
-    if (state.activeSort === 'price-asc') {
-      products.sort(function(a,b){ return priceOf(a) - priceOf(b); });
-    } else if (state.activeSort === 'price-desc') {
-      products.sort(function(a,b){ return priceOf(b) - priceOf(a); });
-    } else if (state.activeSort === 'title-asc') {
-      products.sort(function(a,b){ return (a.title||'').localeCompare(b.title||''); });
-    }
-
-    state.filteredProducts = products;
-    renderProducts(products);
-    countEl && (countEl.textContent = products.length + ' product' + (products.length !== 1 ? 's' : ''));
-  }
-
-  function priceOf(p) {
-    return p.variants && p.variants[0] ? parsePrice(p.variants[0].price) : 0;
-  }
-
-  /* ── Build filter dropdown menus ─────────────────────────────────────── */
-  function buildDropdownMenus(products) {
-    // 1. Brands
-    if (brandMenuEl) {
-      var brands = [];
-      products.forEach(function(p) {
-        var v = (p.vendor || '').trim();
-        if (v && brands.indexOf(v) === -1) brands.push(v);
-      });
-      brands.sort();
-      populateMenu(brandMenuEl, brands, 'brand', 'All Brands');
-    }
-
-    // 2. Types / Subcategories
-    if (typeMenuEl) {
-      var types = [];
-      products.forEach(function(p) {
-        var pt = (p.product_type || '').trim();
-        if (pt && types.indexOf(pt) === -1) types.push(pt);
-      });
-      types.sort();
-      populateMenu(typeMenuEl, types, 'type', 'All Types');
-    }
-
-    // 3. Pack sizes
-    if (packMenuEl) {
-      var packs = [];
-      products.forEach(function(p) {
-        var pk = p.variants && p.variants[0] && p.variants[0].title && p.variants[0].title !== 'Default Title'
-          ? p.variants[0].title
-          : (p.variants && p.variants[0] && p.variants[0].grams ? p.variants[0].grams + 'g' : null);
-        if (pk && packs.indexOf(pk) === -1) packs.push(pk);
-      });
-      packs.sort();
-      populateMenu(packMenuEl, packs, 'pack', 'All Sizes');
-    }
-  }
-
-  function populateMenu(menuEl, items, dataAttr, allLabel) {
+  function populateMenu(menuEl, items, dataAttr, allLabel, selected) {
+    if (!menuEl) return;
     menuEl.innerHTML = '';
     var allItem = document.createElement('li');
-    allItem.className = 'kcb2-dropdown-item is-selected';
+    allItem.className = 'kcb2-dropdown-item' + (selected === 'all' ? ' is-selected' : '');
     allItem.setAttribute('data-' + dataAttr, 'all');
     allItem.setAttribute('role', 'option');
-    allItem.setAttribute('aria-selected', 'true');
+    allItem.setAttribute('aria-selected', selected === 'all' ? 'true' : 'false');
     allItem.setAttribute('tabindex', '0');
     allItem.textContent = allLabel;
     menuEl.appendChild(allItem);
 
-    items.forEach(function(item) {
+    items.forEach(function (item) {
+      var value = typeof item === 'object' ? item.id : item;
+      var label = typeof item === 'object' ? item.label : item;
       var li = document.createElement('li');
-      li.className = 'kcb2-dropdown-item';
-      li.setAttribute('data-' + dataAttr, item);
+      li.className = 'kcb2-dropdown-item' + (String(selected) === String(value) ? ' is-selected' : '');
+      li.setAttribute('data-' + dataAttr, value);
       li.setAttribute('role', 'option');
-      li.setAttribute('aria-selected', 'false');
+      li.setAttribute('aria-selected', String(selected) === String(value) ? 'true' : 'false');
       li.setAttribute('tabindex', '0');
-      li.textContent = item;
+      li.textContent = label;
       menuEl.appendChild(li);
     });
   }
 
-  /* ── Load a category ─────────────────────────────────────────────────── */
-  function loadCategory(handle, label) {
-    if (state.loading) return;
-    state.handle      = handle;
-    state.activeBrand = 'all';
-    state.activeType  = 'all';
-    state.activePack  = 'all';
-    state.loading     = true;
+  function buildDropdownMenus() {
+    var vendors = state.vendors.slice();
+    if (!vendors.length) {
+      state.products.forEach(function (p) {
+        if (p.vendor && vendors.indexOf(p.vendor) === -1) vendors.push(p.vendor);
+      });
+    }
+    vendors.sort();
+    populateMenu(brandMenuEl, vendors, 'brand', 'All Brands', state.activeBrand);
 
-    /* Update heading */
-    titleEl && (titleEl.textContent = label);
-    countEl && (countEl.textContent = '');
+    var types = state.types.slice();
+    if (!types.length) {
+      state.products.forEach(function (p) {
+        if (p.type && types.indexOf(p.type) === -1) types.push(p.type);
+      });
+    }
+    types = types.filter(Boolean).sort();
+    populateMenu(typeMenuEl, types, 'type', 'All Types', state.activeType);
 
-    /* Show skeleton */
-    productsEl && Array.from(productsEl.querySelectorAll('.kcb2-grid')).forEach(function(g){ g.remove(); });
-    if (loadingEl) loadingEl.style.display = 'flex';
-    if (emptyEl)   emptyEl.style.display   = 'none';
-
-    /* Reset labels */
-    brandLabelEl && (brandLabelEl.textContent = 'Brand');
-    typeLabelEl  && (typeLabelEl.textContent  = 'Type');
-    packLabelEl  && (packLabelEl.textContent  = 'Pack Size');
-    sortLabelEl  && (sortLabelEl.textContent  = 'Sort By');
-    state.activeSort = 'default';
-
-    /* Active sidebar */
-    page.querySelectorAll('.kcb2-cat-item').forEach(function(btn) {
-      var active = btn.dataset.handle === handle;
-      btn.classList.toggle('is-active', active);
-      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
-
-    fetchProducts(handle, function(err, products) {
-      state.loading  = false;
-      state.products = products;
-      buildDropdownMenus(products);
-      applyFilters();
-    });
+    var buckets = buildPriceBuckets(state.products);
+    populateMenu(priceMenuEl, buckets, 'price', 'All Prices', state.activePrice);
   }
 
-  /* ── Dropdown helpers ────────────────────────────────────────────────── */
-  var _openBtn = null, _openMenu = null;
+  function loadCategory(btn) {
+    if (!btn || state.loading) return;
+
+    state.kind = btn.dataset.kind || 'collection';
+    state.handle = btn.dataset.handle || '';
+    state.type = btn.dataset.type || '';
+    state.label = btn.dataset.label || '';
+    state.activeBrand = 'all';
+    state.activeType = 'all';
+    state.activeAvail = 'all';
+    state.activePrice = 'all';
+    state.activeSort = 'manual';
+    state.page = 1;
+    state.pages = 1;
+    state.products = [];
+    state.seenIds = {};
+    state.vendors = [];
+    state.types = [];
+
+    if (titleEl) titleEl.textContent = state.label;
+    if (brandLabelEl) brandLabelEl.textContent = 'Brand';
+    if (typeLabelEl) typeLabelEl.textContent = 'Type';
+    if (availLabelEl) availLabelEl.textContent = 'Availability';
+    if (priceLabelEl) priceLabelEl.textContent = 'Price';
+    if (sortLabelEl) sortLabelEl.textContent = 'Sort By';
+    if (sortMenuEl) {
+      sortMenuEl.querySelectorAll('.kcb2-dropdown-item').forEach(function (i) {
+        var sel = i.dataset.sort === 'manual';
+        i.classList.toggle('is-selected', sel);
+        i.setAttribute('aria-selected', sel ? 'true' : 'false');
+      });
+    }
+    if (availMenuEl) {
+      availMenuEl.querySelectorAll('.kcb2-dropdown-item').forEach(function (i) {
+        var sel = i.dataset.avail === 'all';
+        i.classList.toggle('is-selected', sel);
+        i.setAttribute('aria-selected', sel ? 'true' : 'false');
+      });
+    }
+
+    page.querySelectorAll('.kcb2-cat-item').forEach(function (el) {
+      var active = el === btn;
+      el.classList.toggle('is-active', active);
+      el.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+
+    try {
+      var url = new URL(window.location.href);
+      if (state.kind === 'type') url.searchParams.set('cat', state.handle);
+      else url.searchParams.set('cat', state.handle);
+      window.history.replaceState({}, '', url);
+    } catch (e) { /* ignore */ }
+
+    fetchPage(1, false);
+  }
+
+  var _openBtn = null;
+  var _openMenu = null;
 
   function positionMenu(btnEl, menuEl) {
     var rect = btnEl.getBoundingClientRect();
-    menuEl.style.top  = (rect.bottom + 6) + 'px';
+    menuEl.style.top = (rect.bottom + 6) + 'px';
     menuEl.style.left = rect.left + 'px';
   }
 
   function openDropdown(btnEl, menuEl) {
-    _openBtn  = btnEl;
+    _openBtn = btnEl;
     _openMenu = menuEl;
     menuEl.hidden = false;
     positionMenu(btnEl, menuEl);
@@ -905,7 +658,7 @@
   function closeDropdown(btnEl, menuEl) {
     if (!menuEl || !btnEl) return;
     menuEl.hidden = true;
-    menuEl.style.top  = '';
+    menuEl.style.top = '';
     menuEl.style.left = '';
     btnEl.setAttribute('aria-expanded', 'false');
     btnEl.classList.remove('is-open');
@@ -914,160 +667,147 @@
 
   function closeAllDropdowns() {
     brandBtnEl && brandMenuEl && closeDropdown(brandBtnEl, brandMenuEl);
-    sortBtnEl  && sortMenuEl  && closeDropdown(sortBtnEl,  sortMenuEl);
-    typeBtnEl  && typeMenuEl  && closeDropdown(typeBtnEl,  typeMenuEl);
-    packBtnEl  && packMenuEl  && closeDropdown(packBtnEl,  packMenuEl);
+    sortBtnEl && sortMenuEl && closeDropdown(sortBtnEl, sortMenuEl);
+    typeBtnEl && typeMenuEl && closeDropdown(typeBtnEl, typeMenuEl);
+    availBtnEl && availMenuEl && closeDropdown(availBtnEl, availMenuEl);
+    priceBtnEl && priceMenuEl && closeDropdown(priceBtnEl, priceMenuEl);
   }
 
-  /* ── Event delegation ─────────────────────────────────────────────────── */
-  page.addEventListener('click', function(e) {
-    /* Sidebar category */
+  function selectMenuItem(menuEl, attr, value) {
+    menuEl.querySelectorAll('.kcb2-dropdown-item').forEach(function (i) {
+      var sel = String(i.getAttribute('data-' + attr)) === String(value);
+      i.classList.toggle('is-selected', sel);
+      i.setAttribute('aria-selected', sel ? 'true' : 'false');
+    });
+  }
+
+  page.addEventListener('click', function (e) {
     var catBtn = e.target.closest('.kcb2-cat-item');
     if (catBtn) {
-      var h = catBtn.dataset.handle;
-      var l = catBtn.dataset.label;
-      if (h) { loadCategory(h, l); catBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+      loadCategory(catBtn);
+      catBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       closeAllDropdowns();
       return;
     }
 
-    /* Brand dropdown toggle */
+    if (e.target.closest('#KCB2LoadMore')) {
+      if (!state.loading && state.page < state.pages) fetchPage(state.page + 1, true);
+      return;
+    }
+
     if (e.target.closest('#KCB2BrandBtn')) {
-      var wasOpen = brandMenuEl && !brandMenuEl.hidden;
+      var brandOpen = brandMenuEl && !brandMenuEl.hidden;
       closeAllDropdowns();
-      if (!wasOpen) openDropdown(brandBtnEl, brandMenuEl);
+      if (!brandOpen) openDropdown(brandBtnEl, brandMenuEl);
       return;
     }
-
-    /* Brand selection */
     var brandItem = e.target.closest('#KCB2BrandMenu .kcb2-dropdown-item');
     if (brandItem) {
       state.activeBrand = brandItem.dataset.brand || 'all';
-      brandMenuEl.querySelectorAll('.kcb2-dropdown-item').forEach(function(i) {
-        var sel = i.dataset.brand === state.activeBrand;
-        i.classList.toggle('is-selected', sel);
-        i.setAttribute('aria-selected', sel ? 'true' : 'false');
-      });
+      selectMenuItem(brandMenuEl, 'brand', state.activeBrand);
       brandLabelEl.textContent = state.activeBrand === 'all' ? 'Brand' : state.activeBrand;
       applyFilters();
       closeDropdown(brandBtnEl, brandMenuEl);
       return;
     }
 
-    /* Type dropdown toggle */
     if (e.target.closest('#KCB2TypeBtn')) {
-      var typeWasOpen = typeMenuEl && !typeMenuEl.hidden;
+      var typeOpen = typeMenuEl && !typeMenuEl.hidden;
       closeAllDropdowns();
-      if (!typeWasOpen) openDropdown(typeBtnEl, typeMenuEl);
+      if (!typeOpen) openDropdown(typeBtnEl, typeMenuEl);
       return;
     }
-
-    /* Type selection */
     var typeItem = e.target.closest('#KCB2TypeMenu .kcb2-dropdown-item');
     if (typeItem) {
       state.activeType = typeItem.dataset.type || 'all';
-      typeMenuEl.querySelectorAll('.kcb2-dropdown-item').forEach(function(i) {
-        var sel = i.dataset.type === state.activeType;
-        i.classList.toggle('is-selected', sel);
-        i.setAttribute('aria-selected', sel ? 'true' : 'false');
-      });
+      selectMenuItem(typeMenuEl, 'type', state.activeType);
       typeLabelEl.textContent = state.activeType === 'all' ? 'Type' : state.activeType;
       applyFilters();
       closeDropdown(typeBtnEl, typeMenuEl);
       return;
     }
 
-    /* Pack dropdown toggle */
-    if (e.target.closest('#KCB2PackBtn')) {
-      var packWasOpen = packMenuEl && !packMenuEl.hidden;
+    if (e.target.closest('#KCB2AvailBtn')) {
+      var availOpen = availMenuEl && !availMenuEl.hidden;
       closeAllDropdowns();
-      if (!packWasOpen) openDropdown(packBtnEl, packMenuEl);
+      if (!availOpen) openDropdown(availBtnEl, availMenuEl);
       return;
     }
-
-    /* Pack selection */
-    var packItem = e.target.closest('#KCB2PackMenu .kcb2-dropdown-item');
-    if (packItem) {
-      state.activePack = packItem.dataset.pack || 'all';
-      packMenuEl.querySelectorAll('.kcb2-dropdown-item').forEach(function(i) {
-        var sel = i.dataset.pack === state.activePack;
-        i.classList.toggle('is-selected', sel);
-        i.setAttribute('aria-selected', sel ? 'true' : 'false');
-      });
-      packLabelEl.textContent = state.activePack === 'all' ? 'Pack Size' : state.activePack;
+    var availItem = e.target.closest('#KCB2AvailMenu .kcb2-dropdown-item');
+    if (availItem) {
+      state.activeAvail = availItem.dataset.avail || 'all';
+      selectMenuItem(availMenuEl, 'avail', state.activeAvail);
+      availLabelEl.textContent = state.activeAvail === 'all' ? 'Availability' : availItem.textContent;
       applyFilters();
-      closeDropdown(packBtnEl, packMenuEl);
+      closeDropdown(availBtnEl, availMenuEl);
       return;
     }
 
-    /* Sort dropdown toggle */
-    if (e.target.closest('#KCB2SortBtn')) {
-      var sortWasOpen = sortMenuEl && !sortMenuEl.hidden;
+    if (e.target.closest('#KCB2PriceBtn')) {
+      var priceOpen = priceMenuEl && !priceMenuEl.hidden;
       closeAllDropdowns();
-      if (!sortWasOpen) openDropdown(sortBtnEl, sortMenuEl);
+      if (!priceOpen) openDropdown(priceBtnEl, priceMenuEl);
+      return;
+    }
+    var priceItem = e.target.closest('#KCB2PriceMenu .kcb2-dropdown-item');
+    if (priceItem) {
+      state.activePrice = priceItem.dataset.price || 'all';
+      selectMenuItem(priceMenuEl, 'price', state.activePrice);
+      priceLabelEl.textContent = state.activePrice === 'all' ? 'Price' : priceItem.textContent;
+      applyFilters();
+      closeDropdown(priceBtnEl, priceMenuEl);
       return;
     }
 
-    /* Sort selection */
+    if (e.target.closest('#KCB2SortBtn')) {
+      var sortOpen = sortMenuEl && !sortMenuEl.hidden;
+      closeAllDropdowns();
+      if (!sortOpen) openDropdown(sortBtnEl, sortMenuEl);
+      return;
+    }
     var sortItem = e.target.closest('#KCB2SortMenu .kcb2-dropdown-item');
     if (sortItem) {
-      state.activeSort = sortItem.dataset.sort || 'default';
-      sortMenuEl.querySelectorAll('.kcb2-dropdown-item').forEach(function(i) {
-        var sel = i.dataset.sort === state.activeSort;
-        i.classList.toggle('is-selected', sel);
-        i.setAttribute('aria-selected', sel ? 'true' : 'false');
-      });
+      state.activeSort = sortItem.dataset.sort || 'manual';
+      selectMenuItem(sortMenuEl, 'sort', state.activeSort);
       sortLabelEl.textContent = sortItem.textContent;
-      applyFilters();
       closeDropdown(sortBtnEl, sortMenuEl);
+      state.products = [];
+      state.seenIds = {};
+      fetchPage(1, false);
       return;
     }
 
-    /* Close dropdowns when clicking outside (menus are position:fixed on body) */
-    var clickedInsideDropdown = e.target.closest('.kcb2-dropdown');
-    var clickedOnMenu = _openMenu && _openMenu.contains(e.target);
-    if (!clickedInsideDropdown && !clickedOnMenu) {
+    if (!e.target.closest('.kcb2-dropdown') && !(_openMenu && _openMenu.contains(e.target))) {
       closeAllDropdowns();
     }
   });
 
-  /* Reposition on scroll/resize */
-  window.addEventListener('scroll', function() {
+  window.addEventListener('scroll', function () {
     if (_openBtn && _openMenu && !_openMenu.hidden) positionMenu(_openBtn, _openMenu);
   }, true);
-  window.addEventListener('resize', function() {
+  window.addEventListener('resize', function () {
     if (_openBtn && _openMenu && !_openMenu.hidden) positionMenu(_openBtn, _openMenu);
   });
-
-  /* Close dropdowns on Escape */
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeAllDropdowns();
   });
 
-  /* ── Initial load (optional deep-link ?cat=handle) ───────────────────── */
-  var initialHandle = 'dairy-eggs';
-  var initialLabel = 'Milk';
-  var defaultBtn = page.querySelector('.kcb2-cat-item[data-handle="dairy-eggs"]');
-  if (defaultBtn && defaultBtn.dataset.label) {
-    initialLabel = defaultBtn.dataset.label;
-  }
-
+  var initialBtn = page.querySelector('.kcb2-cat-item.is-active') || page.querySelector('.kcb2-cat-item');
   try {
     var catParam = new URLSearchParams(window.location.search).get('cat');
     if (catParam) {
-      var matchedBtn = null;
       page.querySelectorAll('.kcb2-cat-item').forEach(function (btn) {
-        if (btn.dataset.handle === catParam) matchedBtn = btn;
+        if (btn.dataset.handle === catParam) initialBtn = btn;
       });
-      if (matchedBtn) {
-        initialHandle = matchedBtn.dataset.handle;
-        initialLabel = matchedBtn.dataset.label || initialHandle;
-      }
     }
-  } catch (e) { /* URLSearchParams unavailable */ }
+  } catch (e) { /* ignore */ }
 
-  loadCategory(initialHandle, initialLabel);
-
+  if (initialBtn) {
+    loadCategory(initialBtn);
+  } else if (emptyEl) {
+    emptyEl.style.display = 'block';
+    if (titleEl) titleEl.textContent = 'Categories';
+  }
 })();
 </script>
 

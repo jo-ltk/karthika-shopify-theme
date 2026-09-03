@@ -1,0 +1,56 @@
+{% comment %}
+  Alternate collection view: JSON product feed for the Karthika collections browser.
+  Used via ?view=kcb2-json on collection / type / vendor collection URLs.
+  Temporary placeholder images are resolved client-side; real images are preferred here.
+{% endcomment %}
+{% layout none %}
+{%- paginate collection.products by 48 -%}
+{
+  "collection": {
+    "id": {{ collection.id | json }},
+    "handle": {{ collection.handle | json }},
+    "title": {{ collection.title | json }},
+    "products_count": {{ collection.all_products_count | default: collection.products_count | json }},
+    "current_type": {{ collection.current_type | json }},
+    "current_vendor": {{ collection.current_vendor | json }},
+    "all_vendors": {{ collection.all_vendors | json }},
+    "all_types": {{ collection.all_types | json }}
+  },
+  "products": [
+    {%- for product in collection.products -%}
+      {
+        "id": {{ product.id | json }},
+        "title": {{ product.title | json }},
+        "handle": {{ product.handle | json }},
+        "url": {{ product.url | json }},
+        "vendor": {{ product.vendor | json }},
+        "type": {{ product.type | json }},
+        "tags": {{ product.tags | json }},
+        "available": {{ product.available | json }},
+        "price": {{ product.price | json }},
+        "compare_at_price": {{ product.compare_at_price | default: 0 | json }},
+        "featured_image": {% if product.featured_image %}{{ product.featured_image | image_url: width: 600 | json }}{% else %}null{% endif %},
+        "variants": [
+          {%- for v in product.variants limit: 10 -%}
+            {
+              "id": {{ v.id | json }},
+              "title": {{ v.title | json }},
+              "price": {{ v.price | json }},
+              "compare_at_price": {% if v.compare_at_price %}{{ v.compare_at_price | json }}{% else %}null{% endif %},
+              "available": {{ v.available | json }},
+              "sku": {{ v.sku | json }},
+              "grams": {{ v.weight | json }}
+            }{%- unless forloop.last -%},{%- endunless -%}
+          {%- endfor -%}
+        ]
+      }{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ],
+  "pagination": {
+    "current_page": {{ paginate.current_page | json }},
+    "pages": {{ paginate.pages | json }},
+    "items": {{ paginate.items | json }},
+    "page_size": 48
+  }
+}
+{%- endpaginate -%}

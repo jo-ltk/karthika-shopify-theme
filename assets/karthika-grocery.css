@@ -4850,6 +4850,33 @@ textarea {
   padding-right: 0 !important;
 }
 
+.kcb2-count {
+  margin: 0;
+  padding: 0 12px 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.kcb2-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 12px 16px 24px;
+}
+
+.kcb2-card.is-sold-out {
+  opacity: 0.92;
+}
+
+.kcb2-soldout-media {
+  display: block;
+  pointer-events: none;
+}
+
+.kcb2-card.is-sold-out .karthika-compact-title {
+  cursor: default;
+  pointer-events: none;
+}
+
 /* ==========================================================================
    KCL — Categories landing (/collections/all)
    ========================================================================== */
