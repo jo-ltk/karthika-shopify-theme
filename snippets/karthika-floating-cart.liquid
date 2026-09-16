@@ -3,6 +3,11 @@
   class="karthika-floating-cart{% if cart.item_count == 0 %} is-empty{% endif %}"
   aria-label="View cart ({{ cart.item_count }} items)"
   aria-hidden="{% if cart.item_count == 0 %}true{% else %}false{% endif %}"
+  {% if settings.cart_type == 'drawer' %}
+  aria-haspopup="dialog"
+  aria-expanded="false"
+  aria-controls="CartDrawer"
+  {% endif %}
   tabindex="{% if cart.item_count == 0 %}-1{% else %}0{% endif %}"
 >
   <span class="karthika-floating-cart-copy">

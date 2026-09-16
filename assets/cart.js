@@ -36,7 +36,7 @@ class CartItems extends window.StandardEvents.createViewEventElement(HTMLElement
     super.connectedCallback();
 
     this.cartUpdateUnsubscriber = subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
-      if (event.source === 'cart-items') return;
+      if (event.source === 'cart-items' || event.source === 'karthika') return;
       return this.onCartUpdate();
     });
   }

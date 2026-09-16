@@ -31,11 +31,15 @@
     endif
   -%}
 
-  <div
+  <article
     class="karthika-compact-card"
     data-product-id="{{ card_product.id }}"
     data-variant-id="{{ current_variant.id }}"
   >
+    <a href="{{ card_product.url }}" class="karthika-compact-card-link">
+      <span class="visually-hidden">{{ card_product.title | escape }}</span>
+    </a>
+
     <div class="karthika-compact-media">
       {%- if on_sale -%}
         <div class="karthika-card-badge">{{ save_percent }}% OFF</div>
@@ -43,7 +47,6 @@
         <div class="karthika-card-badge karthika-card-badge--new">NEW</div>
       {%- endif -%}
 
-      <!-- Wishlist heart button (visual toggle only — no backend persistence yet) -->
       <button
         type="button"
         class="karthika-wishlist-btn"
@@ -57,18 +60,16 @@
       </button>
 
       {%- if card_product.featured_media -%}
-        <a href="{{ card_product.url }}" class="karthika-compact-media-link" aria-label="{{ card_product.title | escape }}" tabindex="-1" aria-hidden="true">
-          <img
-            src="{{ card_product.featured_media | image_url: width: 360 }}"
-            alt="{{ card_product.featured_media.alt | default: card_product.title | escape }}"
-            loading="lazy"
-            width="200"
-            height="200"
-            class="karthika-compact-img"
-          >
-        </a>
+        <img
+          src="{{ card_product.featured_media | image_url: width: 360 }}"
+          alt=""
+          loading="lazy"
+          width="200"
+          height="200"
+          class="karthika-compact-img"
+        >
       {%- else -%}
-        <div class="karthika-compact-media-placeholder" aria-label="Product image unavailable" role="img">
+        <div class="karthika-compact-media-placeholder" aria-hidden="true">
           <span>{{ card_product.title | truncate: 24 | escape }}</span>
         </div>
       {%- endif -%}
@@ -82,9 +83,9 @@
         </span>
       </div>
 
-      <a href="{{ card_product.url }}" class="karthika-compact-title" title="{{ card_product.title | escape }}">
+      <h3 class="karthika-compact-title" title="{{ card_product.title | escape }}">
         {{ card_product.title | escape }}
-      </a>
+      </h3>
 
       <div class="karthika-price-container">
         <div class="karthika-price-main-row">
@@ -103,11 +104,11 @@
             <span class="karthika-add-btn-text">ADD</span>
           </button>
           <div class="karthika-compact-stepper">
-            <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--minus" aria-label="Decrease quantity">
+            <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--minus" aria-label="Decrease quantity of {{ card_product.title | escape }}">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
-            <span class="karthika-compact-stepper-val karthika-stepper-qty">1</span>
-            <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--plus" aria-label="Increase quantity">
+            <span class="karthika-compact-stepper-val karthika-stepper-qty" aria-live="polite" aria-atomic="true">1</span>
+            <button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--plus" aria-label="Increase quantity of {{ card_product.title | escape }}">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
           </div>
@@ -116,5 +117,5 @@
         <div class="karthika-sold-out-badge" aria-label="Sold out" role="status">SOLD OUT</div>
       {%- endif -%}
     </div>
-  </div>
+  </article>
 {%- endif -%}
