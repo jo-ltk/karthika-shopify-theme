@@ -98,8 +98,9 @@
                     {{- block.settings.text -}}
                   </p>
                 {%- when 'title' -%}
-                  <div class="product__title" {{ block.shopify_attributes }}>
+                  <div class="product__title karthika-pdp-title-row" {{ block.shopify_attributes }}>
                     <h1>{{ product.title | escape }}</h1>
+                    {% render 'karthika-wishlist-button', product: product, button_class: 'karthika-wishlist-btn--pdp' %}
                     <a href="{{ product.url }}" class="product__title">
                       <h2 class="h1">
                         {{ product.title | escape }}
@@ -492,15 +493,31 @@
                     product_form_id: product_form_id
                   %}
                 {%- when 'buy_buttons' -%}
-                  <div style="background: var(--karthika-bg-surface); border: 1px solid var(--karthika-border); border-radius: var(--karthika-radius-md); padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--karthika-red-light); color: var(--karthika-red); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                  {%- if settings.delivery_promise_text != blank or settings.store_location_name != blank or settings.store_location_region != blank -%}
+                    <div class="karthika-product-delivery-note">
+                      <div class="karthika-product-delivery-note__icon" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                      </div>
+                      <div>
+                        {%- if settings.delivery_promise_text != blank -%}
+                          <div class="karthika-product-delivery-note__title">{{ settings.delivery_promise_text | escape }}</div>
+                        {%- endif -%}
+                        {%- liquid
+                          assign delivery_source = settings.store_location_name | strip
+                          if settings.store_location_region != blank
+                            if delivery_source != blank
+                              assign delivery_source = delivery_source | append: ', ' | append: settings.store_location_region
+                            else
+                              assign delivery_source = settings.store_location_region
+                            endif
+                          endif
+                        -%}
+                        {%- if delivery_source != blank -%}
+                          <div class="karthika-product-delivery-note__meta">{{ 'From ' | append: delivery_source | escape }}</div>
+                        {%- endif -%}
+                      </div>
                     </div>
-                    <div>
-                      <div style="font-size: 12px; font-weight: 700; color: var(--karthika-text-dark);">Express 30-Min Delivery in Singapore</div>
-                      <div style="font-size: 11px; color: var(--karthika-text-muted);">Authentic stock direct from Karthika Supermarket, Little India</div>
-                    </div>
-                  </div>
+                  {%- endif -%}
 
                   {%- render 'buy-buttons',
                     block: block,

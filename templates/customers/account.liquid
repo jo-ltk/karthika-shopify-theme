@@ -131,10 +131,10 @@
           <span>Addresses</span>
         </a>
 
-        <div class="kap-action is-unavailable" aria-disabled="true" title="Wishlist is not available yet">
+        <a class="kap-action" href="{% if pages.wishlist.url != blank %}{{ pages.wishlist.url }}{% else %}{{ routes.root_url }}pages/wishlist{% endif %}">
           {%- render 'karthika-account-icon', icon: 'heart' -%}
-          <span>Wishlist</span>
-        </div>
+          <span>{{ 'general.wishlist.title' | t }}</span>
+        </a>
 
         <button type="button" class="kap-action" data-kap-sheet-open="kap-sheet-settings">
           {%- render 'karthika-account-icon', icon: 'gear' -%}

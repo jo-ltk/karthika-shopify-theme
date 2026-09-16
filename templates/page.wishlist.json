@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "karthika-wishlist",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

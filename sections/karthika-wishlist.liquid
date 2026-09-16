@@ -1,0 +1,62 @@
+{%- liquid
+  assign products_url = routes.all_products_collection_url
+  assign categories_url = routes.collections_url
+-%}
+
+<section
+  class="karthika-wishlist-page"
+  data-karthika-wishlist-page
+  data-card-view="wishlist-card"
+  aria-labelledby="KarthikaWishlistTitle"
+>
+  <div class="karthika-wishlist-page__inner">
+    <header class="karthika-wishlist-page__header">
+      <h1 id="KarthikaWishlistTitle" class="karthika-wishlist-page__title">
+        {{ 'general.wishlist.title' | t }}
+      </h1>
+    </header>
+
+    <p
+      class="karthika-wishlist-page__status"
+      data-wishlist-status
+      data-unavailable-message="{{ 'general.wishlist.unavailable' | t | escape }}"
+      data-load-error-message="{{ 'general.wishlist.load_error' | t | escape }}"
+      hidden
+    ></p>
+
+    <div class="karthika-wishlist-page__loading" data-wishlist-loading hidden>
+      <p>{{ 'general.wishlist.loading' | t }}</p>
+    </div>
+
+    <div class="karthika-wishlist-empty" data-wishlist-empty hidden>
+      <h2>{{ 'general.wishlist.empty_heading' | t }}</h2>
+      <p>{{ 'general.wishlist.empty_text' | t }}</p>
+      <div class="karthika-wishlist-empty__actions">
+        <a class="karthika-wishlist-empty__btn" href="{{ products_url }}">
+          {{ 'general.wishlist.shop_products' | t }}
+        </a>
+        <a class="karthika-wishlist-empty__btn karthika-wishlist-empty__btn--secondary" href="{{ categories_url }}">
+          {{ 'general.wishlist.shop_categories' | t }}
+        </a>
+      </div>
+    </div>
+
+    <noscript>
+      <p>{{ 'general.wishlist.js_required' | t }}</p>
+    </noscript>
+
+    <div class="karthika-wishlist-grid" data-wishlist-grid hidden></div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Wishlist",
+  "tag": "section",
+  "class": "section karthika-wishlist-section",
+  "settings": [],
+  "enabled_on": {
+    "templates": ["page"]
+  }
+}
+{% endschema %}

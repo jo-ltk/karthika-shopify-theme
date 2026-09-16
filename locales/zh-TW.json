@@ -48,6 +48,19 @@
       "search": "搜尋",
       "reset": "清除搜尋詞彙"
     },
+    "wishlist": {
+      "add": "Add {{ product }} to wishlist",
+      "remove": "Remove {{ product }} from wishlist",
+      "title": "Wishlist",
+      "empty_heading": "No saved products yet",
+      "empty_text": "Tap the heart on a product to save it here for later.",
+      "shop_products": "Browse products",
+      "shop_categories": "Browse categories",
+      "loading": "Loading your wishlist",
+      "js_required": "Turn on JavaScript to view your saved products.",
+      "unavailable": "This product is no longer available and was removed from your wishlist.",
+      "load_error": "We couldn't load your saved products. Check your connection and try again."
+    },
     "cart": {
       "view": "檢視購物車 ({{ count }})",
       "item_added": "商品已加入購物車",
