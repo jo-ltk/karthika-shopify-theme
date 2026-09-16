@@ -4333,23 +4333,42 @@ body.karthika-location-open {
 /* ==========================================================================
    8. QUICK TABS (mood/category row under search) + AD BANNER + FEATURE GRID
    ========================================================================== */
+.karthika-quick-tabs-section {
+  max-width: 100%;
+  overflow: hidden;
+}
 .karthika-quick-tabs {
   display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 4px 0 4px;
-  margin-bottom: 0;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 4px 0 8px;
+  margin: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+.karthika-quick-tabs::-webkit-scrollbar {
+  height: 4px;
 }
 .karthika-quick-tab {
   display: flex;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   flex-direction: column;
   align-items: center;
-  align-items: center;
+  justify-content: flex-start;
   gap: 6px;
+  box-sizing: border-box;
+  min-width: 64px;
+  max-width: 88px;
+  min-height: 44px;
   border: none;
   background: transparent;
-  padding: 2px 0 8px;
+  padding: 4px 2px 8px;
   font-family: var(--karthika-font-sans);
   cursor: pointer;
   text-decoration: none;
@@ -4369,19 +4388,33 @@ a.karthika-quick-tab:focus-visible {
   place-items: center;
   width: 46px;
   height: 46px;
+  flex: none;
+  overflow: hidden;
   border-radius: 50%;
   background: var(--karthika-bg-surface);
   font-size: 20px;
   line-height: 1;
   transition: background-color 0.2s ease;
 }
-.karthika-quick-tab-icon img { width: 24px; height: 24px; object-fit: contain; }
+.karthika-quick-tab-icon img {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 50%;
+}
 .karthika-quick-tab-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  width: 100%;
   font-size: 11.5px;
   font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
   color: var(--karthika-text-muted);
-  white-space: nowrap;
-  padding-bottom: 6px;
+  word-break: break-word;
+  padding-bottom: 4px;
   border-bottom: 2px solid transparent;
 }
 .karthika-quick-tab.is-active .karthika-quick-tab-icon {
@@ -4391,6 +4424,16 @@ a.karthika-quick-tab:focus-visible {
   color: var(--karthika-red);
   font-weight: 700;
   border-bottom-color: var(--karthika-red);
+}
+@media screen and (min-width: 769px) {
+  .karthika-quick-tabs {
+    gap: 16px;
+    padding: 8px 0 12px;
+  }
+  .karthika-quick-tab {
+    min-width: 72px;
+    max-width: 104px;
+  }
 }
 
 .karthika-ad-banner-carousel {
