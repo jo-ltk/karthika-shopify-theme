@@ -1,15 +1,35 @@
 <div class="karthika-auth-page">
-  <div class="karthika-auth-hero karthika-auth-hero--compact"><div class="karthika-auth-brand">{% render 'karthika-logo', class: 'karthika-logo--auth', loading: 'eager' %}</div></div>
+  <div class="karthika-auth-hero karthika-auth-hero--compact">
+    <a class="karthika-auth-back" href="{{ routes.account_login_url }}" aria-label="{{ 'customer.login_page.title' | t }}">&larr;</a>
+    <div class="karthika-auth-brand">{% render 'karthika-logo', class: 'karthika-logo--auth', loading: 'eager' %}</div>
+  </div>
   <section class="karthika-auth-panel" aria-labelledby="KarthikaActivateTitle">
-    <h1 id="KarthikaActivateTitle">Activate your account</h1>
-    <p>Create a password to finish setting up your account.</p>
+    <h1 id="KarthikaActivateTitle">{{ 'customer.activate_account.title' | t }}</h1>
+    <p>{{ 'customer.activate_account.subtext' | t }}</p>
     {% form 'activate_customer_password', class: 'karthika-auth-form' %}
-      {% render 'karthika-login-home', mode: 'fields' %}
-      {% if form.errors %}<div class="karthika-form-message" role="alert">{{ form.errors | default_errors }}</div>{% endif %}
-      <label for="ActivatePassword">Password</label><input id="ActivatePassword" type="password" name="customer[password]" autocomplete="new-password" required>
-      <label for="ActivatePasswordConfirmation">Confirm password</label><input id="ActivatePasswordConfirmation" type="password" name="customer[password_confirmation]" autocomplete="new-password" required>
-      <button class="karthika-primary-button" type="submit">Activate account</button>
-      <button class="karthika-secondary-button" type="submit" name="decline" value="decline">Decline invitation</button>
+      {% render 'karthika-login-home', mode: 'fields', destination: 'account' %}
+      {% if form.errors %}
+        <div id="ActivateErrors" class="karthika-form-message" role="alert">{{ form.errors | default_errors }}</div>
+      {% endif %}
+      <label for="ActivatePassword">{{ 'customer.activate_account.password' | t }}</label>
+      <input
+        id="ActivatePassword"
+        type="password"
+        name="customer[password]"
+        autocomplete="new-password"
+        required
+        {% if form.errors %}aria-invalid="true" aria-describedby="ActivateErrors"{% endif %}
+      >
+      <label for="ActivatePasswordConfirmation">{{ 'customer.activate_account.password_confirm' | t }}</label>
+      <input
+        id="ActivatePasswordConfirmation"
+        type="password"
+        name="customer[password_confirmation]"
+        autocomplete="new-password"
+        required
+      >
+      <button class="karthika-primary-button" type="submit">{{ 'customer.activate_account.submit' | t }}</button>
+      <button class="karthika-secondary-button" type="submit" name="decline" value="decline">{{ 'customer.activate_account.cancel' | t }}</button>
     {% endform %}
   </section>
 </div>

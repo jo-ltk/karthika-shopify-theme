@@ -1,19 +1,12 @@
-{%- unless request.design_mode -%}
-  <script>
-    (function () {
-      // Only bounce the one-shot post-login landing. Do NOT use document.referrer —
-      // that was also kicking people off /account when they opened Profile on purpose.
-      var fromLogin = false;
-      try {
-        fromLogin = sessionStorage.getItem('karthikaReturnHome') === '1';
-        if (fromLogin) sessionStorage.removeItem('karthikaReturnHome');
-      } catch (err) {}
-      if (fromLogin) {
-        window.location.replace({{ routes.root_url | default: '/' | json }});
-      }
-    })();
-  </script>
-{%- endunless -%}
+{%- unless customer -%}
+  <div class="karthika-auth-page">
+    <section class="karthika-auth-panel" aria-labelledby="KarthikaAccountGuestTitle">
+      <h1 id="KarthikaAccountGuestTitle">{{ 'customer.account.title' | t }}</h1>
+      <p>Sign in to view orders and addresses.</p>
+      <a class="karthika-primary-button" href="{% render 'karthika-login-home', destination: 'account' %}">{{ 'customer.log_in' | t }}</a>
+    </section>
+  </div>
+{%- else -%}
 
 {%- liquid
   assign has_orders = false
@@ -33,18 +26,25 @@
 
   assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
   assign contact_url = pages.contact.url | default: '/pages/contact'
+
+  assign offers_url = routes.all_products_collection_url
+  if pages['offers'] != blank
+    assign offers_url = pages['offers'].url
+  elsif collections['offers'] != blank
+    assign offers_url = collections['offers'].url
+  endif
 -%}
 
 <div class="kap" data-kap>
   <header class="kap-header">
     <div class="kap-header__text">
-      <h1 class="kap-header__title">{{ shop.name }}</h1>
-      <p class="kap-header__subtitle">Welcome back! <span aria-hidden="true">&#128075;</span></p>
+      <h1 class="kap-header__title">{{ shop.name | escape }}</h1>
+      <p class="kap-header__subtitle">{{ 'customer.account.title' | t }}</p>
     </div>
-    <span class="kap-avatar kap-avatar--sm" aria-hidden="true">{{ avatar_initial }}</span>
+    <span class="kap-avatar kap-avatar--sm" aria-hidden="true">{{ avatar_initial | escape }}</span>
   </header>
 
-    <div class="kap-tabs" role="tablist" aria-label="Account sections">
+    <div class="kap-tabs" role="tablist" aria-label="{{ 'customer.account.title' | t }}">
       <button
         type="button"
         class="kap-tab"
@@ -73,27 +73,25 @@
 
   <div class="kap-panel" id="kap-panel-profile" role="tabpanel" aria-labelledby="kap-tab-profile" data-kap-panel="profile">
     <section class="kap-card kap-profile" aria-labelledby="kap-profile-name">
-      <span class="kap-avatar" aria-hidden="true">{{ avatar_initial }}</span>
+      <span class="kap-avatar" aria-hidden="true">{{ avatar_initial | escape }}</span>
       <div class="kap-profile__details">
-        <h2 class="kap-profile__name" id="kap-profile-name">{{ display_name }}</h2>
-        {%- if customer.email != blank -%}<p>{{ customer.email }}</p>{%- endif -%}
+        <h2 class="kap-profile__name" id="kap-profile-name">{{ display_name | escape }}</h2>
+        {%- if customer.email != blank -%}<p>{{ customer.email | escape }}</p>{%- endif -%}
         {%- if customer.phone != blank -%}
-          <p>{{ customer.phone }}</p>
+          <p>{{ customer.phone | escape }}</p>
         {%- elsif default_address.phone != blank -%}
-          <p>{{ default_address.phone }}</p>
+          <p>{{ default_address.phone | escape }}</p>
+        {%- endif -%}
+        {%- if new_customer_accounts -%}
+          <p class="kap-profile__note">Profile details are managed in your Shopify account.</p>
         {%- endif -%}
       </div>
-      {%- if new_customer_accounts -%}
-        <a class="kap-btn kap-btn--soft kap-profile__edit" href="{{ routes.account_url }}">
+      {%- unless new_customer_accounts -%}
+        <a class="kap-btn kap-btn--soft kap-profile__edit" href="{{ routes.account_addresses_url }}">
           {%- render 'karthika-account-icon', icon: 'pencil' -%}
-          <span>Edit profile</span>
+          <span>{{ 'customer.account.view_addresses' | t }}</span>
         </a>
-      {%- else -%}
-        <button type="button" class="kap-btn kap-btn--soft kap-profile__edit" data-kap-sheet-open="kap-sheet-profile">
-          {%- render 'karthika-account-icon', icon: 'pencil' -%}
-          <span>Edit profile</span>
-        </button>
-      {%- endif -%}
+      {%- endunless -%}
     </section>
 
     <section class="kap-section" aria-labelledby="kap-recent-orders-title">
@@ -132,7 +130,7 @@
 
         <a class="kap-action" href="{{ routes.account_addresses_url }}">
           {%- render 'karthika-account-icon', icon: 'pin' -%}
-          <span>Addresses</span>
+          <span>{{ 'customer.addresses.title' | t }}</span>
         </a>
 
         <a class="kap-action" href="{% if pages.wishlist.url != blank %}{{ pages.wishlist.url }}{% else %}{{ routes.root_url }}pages/wishlist{% endif %}">
@@ -153,31 +151,21 @@
           {%- render 'karthika-account-icon', icon: 'home' -%}
         </span>
         <div class="kap-address__details">
-          <h2 class="kap-address__title" id="kap-address-title">Default Address</h2>
-          {%- liquid
-            assign street = default_address.address1
-            if default_address.address2 != blank
-              assign street = street | append: ', ' | append: default_address.address2
-            endif
-            assign locality_parts = ''
-            if default_address.city != blank
-              assign locality_parts = locality_parts | append: default_address.city | append: '|'
-            endif
-            assign region = default_address.province | default: ''
-            if default_address.zip != blank
-              assign region = region | append: ' ' | append: default_address.zip | strip
-            endif
-            if region != blank
-              assign locality_parts = locality_parts | append: region | append: '|'
-            endif
-            assign locality = locality_parts | split: '|' | join: ', '
-          -%}
-          {%- if street != blank -%}<p>{{ street }}</p>{%- endif -%}
-          {%- if locality != blank -%}<p>{{ locality }}</p>{%- endif -%}
-          {%- if default_address.country != blank -%}<p>{{ default_address.country }}</p>{%- endif -%}
-          {%- if default_address.phone != blank -%}<p>{{ default_address.phone }}</p>{%- endif -%}
+          <h2 class="kap-address__title" id="kap-address-title">{{ 'customer.addresses.default' | t }}</h2>
+          {{ default_address | format_address }}
         </div>
-        <a class="kap-btn kap-btn--outline kap-address__manage" href="{{ routes.account_addresses_url }}">Manage</a>
+        <a class="kap-btn kap-btn--outline kap-address__manage" href="{{ routes.account_addresses_url }}">{{ 'customer.addresses.edit' | t }}</a>
+      </section>
+    {%- else -%}
+      <section class="kap-card kap-address" aria-labelledby="kap-address-title">
+        <span class="kap-address__icon" aria-hidden="true">
+          {%- render 'karthika-account-icon', icon: 'home' -%}
+        </span>
+        <div class="kap-address__details">
+          <h2 class="kap-address__title" id="kap-address-title">{{ 'customer.addresses.title' | t }}</h2>
+          <p>{{ 'customer.addresses.add_new' | t }}</p>
+        </div>
+        <a class="kap-btn kap-btn--outline kap-address__manage" href="{{ routes.account_addresses_url }}">{{ 'customer.addresses.add' | t }}</a>
       </section>
     {%- endif -%}
 
@@ -194,6 +182,9 @@
       </span>
     </a>
 
+    <p class="kap-footer-link">
+      <a href="{{ routes.account_logout_url }}">{{ 'customer.log_out' | t }}</a>
+    </p>
     <p class="kap-footer-link"><a href="{{ privacy_url }}">Privacy policy</a></p>
   </div>
 
@@ -230,11 +221,13 @@
       {%- endif -%}
     </section>
 
+    <p class="kap-footer-link">
+      <a href="{{ routes.account_logout_url }}">{{ 'customer.log_out' | t }}</a>
+    </p>
     <p class="kap-footer-link"><a href="{{ privacy_url }}">Privacy policy</a></p>
   </div>
 </div>
 
-{%- comment -%} Account settings sheet: carries every menu row the redesign displaces. {%- endcomment -%}
 <div class="kap-sheet" id="kap-sheet-settings" data-kap-sheet hidden>
   <div class="kap-sheet__backdrop" data-kap-sheet-close></div>
   <div class="kap-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="kap-sheet-settings-title">
@@ -244,14 +237,14 @@
     </div>
     <div class="kap-sheet__body">
       <div class="kap-menu">
-        <a href="{{ routes.all_products_collection_url }}" class="kap-menu__row">
+        <a href="{{ offers_url }}" class="kap-menu__row">
           <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'tag' -%}</span>
-          <span><strong>Offers &amp; Coupons</strong><small>Browse current store offers</small></span>
+          <span><strong>Offers</strong><small>Browse current store offers</small></span>
           <b aria-hidden="true">&rsaquo;</b>
         </a>
         <a href="{{ contact_url }}" class="kap-menu__row">
           <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'chat' -%}</span>
-          <span><strong>Help &amp; Support</strong><small>Contact the Karthika team</small></span>
+          <span><strong>Help &amp; Support</strong><small>Contact the store</small></span>
           <b aria-hidden="true">&rsaquo;</b>
         </a>
         <a href="{{ privacy_url }}" class="kap-menu__row">
@@ -269,53 +262,11 @@
         </div>
         <a href="{{ routes.account_logout_url }}" class="kap-menu__row kap-menu__row--logout">
           <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'logout' -%}</span>
-          <span><strong>Logout</strong><small>Sign out of this device</small></span>
+          <span><strong>{{ 'customer.log_out' | t }}</strong><small>Sign out of this device</small></span>
           <b aria-hidden="true">&rsaquo;</b>
         </a>
       </div>
     </div>
   </div>
 </div>
-
-{%- unless new_customer_accounts -%}
-  <div class="kap-sheet" id="kap-sheet-profile" data-kap-sheet hidden>
-    <div class="kap-sheet__backdrop" data-kap-sheet-close></div>
-    <div class="kap-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="kap-sheet-profile-title">
-      <div class="kap-sheet__head">
-        <h2 id="kap-sheet-profile-title">Edit profile</h2>
-        <button type="button" class="kap-sheet__close" data-kap-sheet-close aria-label="Close">&times;</button>
-      </div>
-      <div class="kap-sheet__body">
-        <div class="kap-readonly">
-          <span>Email</span>
-          <strong>{{ customer.email }}</strong>
-          <small>Managed by Shopify &mdash; change it from the account sign-in flow.</small>
-        </div>
-        {%- liquid
-          assign profile_address = default_address
-          if profile_address == blank
-            assign profile_address = customer.new_address
-          endif
-        -%}
-        {%- form 'customer_address', profile_address -%}
-          {%- render 'karthika-address-fields', address: profile_address, form_id: 'Profile' -%}
-          <div class="kap-sheet__actions">
-            <button class="kap-btn kap-btn--primary" type="submit">Save changes</button>
-            <button class="kap-btn kap-btn--outline" type="button" data-kap-sheet-close>Cancel</button>
-          </div>
-        {%- endform -%}
-      </div>
-    </div>
-  </div>
-
-  <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      if (window.Shopify && Shopify.CountryProvinceSelector) {
-        new Shopify.CountryProvinceSelector('AddressCountry_Profile', 'AddressProvince_Profile', {
-          hideElement: 'AddressProvinceContainer_Profile',
-        });
-      }
-    });
-  </script>
 {%- endunless -%}

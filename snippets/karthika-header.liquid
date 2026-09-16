@@ -89,19 +89,17 @@
         <strong class="karthika-delivery-address">{% if store_location_label != blank %}{{ store_location_label | escape }}{% else %}{{ 'general.location.unconfigured' | t }}{% endif %}</strong>
       </button>
       <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#128241;</span> Download App</span>
-      {%- liquid
-        assign track_order_url = routes.account_login_url
-        if customer
-          assign track_order_url = routes.account_url | append: '#orders'
-        elsif routes.storefront_login_url contains 'customer_authentication'
-          assign track_return = routes.account_url | append: '#orders' | url_encode
-          assign track_order_url = routes.storefront_login_url | append: '?return_to=' | append: track_return
-        endif
-      -%}
+      {%- if customer -%}
+        {%- assign track_order_url = routes.account_url | append: '#orders' -%}
+      {%- else -%}
+        {%- capture track_order_url -%}
+          {% render 'karthika-login-home', destination: 'orders' %}
+        {%- endcapture -%}
+        {%- assign track_order_url = track_order_url | strip -%}
+      {%- endif -%}
       <a
-        class="karthika-desktop-header__utility-item{% unless customer %} karthika-login-home-link{% endunless %}"
+        class="karthika-desktop-header__utility-item"
         href="{{ track_order_url }}"
-        data-karthika-stay-account
       >
         <span aria-hidden="true">&#9716;</span> {{ 'karthika.checkout.track_order' | t }}
       </a>
@@ -157,7 +155,7 @@
       >
         <span aria-hidden="true">&#128722;</span><b class="karthika-cart-badge"{% if cart_count == 0 %} hidden{% endif %}>{{ cart_count }}</b>
       </a>
-      <a class="karthika-desktop-header__account" href="{% if customer %}{{ routes.account_url }}{% else %}{% render 'karthika-login-home' %}{% endif %}"><span aria-hidden="true">&#128100;</span> Account</a>
+      <a class="karthika-desktop-header__account" href="{% if customer %}{{ routes.account_url }}{% else %}{% render 'karthika-login-home', destination: 'account' %}{% endif %}"><span aria-hidden="true">&#128100;</span> Account</a>
     </div>
   </div>
 </div>
@@ -206,7 +204,7 @@
         {% endif %}
       </a>
       {% else %}
-      <a class="karthika-header-account karthika-account-trigger" href="#karthika-account-screen" data-account-href="{% render 'karthika-login-home' %}" data-customer-state="guest" aria-label="Account" aria-haspopup="dialog">
+      <a class="karthika-header-account karthika-account-trigger" href="#karthika-account-screen" data-account-href="{% render 'karthika-login-home', destination: 'account' %}" data-customer-state="guest" aria-label="Account" aria-haspopup="dialog">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="12" cy="8" r="4"></circle>
           <path d="M4 21a8 8 0 0 1 16 0"></path>

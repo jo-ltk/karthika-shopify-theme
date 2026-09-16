@@ -1,17 +1,36 @@
-{{ 'customer.js' | asset_url | script_tag }}
+<script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
+<script src="{{ 'customer.js' | asset_url }}" defer="defer"></script>
+
+{%- unless customer -%}
+  <div class="karthika-account-page">
+    <p>Sign in to manage saved addresses.</p>
+    <a class="karthika-primary-button" href="{% render 'karthika-login-home', destination: 'account' %}">{{ 'customer.log_in' | t }}</a>
+  </div>
+{%- else -%}
 
 <div class="karthika-account-page karthika-address-page" data-customer-addresses>
   <header class="karthika-account-page__header">
-    <a class="karthika-account-page__back" href="{{ routes.account_url }}" aria-label="Back to account">&larr;</a>
-    <div><p>My account</p><h1>Saved Addresses</h1></div>
+    <a class="karthika-account-page__back" href="{{ routes.account_url }}" aria-label="{{ 'customer.account.return' | t }}">&larr;</a>
+    <div>
+      <p>{{ 'customer.account.title' | t }}</p>
+      <h1>{{ 'customer.addresses.title' | t }}</h1>
+    </div>
   </header>
 
   <section class="karthika-account-section">
-    <button class="karthika-primary-button karthika-address-toggle" type="button" aria-expanded="false" aria-controls="KarthikaNewAddress">Add address</button>
+    <button class="karthika-primary-button karthika-address-toggle" type="button" aria-expanded="false" aria-controls="KarthikaNewAddress">
+      {{ 'customer.addresses.add_new' | t }}
+    </button>
     <div id="KarthikaNewAddress" class="karthika-address-form" data-address hidden>
       {% form 'customer_address', customer.new_address %}
+        {% if form.errors %}
+          <div class="karthika-form-message" role="alert">{{ form.errors | default_errors }}</div>
+        {% endif %}
         {% render 'karthika-address-fields', address: customer.new_address, form_id: 'New' %}
-        <div class="karthika-address-form__actions"><button class="karthika-primary-button" type="submit">Save address</button><button class="karthika-secondary-button" type="reset">Cancel</button></div>
+        <div class="karthika-address-form__actions">
+          <button class="karthika-primary-button" type="submit">{{ 'customer.addresses.add' | t }}</button>
+          <button class="karthika-secondary-button" type="reset">{{ 'customer.addresses.cancel' | t }}</button>
+        </div>
       {% endform %}
     </div>
   </section>
@@ -20,19 +39,56 @@
     <div class="karthika-address-list">
       {% for address in customer.addresses %}
         <article class="karthika-address-card" data-address>
-          <div class="karthika-address-card__summary"><div><strong>{% if address == customer.default_address %}Home{% elsif address.company != blank %}Work{% else %}Other{% endif %}</strong>{% if address == customer.default_address %}<span>Default</span>{% endif %}</div><p>{{ address | format_address }}</p></div>
-          <button class="karthika-address-edit" type="button" aria-expanded="false" aria-controls="KarthikaEditAddress{{ address.id }}">Edit</button>
+          <div class="karthika-address-card__summary">
+            <div>
+              <strong>
+                {%- if address.first_name != blank or address.last_name != blank -%}
+                  {{ address.first_name | escape }} {{ address.last_name | escape }}
+                {%- elsif address.company != blank -%}
+                  {{ address.company | escape }}
+                {%- else -%}
+                  {{ 'customer.addresses.title' | t }}
+                {%- endif -%}
+              </strong>
+              {% if address == customer.default_address %}
+                <span>{{ 'customer.addresses.default' | t }}</span>
+              {% endif %}
+            </div>
+            <p>{{ address | format_address }}</p>
+          </div>
+          <button
+            class="karthika-address-edit"
+            type="button"
+            aria-expanded="false"
+            aria-controls="KarthikaEditAddress{{ address.id }}"
+          >
+            {{ 'customer.addresses.edit' | t }}
+          </button>
           <div id="KarthikaEditAddress{{ address.id }}" class="karthika-address-form" hidden>
             {% form 'customer_address', address %}
+              {% if form.errors %}
+                <div class="karthika-form-message" role="alert">{{ form.errors | default_errors }}</div>
+              {% endif %}
               {% render 'karthika-address-fields', address: address, form_id: address.id %}
-              <div class="karthika-address-form__actions"><button class="karthika-primary-button" type="submit">Update address</button><button class="karthika-secondary-button" type="reset">Cancel</button></div>
+              <div class="karthika-address-form__actions">
+                <button class="karthika-primary-button" type="submit">{{ 'customer.addresses.update' | t }}</button>
+                <button class="karthika-secondary-button" type="reset">{{ 'customer.addresses.cancel' | t }}</button>
+              </div>
             {% endform %}
-            <button class="karthika-delete-address" type="button" data-target="{{ address.url }}" data-confirm-message="Delete this address?">Delete address</button>
+            <button
+              class="karthika-delete-address"
+              type="button"
+              data-target="{{ address.url }}"
+              data-confirm-message="{{ 'customer.addresses.delete_confirm' | t | escape }}"
+            >
+              {{ 'customer.addresses.delete' | t }}
+            </button>
           </div>
         </article>
       {% else %}
-        <p class="karthika-empty-state">Add an address to make checkout faster.</p>
+        <p class="karthika-empty-state">{{ 'customer.addresses.add_new' | t }}</p>
       {% endfor %}
     </div>
   </section>
 </div>
+{%- endunless -%}

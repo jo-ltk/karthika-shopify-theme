@@ -2,7 +2,7 @@ const selectors = {
   customerAddresses: '[data-customer-addresses]',
   addressCountrySelect: '[data-address-country-select]',
   addressContainer: '[data-address]',
-  toggleAddressButton: 'button[aria-expanded]',
+  toggleAddressButton: 'button[aria-expanded][aria-controls]',
   cancelAddressButton: 'button[type="reset"]',
   deleteAddressButton: 'button[data-confirm-message]',
 };
@@ -16,6 +16,7 @@ class CustomerAddresses {
   constructor() {
     this.elements = this._getElements();
     if (Object.keys(this.elements).length === 0) return;
+    this._revealInvalidForms();
     this._setupCountries();
     this._setupEventListeners();
   }
@@ -25,8 +26,7 @@ class CustomerAddresses {
     return container
       ? {
           container,
-          addressContainer: container.querySelector(selectors.addressContainer),
-          toggleButtons: document.querySelectorAll(selectors.toggleAddressButton),
+          toggleButtons: container.querySelectorAll(selectors.toggleAddressButton),
           cancelButtons: container.querySelectorAll(selectors.cancelAddressButton),
           deleteButtons: container.querySelectorAll(selectors.deleteAddressButton),
           countrySelects: container.querySelectorAll(selectors.addressCountrySelect),
@@ -34,20 +34,36 @@ class CustomerAddresses {
       : {};
   }
 
+  _panelFor(button) {
+    const id = button.getAttribute('aria-controls');
+    return id ? document.getElementById(id) : null;
+  }
+
+  _setExpanded(button, expanded) {
+    button.setAttribute(attributes.expanded, String(expanded));
+    const panel = this._panelFor(button);
+    if (panel) panel.hidden = !expanded;
+  }
+
+  _revealInvalidForms() {
+    this.elements.toggleButtons.forEach((button) => {
+      const panel = this._panelFor(button);
+      if (panel && panel.querySelector('[role="alert"]')) {
+        this._setExpanded(button, true);
+      }
+    });
+  }
+
   _setupCountries() {
-    if (Shopify && Shopify.CountryProvinceSelector) {
-      // eslint-disable-next-line no-new
-      new Shopify.CountryProvinceSelector('AddressCountryNew', 'AddressProvinceNew', {
-        hideElement: 'AddressProvinceContainerNew',
+    if (typeof Shopify === 'undefined' || !Shopify.CountryProvinceSelector) return;
+
+    this.elements.countrySelects.forEach((select) => {
+      const formId = select.dataset.formId;
+      if (!formId) return;
+      new Shopify.CountryProvinceSelector(`AddressCountry_${formId}`, `AddressProvince_${formId}`, {
+        hideElement: `AddressProvinceContainer_${formId}`,
       });
-      this.elements.countrySelects.forEach((select) => {
-        const formId = select.dataset.formId;
-        // eslint-disable-next-line no-new
-        new Shopify.CountryProvinceSelector(`AddressCountry_${formId}`, `AddressProvince_${formId}`, {
-          hideElement: `AddressProvinceContainer_${formId}`,
-        });
-      });
-    }
+    });
   }
 
   _setupEventListeners() {
@@ -62,25 +78,25 @@ class CustomerAddresses {
     });
   }
 
-  _toggleExpanded(target) {
-    target.setAttribute(attributes.expanded, (target.getAttribute(attributes.expanded) === 'false').toString());
-  }
-
   _handleAddEditButtonClick = ({ currentTarget }) => {
-    this._toggleExpanded(currentTarget);
+    const expanded = currentTarget.getAttribute(attributes.expanded) === 'true';
+    this._setExpanded(currentTarget, !expanded);
   };
 
   _handleCancelButtonClick = ({ currentTarget }) => {
-    this._toggleExpanded(currentTarget.closest(selectors.addressContainer).querySelector(`[${attributes.expanded}]`));
+    const panel =
+      currentTarget.closest('.karthika-address-form') || currentTarget.closest(selectors.addressContainer);
+    if (!panel || !panel.id) return;
+    const toggle = this.elements.container.querySelector(`[aria-controls="${panel.id}"]`);
+    if (toggle) this._setExpanded(toggle, false);
   };
 
   _handleDeleteButtonClick = ({ currentTarget }) => {
-    // eslint-disable-next-line no-alert
-    if (confirm(currentTarget.getAttribute(attributes.confirmMessage))) {
-      Shopify.postLink(currentTarget.dataset.target, {
-        parameters: { _method: 'delete' },
-      });
-    }
+    if (!confirm(currentTarget.getAttribute(attributes.confirmMessage))) return;
+    if (typeof Shopify === 'undefined' || typeof Shopify.postLink !== 'function') return;
+    Shopify.postLink(currentTarget.dataset.target, {
+      parameters: { _method: 'delete' },
+    });
   };
 }
 

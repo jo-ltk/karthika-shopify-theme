@@ -1,49 +1,49 @@
 {% doc %}
-  Customer login helpers that send shoppers to the main homepage after sign-in,
-  instead of the default "Home page" collection listing.
+  Customer login helpers for classic customer accounts and New Customer Accounts.
 
   @param {string} [mode] - `url` (default) prints the login href. `fields` prints hidden form inputs.
+  @param {string} [destination] - `home` (default, used by cart/order-again), `account`, or `orders`.
 
   @example
   {% render 'karthika-login-home' %}
-  {% render 'karthika-login-home', mode: 'fields' %}
+  {% render 'karthika-login-home', destination: 'account' %}
+  {% render 'karthika-login-home', mode: 'fields', destination: 'account' %}
 {% enddoc %}
 {%- liquid
   assign home_path = routes.root_url | default: '/'
   if home_path == blank
     assign home_path = '/'
   endif
-  assign encoded_home = home_path | url_encode
+
+  assign account_path = routes.account_url | default: '/account'
+  assign orders_path = account_path | append: '?tab=orders'
   assign storefront_login = routes.storefront_login_url | default: ''
+
+  assign return_path = home_path
+  if destination == 'account'
+    assign return_path = account_path
+  elsif destination == 'orders'
+    assign return_path = orders_path
+  endif
+
+  if request.query_parameters.return_to != blank
+    assign requested_return = request.query_parameters.return_to | strip
+    assign first_char = requested_return | slice: 0
+    assign second_char = requested_return | slice: 1, 1
+    if first_char == '/' and second_char != '/'
+      unless requested_return contains '://'
+        assign return_path = requested_return
+      endunless
+    endif
+  endif
+
+  assign encoded_return = return_path | url_encode
 -%}
 {%- if mode == 'fields' -%}
-<input type="hidden" name="checkout_url" value="{{ home_path | escape }}">
-<input type="hidden" name="return_to" value="{{ home_path | escape }}">
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var homePath = {{ home_path | json }};
-    document.querySelectorAll('form').forEach(function (form) {
-      var action = form.getAttribute('action') || '';
-      if (action.indexOf('/account') === -1) return;
-      ['checkout_url', 'return_to'].forEach(function (name) {
-        var inputs = form.querySelectorAll('input[name="' + name + '"]');
-        if (!inputs.length) {
-          var input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = name;
-          input.value = homePath;
-          form.appendChild(input);
-          return;
-        }
-        inputs.forEach(function (input) {
-          input.value = homePath;
-        });
-      });
-    });
-  });
-</script>
+<input type="hidden" name="checkout_url" value="{{ return_path | escape }}">
+<input type="hidden" name="return_to" value="{{ return_path | escape }}">
 {%- elsif storefront_login contains 'customer_authentication' -%}
-/customer_authentication/login?return_to={{ encoded_home }}
+{{ storefront_login }}?return_to={{ encoded_return }}
 {%- else -%}
-{{ routes.account_login_url }}?return_to={{ encoded_home }}
+{{ routes.account_login_url }}?return_to={{ encoded_return }}
 {%- endif -%}

@@ -1,12 +1,10 @@
 {%- comment -%}
-  Karthika Supermarket — Mobile Account / Login Screen
-  Full-screen overlay triggered by the profile icon in the mobile header.
-  Slide-up panel with blue hero, branding, grocery decorations, login CTA,
-  account option rows, and app version footer.
+  Karthika — Mobile Account / Login overlay.
+  Guest: Shopify login. Signed-in: account, addresses, logout.
 {%- endcomment -%}
 
 {%- capture login_url -%}
-  {% render 'karthika-login-home' %}
+  {% render 'karthika-login-home', destination: 'account' %}
 {%- endcapture -%}
 {%- liquid
   assign login_url = login_url | strip
@@ -15,21 +13,31 @@
   if customer
     assign target_url = account_url
   endif
+  assign contact_url = pages.contact.url | default: '/pages/contact'
+  assign offers_url = routes.all_products_collection_url
+  if pages['offers'] != blank
+    assign offers_url = pages['offers'].url
+  elsif collections['offers'] != blank
+    assign offers_url = collections['offers'].url
+  endif
 -%}
 
-<div id="karthika-account-screen" class="karthika-account-screen" aria-modal="true" role="dialog" aria-label="Account" hidden>
+<div
+  id="karthika-account-screen"
+  class="karthika-account-screen"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="kas-dialog-title"
+  hidden
+>
 
-  <!-- Blue hero -->
   <div class="kas-hero">
-
-    <!-- Back button -->
-    <a class="kas-back-btn" id="kas-back-btn" href="#" aria-label="Go back">
+    <button type="button" class="kas-back-btn" id="kas-back-btn" aria-label="Close account menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <polyline points="15 18 9 12 15 6"></polyline>
       </svg>
-    </a>
+    </button>
 
-    <!-- Decorative grocery elements (CSS-rendered emoji/shapes, no external imgs) -->
     <div class="kas-deco" aria-hidden="true">
       <span class="kas-deco__item kas-deco__tomato">🍅</span>
       <span class="kas-deco__item kas-deco__lemon">🍋</span>
@@ -40,33 +48,52 @@
       <span class="kas-deco__item kas-deco__orange">🍊</span>
     </div>
 
-    <!-- Central Karthika branding -->
-    <div class="kas-brand" aria-label="Karthika Supermarket">
+    <div class="kas-brand">
       {% render 'karthika-logo', class: 'kas-brand__logo-img', loading: 'eager' %}
+      <h2 id="kas-dialog-title" class="visually-hidden">{{ shop.name | escape }} account</h2>
     </div>
+  </div>
 
-  </div><!-- /kas-hero -->
-
-  <!-- White login panel -->
   <div class="kas-panel">
-
-    <a href="{{ target_url }}" class="kas-login-btn{% unless customer %} karthika-login-home-link{% endunless %}" id="kas-login-btn">
-      {%- if customer -%}My Account{%- else -%}Login{%- endif -%}
+    <a href="{{ target_url }}" class="kas-login-btn" id="kas-login-btn">
+      {%- if customer -%}{{ 'customer.account.title' | t }}{%- else -%}{{ 'customer.log_in' | t }}{%- endif -%}
     </a>
 
     {%- unless customer -%}
-    <p class="kas-terms">
-      By tapping, I accept the
-      <a href="{{ shop.terms_of_service.url | default: '/policies/terms-of-service' }}" class="kas-terms__link">terms of service</a>
-      &amp;
-      <a href="{{ shop.privacy_policy.url | default: '/policies/privacy-policy' }}" class="kas-terms__link">privacy policy</a>
-    </p>
+      {%- if shop.customer_accounts_enabled -%}
+        <a class="kas-register-link" href="{{ routes.account_register_url }}">{{ 'customer.login_page.create_account' | t }}</a>
+      {%- endif -%}
+      <p class="kas-terms">
+        By tapping, I accept the
+        <a href="{{ shop.terms_of_service.url | default: '/policies/terms-of-service' }}" class="kas-terms__link">terms of service</a>
+        &amp;
+        <a href="{{ shop.privacy_policy.url | default: '/policies/privacy-policy' }}" class="kas-terms__link">privacy policy</a>
+      </p>
     {%- endunless -%}
 
-    <!-- Account options card -->
     <div class="kas-options-card" role="list">
+      {%- if customer -%}
+        <a href="{{ routes.account_url }}#orders" class="kas-option-row" role="listitem">
+          <span class="kas-option-row__label">{{ 'karthika.account.orders' | t }}</span>
+          <span class="kas-option-row__chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        </a>
+        <div class="kas-divider" role="separator" aria-hidden="true"></div>
+        <a href="{{ routes.account_addresses_url }}" class="kas-option-row" role="listitem">
+          <span class="kas-option-row__label">{{ 'customer.addresses.title' | t }}</span>
+          <span class="kas-option-row__chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        </a>
+        <div class="kas-divider" role="separator" aria-hidden="true"></div>
+      {%- endif -%}
 
-      <a href="{{ routes.all_products_collection_url }}" class="kas-option-row" role="listitem">
+      <a href="{{ offers_url }}" class="kas-option-row" role="listitem">
         <span class="kas-option-row__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -82,13 +109,13 @@
 
       <div class="kas-divider" role="separator" aria-hidden="true"></div>
 
-      <a href="/pages/contact" class="kas-option-row" role="listitem">
+      <a href="{{ contact_url }}" class="kas-option-row" role="listitem">
         <span class="kas-option-row__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
         </span>
-        <span class="kas-option-row__label">Feedback</span>
+        <span class="kas-option-row__label">Help &amp; Support</span>
         <span class="kas-option-row__chevron" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
@@ -96,11 +123,17 @@
         </span>
       </a>
 
-    </div><!-- /kas-options-card -->
-
-    <!-- App version -->
-    <p class="kas-version">App version 1.0.0</p>
-
-  </div><!-- /kas-panel -->
-
-</div><!-- /karthika-account-screen -->
+      {%- if customer -%}
+        <div class="kas-divider" role="separator" aria-hidden="true"></div>
+        <a href="{{ routes.account_logout_url }}" class="kas-option-row" role="listitem">
+          <span class="kas-option-row__label">{{ 'customer.log_out' | t }}</span>
+          <span class="kas-option-row__chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</div>

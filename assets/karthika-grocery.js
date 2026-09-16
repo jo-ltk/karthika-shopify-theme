@@ -2287,11 +2287,20 @@
       });
 
       if (this.backBtn) {
-        this.backBtn.addEventListener('click', () => this.close());
+        this.backBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.close();
+        });
       }
 
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && this.isOpen()) this.close();
+        if (!this.isOpen()) return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          this.close();
+          return;
+        }
+        if (e.key === 'Tab') this.trapFocus(e);
       });
     },
 
@@ -2326,6 +2335,25 @@
       const returnTarget = this._openedBy || document.querySelector('.karthika-account-trigger');
       this._openedBy = null;
       if (returnTarget) returnTarget.focus();
+    },
+
+    trapFocus(event) {
+      if (!this.overlay) return;
+      const focusable = Array.from(
+        this.overlay.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+        )
+      ).filter((el) => !el.hasAttribute('hidden') && el.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
   };
 
@@ -2337,23 +2365,13 @@
 (function () {
   'use strict';
 
-  function markReturnHome(href) {
-    if (!href) return;
-    if (
-      href.indexOf('customer_authentication') !== -1 ||
-      href.indexOf('/account/login') !== -1
-    ) {
-      try {
-        sessionStorage.setItem('karthikaReturnHome', '1');
-      } catch (err) {}
-    }
-  }
-
   document.addEventListener('click', function (e) {
-    var link = e.target.closest('a[href], .karthika-login-home-link');
-    if (!link) return;
-    if (link.hasAttribute('data-karthika-stay-account')) return;
-    markReturnHome(link.getAttribute('href') || '');
+    var logout = e.target.closest('a[href*="/account/logout"], a[href*="/account/logout/"]');
+    if (!logout) return;
+    try {
+      sessionStorage.removeItem('karthikaReturnHome');
+      sessionStorage.removeItem('karthikaAccountTab');
+    } catch (err) {}
   });
 })();
 
