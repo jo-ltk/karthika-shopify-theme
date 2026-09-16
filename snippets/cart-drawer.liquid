@@ -85,15 +85,19 @@
           if progress_percent > 100
             assign progress_percent = 100
           endif
+          assign amount_left_money = amount_left | money
         -%}
         <div class="karthika-drawer-free-shipping" style="margin: 0 1.5rem 1.2rem 1.5rem;">
           <div style="display: flex; align-items: center; justify-content: space-between; font-size: 1.2rem; font-weight: 700; color: var(--karthika-text-dark);">
             {%- if amount_left > 0 -%}
-              <span>Add <strong style="color: var(--karthika-red);">{{ amount_left | money }}</strong> for free delivery</span>
+              <span>{{ 'sections.cart.free_delivery_remaining_html' | t: amount: amount_left_money }}</span>
             {%- else -%}
-              <span style="color: #15803D;">You’ve unlocked free delivery</span>
+              <span style="color: #15803D;">{{ 'sections.cart.free_delivery_unlocked' | t }}</span>
             {%- endif -%}
           </div>
+          <p style="margin: 0.4rem 0 0; font-size: 1.1rem; font-weight: 500; color: var(--karthika-text-muted, #5c6b52);">
+            {{ 'sections.cart.free_delivery_checkout_note' | t }}
+          </p>
           <div class="karthika-progress-bar-bg">
             <div class="karthika-progress-bar-fill" style="width: {{ progress_percent }}%;"></div>
           </div>

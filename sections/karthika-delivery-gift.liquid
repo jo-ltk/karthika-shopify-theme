@@ -228,6 +228,7 @@
 
     <div class="kdg-panel">
       <h3 class="kdg__subtitle">{{ 'sections.delivery_gift.method_title' | t }}</h3>
+      <p class="kdg__intro">{{ 'sections.delivery_gift.method_note' | t }}</p>
       <div class="kdg__methods" data-kdg-live-methods hidden></div>
       <div class="kdg__methods" data-kdg-fallback-methods>
         {%- for block in section.blocks -%}
@@ -387,7 +388,8 @@
     font-style: normal;
     font-size: 13px;
     font-weight: 700;
-    white-space: nowrap;
+    white-space: normal;
+    text-align: right;
   }
 
   .kdg-address-list {
@@ -480,10 +482,10 @@
       "default": "Delivery & Gift"
     },
     {
-      "type": "textarea",
-      "id": "subheading",
-      "label": "Subheading",
-      "default": "Choose who this order is for, pick an address, and select a delivery method before you place the order."
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "These details are saved as order notes. You will still enter the shipping address and confirm shipping in Shopify checkout."
     },
     {
       "type": "range",
@@ -509,14 +511,16 @@
         {
           "type": "text",
           "id": "subtitle",
-          "label": "Estimated time",
-          "default": "2–4 days"
+          "label": "Preference note",
+          "info": "Order-note copy only. Do not claim a live shipping ETA unless checkout actually offers it.",
+          "default": "Confirmed at checkout"
         },
         {
           "type": "text",
           "id": "price",
           "label": "Price label",
-          "default": "Free"
+          "info": "Shown as an order-note label. Not a live Shopify shipping rate.",
+          "default": "At checkout"
         }
       ]
     }
@@ -529,16 +533,16 @@
           "type": "delivery_method",
           "settings": {
             "title": "Standard",
-            "subtitle": "2–4 days",
-            "price": "Free"
+            "subtitle": "Confirmed at checkout",
+            "price": "At checkout"
           }
         },
         {
           "type": "delivery_method",
           "settings": {
             "title": "Express",
-            "subtitle": "Same day / next day",
-            "price": "From checkout"
+            "subtitle": "Preference only — confirmed at checkout",
+            "price": "At checkout"
           }
         }
       ]

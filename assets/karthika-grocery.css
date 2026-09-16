@@ -3244,6 +3244,7 @@ body.karthika-location-open {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   width: 100%;
   padding: 14px 16px;
@@ -3289,16 +3290,46 @@ body.karthika-location-open {
 }
 
 .karthika-location-item__note {
-  flex: 0 0 auto;
-  max-width: 42%;
+  flex: 1 1 100%;
+  max-width: 100%;
   font-size: 11px;
   font-weight: 700;
   color: #15803d;
   background: #dcfce7;
-  padding: 2px 8px;
+  padding: 4px 8px;
   border-radius: 999px;
-  text-align: right;
+  text-align: left;
   overflow-wrap: anywhere;
+}
+
+@media screen and (min-width: 480px) {
+  .karthika-location-item__note {
+    flex: 0 0 auto;
+    max-width: 42%;
+    text-align: right;
+  }
+}
+
+.karthika-location-reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  color: var(--karthika-red, #3f7d2e);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.karthika-location-reset:focus-visible {
+  outline: 2px solid #2775D9;
+  outline-offset: 2px;
 }
 
 .karthika-product-delivery-note {

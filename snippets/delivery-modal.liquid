@@ -5,16 +5,17 @@
 {%- liquid
   assign location_address = settings.store_location_address | strip
   assign location_city = settings.store_location_city | strip
-  assign location_postal = settings.store_location_postal | strip
+  assign location_region = settings.store_location_region | strip
   assign location_name = settings.store_location_name | strip
-  assign default_label = location_address
-  if default_label == blank and location_city != blank and location_postal != blank
-    assign default_label = location_city | append: ' ' | append: location_postal
-  elsif default_label == blank
+  assign default_label = ''
+  if location_region != blank and location_city != blank
+    assign default_label = location_region | append: ', ' | append: location_city
+  elsif location_city != blank
     assign default_label = location_city
-  endif
-  if default_label == blank
+  elsif location_name != blank
     assign default_label = location_name
+  elsif location_address != blank
+    assign default_label = location_address
   endif
 -%}
 
@@ -28,6 +29,7 @@
   aria-hidden="true"
   hidden
   data-default-location="{{ default_label | escape }}"
+  data-default-location-id="area-1"
 >
   <button
     type="button"
@@ -83,17 +85,18 @@
 
       {%- if area_1_name != blank or area_1_address != blank -%}
         {%- liquid
-          assign area_1_label = area_1_address
+          assign area_1_label = area_1_name
           if area_1_label == blank
-            assign area_1_label = area_1_name
+            assign area_1_label = area_1_address
           endif
         -%}
         <button
           type="button"
-          class="karthika-location-item{% if area_1_label == default_label %} is-selected{% endif %}"
+          class="karthika-location-item is-selected"
           data-location-id="area-1"
+          data-label="{{ area_1_label | escape }}"
           data-address="{{ area_1_label | escape }}"
-          aria-pressed="{% if area_1_label == default_label %}true{% else %}false{% endif %}"
+          aria-pressed="true"
         >
           <span class="karthika-location-item__copy">
             {%- if area_1_name != blank -%}<span class="karthika-location-item__name">{{ area_1_name | escape }}</span>{%- endif -%}
@@ -105,17 +108,18 @@
 
       {%- if area_2_name != blank or area_2_address != blank -%}
         {%- liquid
-          assign area_2_label = area_2_address
+          assign area_2_label = area_2_name
           if area_2_label == blank
-            assign area_2_label = area_2_name
+            assign area_2_label = area_2_address
           endif
         -%}
         <button
           type="button"
-          class="karthika-location-item{% if area_2_label == default_label %} is-selected{% endif %}"
+          class="karthika-location-item"
           data-location-id="area-2"
+          data-label="{{ area_2_label | escape }}"
           data-address="{{ area_2_label | escape }}"
-          aria-pressed="{% if area_2_label == default_label %}true{% else %}false{% endif %}"
+          aria-pressed="false"
         >
           <span class="karthika-location-item__copy">
             {%- if area_2_name != blank -%}<span class="karthika-location-item__name">{{ area_2_name | escape }}</span>{%- endif -%}
@@ -127,17 +131,18 @@
 
       {%- if area_3_name != blank or area_3_address != blank -%}
         {%- liquid
-          assign area_3_label = area_3_address
+          assign area_3_label = area_3_name
           if area_3_label == blank
-            assign area_3_label = area_3_name
+            assign area_3_label = area_3_address
           endif
         -%}
         <button
           type="button"
-          class="karthika-location-item{% if area_3_label == default_label %} is-selected{% endif %}"
+          class="karthika-location-item"
           data-location-id="area-3"
+          data-label="{{ area_3_label | escape }}"
           data-address="{{ area_3_label | escape }}"
-          aria-pressed="{% if area_3_label == default_label %}true{% else %}false{% endif %}"
+          aria-pressed="false"
         >
           <span class="karthika-location-item__copy">
             {%- if area_3_name != blank -%}<span class="karthika-location-item__name">{{ area_3_name | escape }}</span>{%- endif -%}
@@ -149,17 +154,18 @@
 
       {%- if area_4_name != blank or area_4_address != blank -%}
         {%- liquid
-          assign area_4_label = area_4_address
+          assign area_4_label = area_4_name
           if area_4_label == blank
-            assign area_4_label = area_4_name
+            assign area_4_label = area_4_address
           endif
         -%}
         <button
           type="button"
-          class="karthika-location-item{% if area_4_label == default_label %} is-selected{% endif %}"
+          class="karthika-location-item"
           data-location-id="area-4"
+          data-label="{{ area_4_label | escape }}"
           data-address="{{ area_4_label | escape }}"
-          aria-pressed="{% if area_4_label == default_label %}true{% else %}false{% endif %}"
+          aria-pressed="false"
         >
           <span class="karthika-location-item__copy">
             {%- if area_4_name != blank -%}<span class="karthika-location-item__name">{{ area_4_name | escape }}</span>{%- endif -%}
@@ -179,6 +185,7 @@
           type="button"
           class="karthika-location-item is-selected"
           data-location-id="area-1"
+          data-label="{{ default_label | escape }}"
           data-address="{{ default_label | escape }}"
           aria-pressed="true"
         >
@@ -192,6 +199,10 @@
 
     {%- if default_label == blank and area_1_name == blank and area_2_name == blank and area_3_name == blank and area_4_name == blank and area_1_address == blank and area_2_address == blank and area_3_address == blank and area_4_address == blank -%}
       <p class="karthika-delivery-modal-empty">{{ 'general.location.unconfigured' | t }}</p>
+    {%- elsif default_label != blank -%}
+      <button type="button" class="karthika-location-reset" data-karthika-location-reset>
+        {{ 'general.location.reset' | t }}
+      </button>
     {%- endif -%}
   </div>
 </div>

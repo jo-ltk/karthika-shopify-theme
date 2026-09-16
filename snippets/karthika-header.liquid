@@ -58,14 +58,17 @@
 {%- unless template.name == 'list-collections' or request.path == '/collections' -%}
 <div class="karthika-desktop-header" role="banner">
   {%- liquid
-    assign store_location_label = settings.store_location_address | strip
-    if store_location_label == blank and settings.store_location_city != blank and settings.store_location_postal != blank
-      assign store_location_label = settings.store_location_city | append: ' ' | append: settings.store_location_postal | strip
-    elsif store_location_label == blank
-      assign store_location_label = settings.store_location_city | strip
-    endif
-    if store_location_label == blank
+    assign store_location_city = settings.store_location_city | strip
+    assign store_location_region = settings.store_location_region | strip
+    assign store_location_label = ''
+    if store_location_region != blank and store_location_city != blank
+      assign store_location_label = store_location_region | append: ', ' | append: store_location_city
+    elsif store_location_city != blank
+      assign store_location_label = store_location_city
+    elsif settings.store_location_name != blank
       assign store_location_label = settings.store_location_name | strip
+    elsif settings.store_location_address != blank
+      assign store_location_label = settings.store_location_address | strip
     endif
   -%}
   <div class="karthika-desktop-header__utility">

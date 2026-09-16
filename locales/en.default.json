@@ -51,11 +51,12 @@
     "location": {
       "title": "Store location",
       "close": "Close location selector",
-      "delivering_to": "Delivering to",
+      "delivering_to": "Store location",
       "change_location": "Choose store location",
-      "checkout_note": "This updates the location shown in the header. Shipping options and rates are calculated at checkout.",
+      "checkout_note": "This updates the location shown in the header. It does not change Shopify shipping, rates, or checkout.",
       "unconfigured": "Add a store address in Theme settings → Store location & delivery.",
-      "from_store": "From {{ name }}"
+      "from_store": "From {{ name }}",
+      "reset": "Use default store location"
     },
     "wishlist": {
       "add": "Add {{ product }} to wishlist",
@@ -248,6 +249,10 @@
     }
   },
   "templates": {
+    "404": {
+      "title": "Page not found",
+      "subtext": "404"
+    },
     "search": {
       "no_results": "No results found for “{{ terms }}”. Check the spelling or use a different word or phrase.",
       "page": "Page",
@@ -291,10 +296,6 @@
         "post_success": "Thanks for contacting us. We'll get back to you as soon as possible.",
         "error_heading": "Please adjust the following:"
       }
-    },
-    "404": {
-      "title": "Page not found",
-      "subtext": "404"
     }
   },
   "sections": {
@@ -305,7 +306,6 @@
       "announcement": "Announcement",
       "announcement_bar": "Announcement bar"
     },
-
     "header": {
       "announcement": "Announcement",
       "menu": "Menu",
@@ -335,6 +335,9 @@
       "duties_included_taxes_at_checkout_shipping_at_checkout_without_policy": "Duties included. Taxes, discounts and shipping calculated at checkout.",
       "taxes_at_checkout_shipping_at_checkout_with_policy_html": "Taxes, discounts and <a href=\"{{ link }}\">shipping</a> calculated at checkout.",
       "taxes_at_checkout_shipping_at_checkout_without_policy": "Taxes, discounts and shipping calculated at checkout.",
+      "free_delivery_remaining_html": "Add <strong>{{ amount }}</strong> for promotional free delivery",
+      "free_delivery_unlocked": "Promotional free-delivery threshold reached",
+      "free_delivery_checkout_note": "This progress bar is a storefront message. Shipping is calculated at checkout.",
       "headings": {
         "product": "Product",
         "price": "Price",
@@ -350,12 +353,12 @@
     },
     "delivery_gift": {
       "title": "Delivery & Gift",
-      "intro": "Choose who this order is for, pick an address, and select a delivery method before you place the order.",
+      "intro": "These details are saved as order notes. You will still enter the shipping address and confirm shipping in Shopify checkout.",
       "destination": "Delivery destination",
       "deliver_to_me": "Deliver to my address",
-      "deliver_to_me_hint": "Send this order to one of your saved addresses.",
+      "deliver_to_me_hint": "Saved as an order note. Checkout still collects the shipping address.",
       "send_as_gift": "Send as a gift",
-      "send_as_gift_hint": "Deliver to a friend or family member.",
+      "send_as_gift_hint": "Gift details are saved as order notes. Checkout still collects the shipping address.",
       "gift_details": "Gift details",
       "recipient_name": "Recipient name",
       "recipient_phone": "Recipient phone number",
@@ -382,14 +385,15 @@
       "province": "State / Province",
       "zip": "Postal code",
       "phone": "Phone",
-      "method_title": "Delivery method",
+      "method_title": "Delivery method preference",
+      "method_note": "If live options appear, they come from Shopify. Selecting one here saves it as an order note and does not lock the shipping rate at checkout.",
       "error_address": "Choose a delivery address.",
       "error_method": "Choose a delivery method.",
       "error_recipient": "Enter the recipient name.",
       "error_phone": "Enter the recipient phone number.",
       "error_save": "Could not save delivery details. Try again.",
       "change": "Change",
-      "choose_on_cart": "Choose an address and delivery method before placing the order.",
+      "choose_on_cart": "Add delivery notes on the cart page. Shipping address and rates are confirmed at checkout.",
       "gift_to": "Gift to {{ name }}"
     },
     "footer": {
@@ -563,6 +567,7 @@
       "recipient_name": "Recipient",
       "recipient_phone": "Recipient phone",
       "gift_message": "Gift message",
+      "delivery_notes_disclaimer": "These fields were saved as order notes. The shipping address and rates on this order come from Shopify checkout.",
       "cancelled_status": "Cancelled",
       "tracking_unavailable": "Tracking information is not available yet.",
       "tracking_title": "Tracking"

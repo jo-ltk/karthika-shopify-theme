@@ -782,11 +782,18 @@
           return;
         }
 
+        const reset = e.target.closest('[data-karthika-location-reset]');
+        if (reset) {
+          e.preventDefault();
+          this.resetToDefault();
+          return;
+        }
+
         const locationOption = e.target.closest('.karthika-location-item');
         if (locationOption && locationOption.closest('#KarthikaDeliveryModal')) {
           const id = locationOption.dataset.locationId;
-          const address = locationOption.dataset.address;
-          if (address) this.setLocation({ id, label: address });
+          const label = (locationOption.dataset.label || locationOption.dataset.address || '').trim();
+          if (label) this.setLocation({ id, label });
         }
       });
     },
@@ -799,6 +806,23 @@
       return !!document.querySelector('#KarthikaSearchModal')?.classList.contains('is-open');
     },
 
+    clearStoredLocation() {
+      try {
+        localStorage.removeItem(this.STORAGE_KEY);
+      } catch (e) {}
+    },
+
+    defaultLocation() {
+      const modal = this.getModal();
+      if (!modal) return null;
+      const label = (modal.getAttribute('data-default-location') || '').trim();
+      if (!label) return null;
+      return {
+        id: (modal.getAttribute('data-default-location-id') || '').trim(),
+        label,
+      };
+    },
+
     restore() {
       const modal = this.getModal();
       if (!modal) return;
@@ -808,14 +832,24 @@
       } catch (e) {
         stored = null;
       }
-      const id = stored && typeof stored.id === 'string' && /^area-\d+$/.test(stored.id) ? stored.id : '';
+      const validObject = stored && typeof stored === 'object' && !Array.isArray(stored);
+      const id = validObject && typeof stored.id === 'string' && /^area-\d+$/.test(stored.id) ? stored.id : '';
       const match = id ? modal.querySelector(`.karthika-location-item[data-location-id="${id}"]`) : null;
-      if (match?.dataset.address) {
-        this.applyLocation({ id, label: match.dataset.address }, { persist: false, close: false });
+      const matchLabel = match ? (match.dataset.label || match.dataset.address || '').trim() : '';
+      if (matchLabel) {
+        this.applyLocation({ id, label: matchLabel }, { persist: false, close: false });
         return;
       }
-      const fallback = modal.getAttribute('data-default-location') || '';
-      if (fallback) this.applyLocation({ id: '', label: fallback }, { persist: false, close: false });
+      if (localStorage.getItem(this.STORAGE_KEY)) this.clearStoredLocation();
+      const fallback = this.defaultLocation();
+      if (fallback) this.applyLocation(fallback, { persist: false, close: false });
+    },
+
+    resetToDefault() {
+      this.clearStoredLocation();
+      const fallback = this.defaultLocation();
+      if (fallback) this.applyLocation(fallback, { persist: false, close: true });
+      else this.close();
     },
 
     setLocation(location) {
@@ -831,7 +865,7 @@
       });
 
       document.querySelectorAll('#KarthikaDeliveryModal .karthika-location-item').forEach((item) => {
-        const selected = item.dataset.locationId === location.id || item.dataset.address === label;
+        const selected = item.dataset.locationId === location.id || item.dataset.label === label || item.dataset.address === label;
         item.classList.toggle('is-selected', selected);
         item.setAttribute('aria-pressed', selected ? 'true' : 'false');
       });

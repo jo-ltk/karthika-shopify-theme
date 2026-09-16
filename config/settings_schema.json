@@ -1544,7 +1544,7 @@
         "type": "textarea",
         "id": "location_selector_note",
         "label": "Location selector note",
-        "default": "This updates the location shown in the header. Shipping options and rates are calculated at checkout."
+        "default": "This updates the location shown in the header. It does not change Shopify shipping, rates, or checkout."
       },
       {
         "type": "header",
@@ -1569,58 +1569,62 @@
       {
         "type": "text",
         "id": "delivery_area_1_note",
-        "label": "Area 1 note"
+        "label": "Area 1 note",
+        "default": "Store address"
       },
       {
         "type": "text",
         "id": "delivery_area_2_name",
         "label": "Area 2 name",
-        "default": "Tampines & East Area"
+        "info": "Optional display area. Leave blank to hide. Do not enter a street unless it is a real store address.",
+        "default": "East Singapore"
       },
       {
         "type": "text",
         "id": "delivery_area_2_address",
-        "label": "Area 2 address",
-        "default": "Tampines Central, Singapore 529538"
+        "label": "Area 2 address"
       },
       {
         "type": "text",
         "id": "delivery_area_2_note",
-        "label": "Area 2 note"
+        "label": "Area 2 note",
+        "default": "Informational. Shipping is calculated at checkout."
       },
       {
         "type": "text",
         "id": "delivery_area_3_name",
         "label": "Area 3 name",
-        "default": "Jurong & West Region"
+        "info": "Optional display area. Leave blank to hide. Do not enter a street unless it is a real store address.",
+        "default": "West Singapore"
       },
       {
         "type": "text",
         "id": "delivery_area_3_address",
-        "label": "Area 3 address",
-        "default": "Jurong East Ave 1, Singapore 609788"
+        "label": "Area 3 address"
       },
       {
         "type": "text",
         "id": "delivery_area_3_note",
-        "label": "Area 3 note"
+        "label": "Area 3 note",
+        "default": "Informational. Shipping is calculated at checkout."
       },
       {
         "type": "text",
         "id": "delivery_area_4_name",
         "label": "Area 4 name",
-        "default": "Woodlands & North Region"
+        "info": "Optional display area. Leave blank to hide. Do not enter a street unless it is a real store address.",
+        "default": "North Singapore"
       },
       {
         "type": "text",
         "id": "delivery_area_4_address",
-        "label": "Area 4 address",
-        "default": "Woodlands Square, Singapore 737737"
+        "label": "Area 4 address"
       },
       {
         "type": "text",
         "id": "delivery_area_4_note",
-        "label": "Area 4 note"
+        "label": "Area 4 note",
+        "default": "Informational. Shipping is calculated at checkout."
       }
     ]
   },

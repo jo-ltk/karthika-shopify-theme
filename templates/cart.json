@@ -24,16 +24,16 @@
           "type": "delivery_method",
           "settings": {
             "title": "Standard",
-            "subtitle": "2–4 days",
-            "price": "Free"
+            "subtitle": "Confirmed at checkout",
+            "price": "At checkout"
           }
         },
         "express": {
           "type": "delivery_method",
           "settings": {
             "title": "Express",
-            "subtitle": "Same day / next day",
-            "price": "From checkout"
+            "subtitle": "Preference only — confirmed at checkout",
+            "price": "At checkout"
           }
         }
       },
@@ -43,7 +43,7 @@
       ],
       "settings": {
         "heading": "Delivery & Gift",
-        "subheading": "Choose who this order is for, pick an address, and select a delivery method before you place the order.",
+        "subheading": "These details are saved as order notes. You will still enter the shipping address and confirm shipping in Shopify checkout.",
         "gift_message_max": 250
       }
     },

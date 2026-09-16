@@ -51,11 +51,12 @@
     "location": {
       "title": "Store location",
       "close": "Close location selector",
-      "delivering_to": "Delivering to",
+      "delivering_to": "Store location",
       "change_location": "Choose store location",
-      "checkout_note": "This updates the location shown in the header. Shipping options and rates are calculated at checkout.",
+      "checkout_note": "This updates the location shown in the header. It does not change Shopify shipping, rates, or checkout.",
       "unconfigured": "Add a store address in Theme settings → Store location & delivery.",
-      "from_store": "From {{ name }}"
+      "from_store": "From {{ name }}",
+      "reset": "Use default store location"
     },
     "wishlist": {
       "add": "Add {{ product }} to wishlist",
@@ -252,6 +253,10 @@
     }
   },
   "templates": {
+    "404": {
+      "title": "Página não encontrada",
+      "subtext": "404"
+    },
     "search": {
       "no_results": "Não foram encontrados resultados para “{{ terms }}”. Verifique a ortografia ou use uma palavra ou frase diferente.",
       "results_with_count": {
@@ -300,10 +305,6 @@
         "error_heading": "Ajuste o seguinte:",
         "title": "Formulário de contato"
       }
-    },
-    "404": {
-      "title": "Página não encontrada",
-      "subtext": "404"
     }
   },
   "sections": {
@@ -348,10 +349,18 @@
       "duties_included_taxes_at_checkout_shipping_at_checkout_with_policy_html": "Tributos de importação incluídos. Tributos, descontos e <a href=\"{{ link }}\">frete</a> calculados no checkout.",
       "duties_included_taxes_at_checkout_shipping_at_checkout_without_policy": "Tributos de importação incluídos. Tributos, descontos e frete calculados no checkout.",
       "taxes_at_checkout_shipping_at_checkout_with_policy_html": "Tributos, descontos e <a href=\"{{ link }}\">frete</a> calculados no checkout.",
-      "taxes_at_checkout_shipping_at_checkout_without_policy": "Tributos, descontos e frete calculados no checkout."
+      "taxes_at_checkout_shipping_at_checkout_without_policy": "Tributos, descontos e frete calculados no checkout.",
+      "free_delivery_remaining_html": "Add <strong>{{ amount }}</strong> for promotional free delivery",
+      "free_delivery_unlocked": "Promotional free-delivery threshold reached",
+      "free_delivery_checkout_note": "This progress bar is a storefront message. Shipping is calculated at checkout."
     },
     "footer": {
-      "payment": "Formas de pagamento"
+      "payment": "Formas de pagamento",
+      "helpline": "Helpline",
+      "gst_label": "GST Registration Number",
+      "tel_label": "Tel",
+      "fax_label": "Fax",
+      "email_label": "Email"
     },
     "featured_blog": {
       "view_all": "Ver tudo",
@@ -418,6 +427,62 @@
       "min_error": "Este item apresenta um mínimo de {{ min }}",
       "max_error": "Este item apresenta um máximo de {{ max }}",
       "step_error": "Só é possível adicionar este item em incrementos de {{ step }}"
+    },
+    "delivery_gift": {
+      "title": "Delivery & Gift",
+      "intro": "These details are saved as order notes. You will still enter the shipping address and confirm shipping in Shopify checkout.",
+      "destination": "Delivery destination",
+      "deliver_to_me": "Deliver to my address",
+      "deliver_to_me_hint": "Saved as an order note. Checkout still collects the shipping address.",
+      "send_as_gift": "Send as a gift",
+      "send_as_gift_hint": "Gift details are saved as order notes. Checkout still collects the shipping address.",
+      "gift_details": "Gift details",
+      "recipient_name": "Recipient name",
+      "recipient_phone": "Recipient phone number",
+      "gift_message": "Gift message",
+      "gift_message_placeholder": "Write a short note for the recipient",
+      "address_title": "Delivery address",
+      "login_to_save": "Log in to use saved addresses",
+      "default_address": "Default address",
+      "no_addresses": "No saved addresses yet. Add one below.",
+      "add_address": "Add address",
+      "edit": "Edit",
+      "delete": "Delete",
+      "delete_confirm": "Delete this address?",
+      "save_address": "Save address",
+      "cancel": "Cancel",
+      "one_time_address": "Use a one-time address",
+      "one_time_hint": "This address is used for this order only and is not saved to your account.",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "street": "Address",
+      "apartment": "Apartment, suite, etc.",
+      "city": "City",
+      "country": "Country/region",
+      "province": "State / Province",
+      "zip": "Postal code",
+      "phone": "Phone",
+      "method_title": "Delivery method preference",
+      "method_note": "If live options appear, they come from Shopify. Selecting one here saves it as an order note and does not lock the shipping rate at checkout.",
+      "error_address": "Choose a delivery address.",
+      "error_method": "Choose a delivery method.",
+      "error_recipient": "Enter the recipient name.",
+      "error_phone": "Enter the recipient phone number.",
+      "error_save": "Could not save delivery details. Try again.",
+      "change": "Change",
+      "choose_on_cart": "Add delivery notes on the cart page. Shipping address and rates are confirmed at checkout.",
+      "gift_to": "Gift to {{ name }}"
+    },
+    "order_again": {
+      "title": "Order again",
+      "heading_named": "{{ name }}, order again",
+      "guest_subtext": "Sign in to reorder your favourites.",
+      "guest_button": "Sign in",
+      "see_all": "See all",
+      "shop_category": "Shop {{ name }}",
+      "more_products": "{{ count }} more products",
+      "favourites": "Favourites",
+      "editor_hidden_hint": "Hidden for signed-in customers with no previous orders. Guests see a sign-in poster."
     }
   },
   "localization": {
@@ -536,7 +601,18 @@
       "tracking_number": "Número de rastreamento",
       "subtotal": "Subtotal",
       "total_duties": "Tributos de importação",
-      "total_refunded": "Reembolsado"
+      "total_refunded": "Reembolsado",
+      "delivery_notes_disclaimer": "These fields were saved as order notes. The shipping address and rates on this order come from Shopify checkout.",
+      "delivery_gift": "Delivery & Gift",
+      "delivery_type": "Delivery type",
+      "delivery_method": "Delivery method",
+      "delivery_address": "Delivery address",
+      "recipient_name": "Recipient",
+      "recipient_phone": "Recipient phone",
+      "gift_message": "Gift message",
+      "cancelled_status": "Cancelled",
+      "tracking_unavailable": "Tracking information is not available yet.",
+      "tracking_title": "Tracking"
     }
   },
   "gift_cards": {
@@ -569,6 +645,68 @@
       "send_on_label": "Enviar em (opcional)",
       "expanded": "Formulário de destinatário do cartão-presente expandido",
       "collapsed": "Formulário de destinatário do cartão-presente recolhido"
+    }
+  },
+  "karthika": {
+    "assistant": {
+      "badge": "Shopping assistant",
+      "heading_default": "What are you shopping for?",
+      "description_default": "Choose a category, a meal, or a recipe. Products come from this store.",
+      "shop_categories": "Shop by category",
+      "shop_need": "Shop by need",
+      "recipe_ideas": "Recipe ideas",
+      "try_one": "Try one of these:",
+      "search_label": "Looking for something?",
+      "search_placeholder": "Try a category or recipe below",
+      "search_submit": "Show suggestions",
+      "search_hint": "This assistant does not answer free-text questions. Choose a category, need, or recipe.",
+      "back": "Back",
+      "recommended": "Popular choices",
+      "shop_category": "Shop this category",
+      "see_all": "See all",
+      "empty_collection": "No products are available in this collection yet.",
+      "empty_config": "Add collections and recipes for this assistant in the theme editor.",
+      "unmapped_notice": "Some ingredients are not available in this store.",
+      "unmapped_item": "Not available in this store",
+      "shop_ingredient": "Shop {{ label }}",
+      "add_available": "Add available ingredients",
+      "adding": "Adding items…",
+      "add_partial": "{{ added }} items added. {{ failed }} item could not be added.",
+      "add_partial_one_fail": "{{ added }} items added. 1 item could not be added.",
+      "add_all_ok": "{{ added }} items added.",
+      "add_none": "No items could be added.",
+      "add_one_ok": "1 item added.",
+      "none_available": "No available ingredients to add.",
+      "ai_badge": "Optional AI",
+      "ai_submit": "Ask",
+      "ai_placeholder": "e.g. Fish curry for 4",
+      "ai_unavailable": "Sorry, the assistant is unavailable right now. Please try again, or shop by category below.",
+      "ai_empty": "Enter a short question or tap a suggestion.",
+      "ai_loading": "Looking up store items…",
+      "ai_no_match": "No matching products in this store.",
+      "ai_invalid_product": "That product is currently unavailable.",
+      "items_matched": "{{ count }} store items",
+      "add_matched": "Add available items ({{ count }})"
+    },
+    "checkout": {
+      "loading": "Redirecting to checkout…",
+      "empty": "Your cart is empty. Add items before checking out.",
+      "unavailable": "An item in your cart is no longer available. Update your cart and try again.",
+      "network": "We couldn't reach checkout. Check your connection and try again.",
+      "failed": "Checkout could not start. No order was placed.",
+      "order_now": "Order now",
+      "track_order": "Track order"
+    },
+    "account": {
+      "empty_orders_hint": "When you complete a purchase, it will show up here.",
+      "shop_now": "Start shopping",
+      "orders": "Orders",
+      "profile": "Profile",
+      "buy_again": "Buy again",
+      "buy_again_adding": "Adding…",
+      "buy_again_unavailable": "Unavailable",
+      "buy_again_retry": "Try again",
+      "buy_again_added": "[count] added"
     }
   }
 }
