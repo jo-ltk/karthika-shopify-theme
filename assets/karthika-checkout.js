@@ -4,23 +4,46 @@
   const Checkout = {
     lock: false,
     timeoutId: 0,
+    lastButton: null,
 
     strings() {
-      return window.karthikaCheckoutStrings || {};
+      return {
+        loading: 'Redirecting to checkout…',
+        empty: 'Your cart is empty. Add items before checking out.',
+        unavailable: 'An item in your cart is no longer available. Update your cart and try again.',
+        network: "We couldn't reach checkout. Check your connection and try again.",
+        failed: 'Checkout could not start. No order was placed.',
+        ...(window.karthikaCheckoutStrings || {}),
+      };
     },
 
     buttons() {
       return document.querySelectorAll('button[name="checkout"], [data-karthika-checkout]');
     },
 
-    errorEl() {
-      return document.getElementById('CartDrawer-CartErrors') || document.getElementById('cart-errors');
+    errorEl(button) {
+      const source = button || this.lastButton;
+      const formId = source?.getAttribute('form') || '';
+      const form = source?.form || (formId ? document.getElementById(formId) : null);
+      if (form) {
+        const nested = form.querySelector('.cart-errors');
+        if (nested) return nested;
+        if (form.id === 'CartDrawer-Form') return document.getElementById('CartDrawer-CartErrors');
+        if (form.id === 'cart') return document.getElementById('cart-errors');
+        if (form.id === 'cart-notification-form') return document.getElementById('cart-notification-errors');
+      }
+      return (
+        document.getElementById('cart-errors') ||
+        document.getElementById('CartDrawer-CartErrors') ||
+        document.getElementById('cart-notification-errors')
+      );
     },
 
-    showError(message) {
-      const el = this.errorEl();
+    showError(message, button) {
+      const el = this.errorEl(button);
       if (!el) return;
       el.textContent = message || '';
+      el.hidden = !message;
       el.setAttribute('tabindex', '-1');
       if (message) {
         try {
@@ -59,10 +82,11 @@
       }
     },
 
-    begin() {
+    begin(button) {
       if (this.lock) return false;
       this.lock = true;
-      this.showError('');
+      this.lastButton = button || this.lastButton;
+      this.showError('', this.lastButton);
       this.setBusy(true);
       this.clearTimer();
       this.timeoutId = window.setTimeout(() => {
@@ -81,7 +105,7 @@
 
     fail(message) {
       this.reset();
-      if (message) this.showError(message);
+      if (message) this.showError(message, this.lastButton);
     },
 
     cartJsonUrl() {
@@ -156,7 +180,7 @@
         if (this.hasFullDeliveryGift()) return;
 
         event.preventDefault();
-        if (!this.begin()) return;
+        if (!this.begin(button)) return;
         try {
           await this.validateCart();
           this.submitForm(button);

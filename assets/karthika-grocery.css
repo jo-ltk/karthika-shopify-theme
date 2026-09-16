@@ -1063,7 +1063,7 @@ textarea {
 .karthika-carousel-dot.is-active {
   width: 18px;
   height: 6px;
-  background-color: var(--karthika-red, #B40000);
+  background-color: var(--karthika-red, #3F7D2E);
 }
 
 /* ==========================================================================
@@ -1634,7 +1634,7 @@ textarea {
 }
 
 .karthika-compact-title:hover {
-  color: var(--karthika-red, #B40000);
+  color: var(--karthika-red, #3F7D2E);
 }
 
 /* Modern 2026 Grocery Price Area */
@@ -1679,7 +1679,7 @@ textarea {
 .karthika-price-discount-tag {
   font-size: 10.5px;
   font-weight: 800;
-  color: var(--karthika-red, #B40000);
+  color: var(--karthika-red, #3F7D2E);
   background: rgba(180, 0, 0, 0.08);
   padding: 2px 6px;
   border-radius: 6px;
@@ -1713,8 +1713,8 @@ textarea {
   height: 100%;
   border-radius: 12px;
   background: #FFFFFF;
-  border: 1.5px solid var(--karthika-red, #B40000);
-  color: var(--karthika-red, #B40000);
+  border: 1.5px solid var(--karthika-red, #3F7D2E);
+  color: var(--karthika-red, #3F7D2E);
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.4px;
@@ -1728,7 +1728,7 @@ textarea {
 
 .karthika-card-action-bar .karthika-stepper-add-btn:hover,
 .karthika-compact-add-wrap .karthika-stepper-add-btn:hover {
-  background: var(--karthika-red, #B40000);
+  background: var(--karthika-red, #3F7D2E);
   color: #FFFFFF;
   box-shadow: 0 3px 8px rgba(180, 0, 0, 0.2);
 }
@@ -1736,7 +1736,7 @@ textarea {
 .karthika-card-action-bar .karthika-stepper-add-btn:active,
 .karthika-compact-add-wrap .karthika-stepper-add-btn:active {
   transform: scale(0.97);
-  background: var(--karthika-red-hover, #960000);
+  background: var(--karthika-red-hover, #336524);
   color: #FFFFFF;
 }
 
@@ -1759,7 +1759,7 @@ textarea {
   width: 100%;
   height: 100%;
   border-radius: 12px;
-  background-color: var(--karthika-red, #B40000);
+  background-color: var(--karthika-red, #3F7D2E);
   color: #FFFFFF;
   align-items: center;
   justify-content: space-between;
@@ -4488,7 +4488,7 @@ a.karthika-quick-tab:focus-visible {
 .karthika-ad-carousel-dot.is-active {
   width: 18px;
   height: 6px;
-  background-color: var(--karthika-red, #B40000);
+  background-color: var(--karthika-red, #3F7D2E);
 }
 
 .karthika-feature-grid-wrap { margin-bottom: 4px; }

@@ -53,6 +53,7 @@
             <span data-checkout-label>{{ 'sections.cart.checkout' | t }}</span>
             {%- render 'loading-spinner' -%}
           </button>
+          <div id="cart-notification-errors" class="cart-errors" role="alert" aria-live="assertive" tabindex="-1" hidden></div>
         </form>
         <button type="button" class="link button-label">{{ 'general.continue_shopping' | t }}</button>
       </div>

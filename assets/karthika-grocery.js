@@ -199,10 +199,8 @@
         const currentInner = drawer.querySelector('.drawer__inner');
         if (nextInner && currentInner) currentInner.replaceWith(nextInner);
         drawer.classList.toggle('is-empty', this.state.item_count === 0);
-        const overlay = drawer.querySelector('#CartDrawer-Overlay');
-        if (overlay && typeof drawer.close === 'function') {
-          overlay.addEventListener('click', () => drawer.close());
-        }
+        // Overlay is a sibling of .drawer__inner and is not replaced here.
+        // CartDrawer already binds overlay click in its constructor.
       } catch (err) {}
     },
 

@@ -25,7 +25,10 @@
     <meta name="theme-color" content="">
     <link rel="canonical" href="{{ canonical_url }}">
     <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
-    <link href="https://fonts.cdnfonts.com/css/gilroy" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/gilroy" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/gilroy">
+    </noscript>
 
     {%- if settings.favicon != blank -%}
       <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
@@ -405,6 +408,14 @@
         buyAgainAdding: {{ 'karthika.account.buy_again_adding' | t | json }},
         buyAgainRetry: {{ 'karthika.account.buy_again_retry' | t | json }},
         buyAgainAdded: {{ 'karthika.account.buy_again_added' | t | json }},
+      };
+
+      window.karthikaCheckoutStrings = {
+        loading: {{ 'karthika.checkout.loading' | t | json }},
+        empty: {{ 'karthika.checkout.empty' | t | json }},
+        unavailable: {{ 'karthika.checkout.unavailable' | t | json }},
+        network: {{ 'karthika.checkout.network' | t | json }},
+        failed: {{ 'karthika.checkout.failed' | t | json }},
       };
 
       window.variantStrings = {
