@@ -1,6 +1,11 @@
 {
   "sections": {
-    "desktop_home": { "type": "karthika-desktop-home", "settings": { "products_collection": "all" } },
+    "desktop_home": {
+      "type": "karthika-desktop-home",
+      "settings": {
+        "products_collection": "all"
+      }
+    },
     "order_again": {
       "type": "karthika-order-again",
       "blocks": {},
@@ -15,14 +20,15 @@
     "quick_tabs": {
       "type": "karthika-quick-tabs",
       "blocks": {
-        "tab_1": { "type": "tab_item", "settings": { "label": "All", "icon": "🛍️" } },
-        "tab_2": { "type": "tab_item", "settings": { "label": "Electronics", "icon": "🎧" } },
-        "tab_3": { "type": "tab_item", "settings": { "label": "50% Off", "icon": "🏷️" } },
-        "tab_4": { "type": "tab_item", "settings": { "label": "Monsoon", "icon": "☔" } },
-        "tab_5": { "type": "tab_item", "settings": { "label": "Beauty", "icon": "💄" } }
+        "tab_1": { "type": "tab_item", "settings": { "label": "All", "icon": "🛍️", "link_all_products": true } },
+        "tab_2": { "type": "tab_item", "settings": { "label": "Rice", "icon": "🍚" } },
+        "tab_3": { "type": "tab_item", "settings": { "label": "Spices", "icon": "🌶️" } },
+        "tab_4": { "type": "tab_item", "settings": { "label": "Snacks", "icon": "🍪" } },
+        "tab_5": { "type": "tab_item", "settings": { "label": "Vegetables", "icon": "🥬" } },
+        "tab_6": { "type": "tab_item", "settings": { "label": "Dairy", "icon": "🥛" } }
       },
-      "block_order": ["tab_1", "tab_2", "tab_3", "tab_4", "tab_5"],
-      "settings": { "title": "Shop by mood" }
+      "block_order": ["tab_1", "tab_2", "tab_3", "tab_4", "tab_5", "tab_6"],
+      "settings": { "title": "Shop by category" }
     },
     "festive_ad_banner": {
       "type": "karthika-ad-banner",
@@ -71,7 +77,6 @@
         "title": "Today's deals",
         "subtitle": "Daily fresh savings & discounts",
         "link_text": "See all",
-        "collection": "all",
         "preset_type": "deals",
         "products_to_show": 6
       }
@@ -82,7 +87,6 @@
         "title": "Kerala favourites",
         "subtitle": "Authentic flavours from home",
         "link_text": "See all",
-        "collection": "all",
         "preset_type": "kerala",
         "products_to_show": 6
       }
@@ -100,7 +104,6 @@
         "title": "New arrivals",
         "subtitle": "Freshly stocked groceries & specialities",
         "link_text": "See all",
-        "collection": "all",
         "preset_type": "new_arrivals",
         "products_to_show": 6
       }

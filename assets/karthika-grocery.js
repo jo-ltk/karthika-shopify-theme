@@ -840,8 +840,14 @@
           return;
         }
 
+        const collectionNav = e.target.closest(
+          'a.karthika-cat-card, a.karthika-category-card, a.kcl-tile, a.karthika-quick-tab, a.kd-category, a.karthika-feature-card'
+        );
+        if (collectionNav) return;
+
         const searchChip = e.target.closest('.karthika-search-chip, .karthika-search-category, .karthika-recent-card-btn, .karthika-popular-icon-btn');
         if (searchChip) {
+          if (searchChip.tagName === 'A') return;
           const query = searchChip.dataset.query;
           if (query) this.submitQuery(query);
         }

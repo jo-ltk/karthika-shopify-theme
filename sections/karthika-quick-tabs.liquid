@@ -1,46 +1,70 @@
 {%- comment -%}
-  Karthika Quick Tabs — horizontal row of 5 mood/category tabs directly under the search bar.
+  Karthika Quick Tabs — horizontal category shortcuts. Each tab is a single link.
 {%- endcomment -%}
 
-<div class="karthika-quick-tabs" id="KarthikaQuickTabs-{{ section.id }}" role="tablist" aria-label="{{ section.settings.title | default: 'Shop by mood' | escape }}">
-  {%- for block in section.blocks -%}
-    <button
-      type="button"
-      class="karthika-quick-tab{% if forloop.first %} is-active{% endif %}"
-      role="tab"
-      aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-      data-tab-link="{{ block.settings.link | default: routes.all_products_collection_url }}"
-      {{ block.shopify_attributes }}
-    >
-      <span class="karthika-quick-tab-icon" aria-hidden="true">
-        {%- if block.settings.image != blank -%}
-          <img src="{{ block.settings.image | image_url: width: 80 }}" alt="" width="24" height="24" loading="lazy">
-        {%- else -%}
-          {{ block.settings.icon | default: '🛒' }}
-        {%- endif -%}
-      </span>
-      <span class="karthika-quick-tab-label">{{ block.settings.label | default: 'Tab' }}</span>
-    </button>
-  {%- endfor -%}
-</div>
+{%- assign visible_tabs = 0 -%}
+{%- for block in section.blocks -%}
+  {%- liquid
+    assign tab_url = blank
+    if block.settings.collection != blank and block.settings.collection.url != blank
+      assign tab_url = block.settings.collection.url
+    elsif block.settings.link_all_products
+      assign tab_url = routes.all_products_collection_url
+    elsif block.settings.link != blank
+      assign tab_url = block.settings.link
+    endif
+  -%}
+  {%- if tab_url != blank -%}
+    {%- assign visible_tabs = visible_tabs | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
 
-<script>
-  (function () {
-    var wrap = document.getElementById('KarthikaQuickTabs-{{ section.id }}');
-    if (!wrap) return;
-    var tabs = wrap.querySelectorAll('.karthika-quick-tab');
-    wrap.addEventListener('click', function (event) {
-      var tab = event.target.closest('.karthika-quick-tab');
-      if (!tab) return;
-      tabs.forEach(function (t) {
-        t.classList.toggle('is-active', t === tab);
-        t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
-      });
-      var link = tab.getAttribute('data-tab-link');
-      if (link) window.location.href = link;
-    });
-  })();
-</script>
+{%- if visible_tabs > 0 or request.design_mode -%}
+  <div class="karthika-quick-tabs" id="KarthikaQuickTabs-{{ section.id }}" aria-label="{{ section.settings.title | default: 'Shop by category' | escape }}">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign tab_url = blank
+        assign tab_collection = block.settings.collection
+        if tab_collection != blank and tab_collection.url != blank
+          assign tab_url = tab_collection.url
+        elsif block.settings.link_all_products
+          assign tab_url = routes.all_products_collection_url
+        elsif block.settings.link != blank
+          assign tab_url = block.settings.link
+        endif
+
+        assign tab_active = false
+        if tab_collection != blank and collection and collection.handle == tab_collection.handle
+          assign tab_active = true
+        elsif block.settings.link_all_products and collection.handle == 'all'
+          assign tab_active = true
+        endif
+      -%}
+      {%- if tab_url != blank -%}
+        <a
+          href="{{ tab_url }}"
+          class="karthika-quick-tab{% if tab_active %} is-active{% endif %}"
+          {% if tab_active %}aria-current="page"{% endif %}
+          {{ block.shopify_attributes }}
+        >
+          <span class="karthika-quick-tab-icon" aria-hidden="true">
+            {%- if block.settings.image != blank -%}
+              <img src="{{ block.settings.image | image_url: width: 80 }}" alt="" width="24" height="24" loading="lazy">
+            {%- else -%}
+              {{ block.settings.icon | default: '🛒' }}
+            {%- endif -%}
+          </span>
+          <span class="karthika-quick-tab-label">{{ block.settings.label | default: tab_collection.title | default: 'Category' }}</span>
+        </a>
+      {%- elsif request.design_mode -%}
+        <span class="karthika-quick-tab is-unconfigured" {{ block.shopify_attributes }}>
+          <span class="karthika-quick-tab-icon" aria-hidden="true">{{ block.settings.icon | default: '🛒' }}</span>
+          <span class="karthika-quick-tab-label">{{ block.settings.label | default: 'Select a collection' }}</span>
+        </span>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+{%- endif -%}
 
 {% schema %}
 {
@@ -52,7 +76,7 @@
       "type": "text",
       "id": "title",
       "label": "Accessible title",
-      "default": "Shop by mood"
+      "default": "Shop by category"
     }
   ],
   "blocks": [
@@ -63,7 +87,20 @@
         { "type": "text", "id": "label", "label": "Label", "default": "All" },
         { "type": "text", "id": "icon", "label": "Icon (emoji)", "default": "🛒" },
         { "type": "image_picker", "id": "image", "label": "Icon image (optional, overrides emoji)" },
-        { "type": "url", "id": "link", "label": "Link" }
+        {
+          "type": "checkbox",
+          "id": "link_all_products",
+          "label": "Link to all products",
+          "default": false,
+          "info": "Use for an All tab. Ignored when a collection is selected."
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection",
+          "info": "Required for category tabs. Do not leave blank or the tab is hidden on the storefront."
+        },
+        { "type": "url", "id": "link", "label": "Custom link", "info": "Used only when no collection is selected and All products is off." }
       ]
     }
   ],
@@ -71,11 +108,12 @@
     {
       "name": "Karthika Quick Tabs",
       "blocks": [
-        { "type": "tab_item", "settings": { "label": "All", "icon": "🛍️" } },
-        { "type": "tab_item", "settings": { "label": "Electronics", "icon": "🎧" } },
-        { "type": "tab_item", "settings": { "label": "50% Off", "icon": "🏷️" } },
-        { "type": "tab_item", "settings": { "label": "Monsoon", "icon": "☔" } },
-        { "type": "tab_item", "settings": { "label": "Beauty", "icon": "💄" } }
+        { "type": "tab_item", "settings": { "label": "All", "icon": "🛍️", "link_all_products": true } },
+        { "type": "tab_item", "settings": { "label": "Rice", "icon": "🍚" } },
+        { "type": "tab_item", "settings": { "label": "Spices", "icon": "🌶️" } },
+        { "type": "tab_item", "settings": { "label": "Snacks", "icon": "🍪" } },
+        { "type": "tab_item", "settings": { "label": "Vegetables", "icon": "🥬" } },
+        { "type": "tab_item", "settings": { "label": "Dairy", "icon": "🥛" } }
       ]
     }
   ]

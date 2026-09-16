@@ -1,47 +1,74 @@
 {%- comment -%}
-  Karthika Feature Grid — two-column grid of large tappable cards, many blocks so the page scrolls.
+  Karthika Feature Grid — tappable cards that navigate to configured collections.
 {%- endcomment -%}
 
-<div class="karthika-feature-grid-wrap">
-  {%- if section.settings.title != blank -%}
-    <div class="karthika-section-head karthika-section-head--compact">
-      <h2 class="karthika-section-head-title">{{ section.settings.title }}</h2>
-      {%- if section.settings.link_text != blank -%}
-        <a href="{{ section.settings.link | default: routes.collections_url }}" class="karthika-section-head-link">{{ section.settings.link_text }}</a>
-      {%- endif -%}
-    </div>
+{%- assign visible_cards = 0 -%}
+{%- for block in section.blocks -%}
+  {%- if block.type == 'feature_card' -%}
+    {%- if block.settings.collection != blank or block.settings.link != blank -%}
+      {%- assign visible_cards = visible_cards | plus: 1 -%}
+    {%- endif -%}
   {%- endif -%}
+{%- endfor -%}
 
-  <div class="karthika-feature-grid">
-    <a href="{{ routes.all_products_collection_url }}" class="karthika-feature-card karthika-feature-card--masala">
-      <span class="karthika-feature-card-copy">
-        <strong class="karthika-feature-card-label">Masala<br>Snacks</strong>
-        <span class="karthika-feature-card-description">Spicy &amp; crunchy<br>favorites</span>
-      </span>
-      <span class="karthika-feature-card-arrow" aria-hidden="true">&#8594;</span>
-      <img src="{{ 'masala-snacks.png' | asset_url }}" alt="Masala Snacks" class="karthika-feature-card-img" width="300" height="275" loading="lazy">
-    </a>
-    <a href="{{ routes.all_products_collection_url }}" class="karthika-feature-card karthika-feature-card--dairy">
-      <span class="karthika-feature-card-copy">
-        <strong class="karthika-feature-card-label">Dairy<br>Delights</strong>
-        <span class="karthika-feature-card-description">Fresh &amp; pure<br>essentials</span>
-      </span>
-      <span class="karthika-feature-card-arrow" aria-hidden="true">&#8594;</span>
-      <img src="{{ 'dairy-delights.png' | asset_url }}" alt="Dairy Delights" class="karthika-feature-card-img" width="300" height="275" loading="lazy">
-    </a>
-    <a href="{{ routes.all_products_collection_url }}" class="karthika-feature-card karthika-feature-card--home">
-      <span class="karthika-feature-card-copy">
-        <strong class="karthika-feature-card-label">Home<br>Essentials</strong>
-        <span class="karthika-feature-card-description">Everything for<br>your home</span>
-      </span>
-      <span class="karthika-feature-card-arrow" aria-hidden="true">&#8594;</span>
-      <img src="{{ 'home-essentials.png' | asset_url }}" alt="Home Essentials" class="karthika-feature-card-img" width="300" height="200" loading="lazy">
-    </a>
+{%- if visible_cards > 0 or request.design_mode -%}
+  <div class="karthika-feature-grid-wrap">
+    {%- if section.settings.title != blank -%}
+      <div class="karthika-section-head karthika-section-head--compact">
+        <h2 class="karthika-section-head-title">{{ section.settings.title }}</h2>
+        {%- if section.settings.link_text != blank -%}
+          <a href="{{ section.settings.link | default: routes.collections_url }}" class="karthika-section-head-link">{{ section.settings.link_text }}</a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if visible_cards > 0 -%}
+      <div class="karthika-feature-grid">
+        {%- assign card_index = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'feature_card' -%}
+            {%- liquid
+              assign card_collection = block.settings.collection
+              assign card_url = blank
+              assign card_title = block.settings.title
+              if card_collection != blank
+                assign card_url = card_collection.url
+                if card_title == blank
+                  assign card_title = card_collection.title
+                endif
+              elsif block.settings.link != blank
+                assign card_url = block.settings.link
+              endif
+              assign variant_class = 'karthika-feature-card--home'
+              assign remainder = card_index | modulo: 3
+              if remainder == 0
+                assign variant_class = 'karthika-feature-card--masala'
+              elsif remainder == 1
+                assign variant_class = 'karthika-feature-card--dairy'
+              endif
+            -%}
+            {%- if card_url != blank -%}
+              {%- assign card_index = card_index | plus: 1 -%}
+              <a href="{{ card_url }}" class="karthika-feature-card {{ variant_class }}" {{ block.shopify_attributes }}>
+                <span class="karthika-feature-card-copy">
+                  <strong class="karthika-feature-card-label">{{ card_title | escape }}</strong>
+                </span>
+                <span class="karthika-feature-card-arrow" aria-hidden="true">&#8594;</span>
+                {%- if block.settings.image != blank -%}
+                  <img src="{{ block.settings.image | image_url: width: 300 }}" alt="{{ card_title | escape }}" class="karthika-feature-card-img" width="300" height="275" loading="lazy">
+                {%- elsif card_collection != blank and card_collection.featured_image -%}
+                  <img src="{{ card_collection.featured_image | image_url: width: 300 }}" alt="{{ card_title | escape }}" class="karthika-feature-card-img" width="300" height="275" loading="lazy">
+                {%- endif -%}
+              </a>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- elsif request.design_mode -%}
+      <p class="karthika-empty-state">Select a collection on each feature card in the theme editor.</p>
+    {%- endif -%}
   </div>
-  <a href="{{ routes.collections_url }}" class="karthika-feature-banner">
-    <img src="{{ 'raksha-bandhan-banner.png' | asset_url }}" alt="Gifts for the ones you love - Celebrate Raksha Bandhan" width="766" height="154" loading="lazy">
-  </a>
-</div>
+{%- endif -%}
 
 {% schema %}
 {
@@ -60,9 +87,9 @@
       "settings": [
         { "type": "text", "id": "title", "label": "Title" },
         { "type": "image_picker", "id": "image", "label": "Image" },
-        { "type": "text", "id": "demo_image_url", "label": "Demo image URL" },
         { "type": "color", "id": "bg_color", "label": "Background color", "default": "#EAF4DE" },
-        { "type": "url", "id": "link", "label": "Link" }
+        { "type": "collection", "id": "collection", "label": "Collection", "info": "Required on the storefront. The card is hidden until a collection or custom link is set." },
+        { "type": "url", "id": "link", "label": "Custom link", "info": "Used only when no collection is selected." }
       ]
     }
   ],
@@ -70,14 +97,9 @@
     {
       "name": "Karthika Feature Grid",
       "blocks": [
-        { "type": "feature_card", "settings": { "title": "Onam specials", "bg_color": "#EAF4DE", "demo_image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=300&q=80" } },
-        { "type": "feature_card", "settings": { "title": "Sadya & payasam", "bg_color": "#FFF6DC", "demo_image_url": "https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=300&q=80" } },
-        { "type": "feature_card", "settings": { "title": "Pookkalam & celebration", "bg_color": "#FCEAEA", "demo_image_url": "https://images.unsplash.com/photo-1600684646107-cd777b111b70?auto=format&fit=crop&w=300&q=80" } },
-        { "type": "feature_card", "settings": { "title": "Glam up for the festival", "bg_color": "#EDEBFB", "demo_image_url": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80" } },
-        { "type": "feature_card", "settings": { "title": "Fresh vegetables", "bg_color": "#E7EEDA", "demo_image_url": "https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=300&q=80" } },
-        { "type": "feature_card", "settings": { "title": "Kerala snacks", "bg_color": "#FFEDA8", "demo_image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=300&q=80" } },
-        { "type": "feature_card", "settings": { "title": "Dairy delights", "bg_color": "#EAF4DE", "demo_image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=300&q=80" } },
-        { "type": "feature_card", "settings": { "title": "Home essentials", "bg_color": "#FCEAEA", "demo_image_url": "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=300&q=80" } }
+        { "type": "feature_card", "settings": { "title": "Masala snacks", "bg_color": "#EAF4DE" } },
+        { "type": "feature_card", "settings": { "title": "Dairy delights", "bg_color": "#EAF4DE" } },
+        { "type": "feature_card", "settings": { "title": "Home essentials", "bg_color": "#FCEAEA" } }
       ]
     }
   ]

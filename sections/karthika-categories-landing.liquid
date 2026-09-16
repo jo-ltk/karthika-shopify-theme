@@ -300,7 +300,19 @@
 
                     if group_tile_count == 1
 
-                      assign group_view_url = browse_url | append: '?cat=' | append: b.settings.browse_handle
+                      assign group_col = b.settings.collection
+
+                      if group_col == blank and b.settings.browse_handle != blank
+
+                        assign group_col = collections[b.settings.browse_handle]
+
+                      endif
+
+                      if group_col != blank and group_col.url != blank
+
+                        assign group_view_url = group_col.url
+
+                      endif
 
                     endif
 
@@ -356,19 +368,49 @@
 
                 assign tile_handle = block.settings.browse_handle
 
-                assign tile_link = browse_url | append: '?cat=' | append: tile_handle
-
                 assign tile_image = block.settings.image
 
                 assign tile_demo_url = block.settings.demo_image_url
 
-                assign tile_collection = collections[block.settings.collection]
+                assign tile_collection = block.settings.collection
+
+                if tile_collection == blank and tile_handle != blank
+
+                  assign tile_collection = collections[tile_handle]
+
+                endif
+
+                assign tile_link = blank
+
+                if tile_collection != blank and tile_collection.url != blank
+
+                  assign tile_link = tile_collection.url
+
+                  if tile_title == blank
+
+                    assign tile_title = tile_collection.title
+
+                  endif
+
+                endif
 
                 if tile_image == blank and tile_collection != blank and tile_collection.featured_image
 
                   assign tile_image = tile_collection.featured_image
 
                 endif
+
+                unless tile_link != blank
+
+                  unless request.design_mode
+
+                    continue
+
+                  endunless
+
+                  assign tile_link = '#'
+
+                endunless
 
 
 
@@ -482,7 +524,7 @@
 
                     >
 
-                  {%- elsif tile_demo_url != blank -%}
+                  {%- elsif request.design_mode and tile_demo_url != blank -%}
 
                     <img
 
@@ -868,9 +910,9 @@
 
           "id": "browse_handle",
 
-          "label": "Browse handle",
+          "label": "Collection handle fallback",
 
-          "info": "Must match a sidebar handle on the /collections browse page (e.g. fresh-fruits, dairy-eggs)."
+          "info": "Used only when the Collection picker is empty. Must match an existing collection handle in Admin."
 
         },
 
@@ -900,7 +942,9 @@
 
           "id": "collection",
 
-          "label": "Collection (optional image source)"
+          "label": "Collection",
+
+          "info": "Destination for this tile. The tile is hidden on the storefront if the collection is missing."
 
         }
 

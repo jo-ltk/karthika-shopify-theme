@@ -40,24 +40,24 @@
       <span class="visually-hidden">{{ card_product.title | escape }}</span>
     </a>
 
+    <button
+      type="button"
+      class="karthika-wishlist-btn"
+      aria-label="Add {{ card_product.title | escape }} to wishlist"
+      aria-pressed="false"
+      data-product-id="{{ card_product.id }}"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+    </button>
+
     <div class="karthika-compact-media">
       {%- if on_sale -%}
         <div class="karthika-card-badge">{{ save_percent }}% OFF</div>
       {%- elsif card_product.tags contains 'new' or card_product.tags contains 'New' -%}
         <div class="karthika-card-badge karthika-card-badge--new">NEW</div>
       {%- endif -%}
-
-      <button
-        type="button"
-        class="karthika-wishlist-btn"
-        aria-label="Add {{ card_product.title | escape }} to wishlist"
-        aria-pressed="false"
-        data-product-id="{{ card_product.id }}"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-        </svg>
-      </button>
 
       {%- if card_product.featured_media -%}
         <img
@@ -83,7 +83,7 @@
         </span>
       </div>
 
-      <h3 class="karthika-compact-title" title="{{ card_product.title | escape }}">
+      <h3 class="karthika-compact-title" title="{{ card_product.title | escape }}" aria-hidden="true">
         {{ card_product.title | escape }}
       </h3>
 

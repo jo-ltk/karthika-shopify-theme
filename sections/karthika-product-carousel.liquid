@@ -1,53 +1,50 @@
 {%- comment -%}
-  Karthika Supermarket - Grocery Product Grid Section
-  Renders responsive 2-column mobile / 4-5 column desktop product grid.
+  Karthika product shelf. Products come from one merchant-selected collection.
 {%- endcomment -%}
 
-<div class="karthika-grid-section{% if section.settings.carousel %} karthika-product-section--carousel{% endif %}">
-  <div class="karthika-section-head">
-    <div class="karthika-section-head-title-wrap">
-      <h2 class="karthika-section-head-title">{{ section.settings.title | default: 'Popular this week' }}</h2>
-      {%- if section.settings.subtitle != blank -%}
-        <span class="karthika-section-head-sub">{{ section.settings.subtitle }}</span>
+{%- assign target_collection = section.settings.collection -%}
+{%- assign products_to_show = section.settings.products_to_show | default: 4 -%}
+
+{%- if target_collection != blank -%}
+  <div class="karthika-grid-section{% if section.settings.carousel %} karthika-product-section--carousel{% endif %}">
+    <div class="karthika-section-head">
+      <div class="karthika-section-head-title-wrap">
+        <h2 class="karthika-section-head-title">{{ section.settings.title | default: target_collection.title }}</h2>
+        {%- if section.settings.subtitle != blank -%}
+          <span class="karthika-section-head-sub">{{ section.settings.subtitle }}</span>
+        {%- endif -%}
+      </div>
+
+      {%- if target_collection.url != blank -%}
+        <a href="{{ target_collection.url }}" class="karthika-section-head-link">
+          {{ section.settings.link_text | default: 'See all' }}
+        </a>
       {%- endif -%}
     </div>
-    
-    {%- assign see_all_link = section.settings.collection.url | default: routes.all_products_collection_url -%}
-    <a href="{{ see_all_link }}" class="karthika-section-head-link">
-      {{ section.settings.link_text | default: 'See all' }}
-    </a>
-  </div>
 
-  <div class="{% if section.settings.preset_type == 'popular' %}karthika-popular-mini-grid{% elsif section.settings.preset_type == 'deals' or section.settings.preset_type == 'kerala' or section.settings.preset_type == 'new_arrivals' %}karthika-deals-three-grid{% else %}karthika-two-col-grid{% endif %}">
-    {%- assign products_to_show = section.settings.products_to_show | default: 4 -%}
-    {%- assign product_offset = section.settings.product_offset | default: 0 -%}
-    {%- if product_offset == 0 -%}
-      {%- case section.settings.preset_type -%}
-        {%- when 'deals' -%}
-          {%- assign product_offset = 6 -%}
-        {%- when 'kerala' -%}
-          {%- assign product_offset = 12 -%}
-        {%- when 'new_arrivals' -%}
-          {%- assign product_offset = 18 -%}
-      {%- endcase -%}
-    {%- endif -%}
-    {%- assign target_collection = section.settings.collection | default: collections.all -%}
-    {%- if target_collection != blank and target_collection.products_count > 0 -%}
-      {%- for product in target_collection.products offset: product_offset limit: products_to_show -%}
-        {%- if section.settings.preset_type == 'popular' -%}
-          {% render 'karthika-card-product-mini', card_product: product %}
-        {%- else -%}
-          {% render 'karthika-card-product', card_product: product, section_id: section.id %}
-        {%- endif -%}
-      {%- endfor -%}
-    {%- else -%}
-      <div class="karthika-empty-state" role="status" aria-live="polite">
-        <p>No products are available in this collection yet.</p>
-        <a href="{{ routes.all_products_collection_url }}" class="karthika-section-head-link">Browse all products</a>
-      </div>
-    {%- endif -%}
+    <div class="{% if section.settings.preset_type == 'popular' %}karthika-popular-mini-grid{% elsif section.settings.preset_type == 'deals' or section.settings.preset_type == 'kerala' or section.settings.preset_type == 'new_arrivals' %}karthika-deals-three-grid{% else %}karthika-two-col-grid{% endif %}">
+      {%- if target_collection.products_count > 0 -%}
+        {%- for product in target_collection.products limit: products_to_show -%}
+          {%- if section.settings.preset_type == 'popular' -%}
+            {% render 'karthika-card-product-mini', card_product: product %}
+          {%- else -%}
+            {% render 'karthika-card-product', card_product: product, section_id: section.id %}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        <div class="karthika-empty-state" role="status">
+          <p>No products are available in this collection yet.</p>
+        </div>
+      {%- endif -%}
+    </div>
   </div>
-</div>
+{%- elsif request.design_mode -%}
+  <div class="karthika-grid-section">
+    <div class="karthika-empty-state" role="status">
+      <p>Select a collection for this product shelf in the theme editor.</p>
+    </div>
+  </div>
+{%- endif -%}
 
 {% schema %}
 {
@@ -75,17 +72,18 @@
     {
       "type": "collection",
       "id": "collection",
-      "label": "Collection"
+      "label": "Collection",
+      "info": "Required. This shelf is hidden on the storefront until a collection is selected. Do not reuse one collection across shelves unless they should show the same products."
     },
     {
       "type": "select",
       "id": "preset_type",
-      "label": "Demo Category Type",
+      "label": "Layout",
       "options": [
-        { "value": "popular", "label": "Popular / Fresh Produce" },
-        { "value": "kerala", "label": "Kerala Essentials" },
-        { "value": "deals", "label": "Today's Deals" },
-        { "value": "new_arrivals", "label": "New Arrivals" }
+        { "value": "popular", "label": "Compact mini cards" },
+        { "value": "kerala", "label": "Three-column cards" },
+        { "value": "deals", "label": "Deal cards" },
+        { "value": "new_arrivals", "label": "New arrival cards" }
       ],
       "default": "popular"
     },
@@ -97,16 +95,6 @@
       "step": 2,
       "default": 4,
       "label": "Products to Show"
-    },
-    {
-      "type": "range",
-      "id": "product_offset",
-      "min": 0,
-      "max": 40,
-      "step": 1,
-      "default": 0,
-      "label": "Product Offset (0 for auto)",
-      "info": "Leave as 0 to automatically use section preset offsets to avoid repeating products across sections."
     },
     {
       "type": "checkbox",

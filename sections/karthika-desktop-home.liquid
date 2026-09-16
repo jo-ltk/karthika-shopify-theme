@@ -1,10 +1,16 @@
 {%- liquid
-  assign products_collection = section.settings.products_collection | default: collections.all
-  assign category_handles = 'fresh-fruits,vegetables,rice-grains,spices-masala,kerala-favourites,indian-snacks,dairy-eggs,beverages' | split: ','
-  assign products_url = routes.all_products_collection_url
+  assign products_collection = section.settings.products_collection
+  assign products_url = blank
   if products_collection != blank and products_collection.url != blank
     assign products_url = products_collection.url
   endif
+
+  assign cat_1 = section.settings.category_collection_1
+  assign cat_2 = section.settings.category_collection_2
+  assign cat_3 = section.settings.category_collection_3
+  assign shelf_1 = section.settings.shelf_collection_1
+  assign shelf_2 = section.settings.shelf_collection_2
+  assign shelf_3 = section.settings.shelf_collection_3
 -%}
 <div class="karthika-home-desktop karthika-home-tablet kd-home">
   <main>
@@ -50,43 +56,101 @@
       </div>
     </section>
 
-    <section class="kd-section kd-category-section kd-container" aria-labelledby="kd-category-title">
-      <div class="kd-section-heading"><h2 id="kd-category-title">Shop by category</h2><a href="{{ routes.collections_url }}">See all</a></div>
-      <div class="kd-category-row">
-        <a class="kd-category kd-category--masala" href="{{ routes.all_products_collection_url }}">
-          <strong>Masala<br>Snacks</strong><span>Spicy &amp; crunchy<br>favorites</span><i aria-hidden="true">&#8594;</i><img src="{{ 'masala-snacks.png' | asset_url }}" alt="Masala Snacks" width="300" height="275" loading="lazy">
-        </a>
-        <a class="kd-category kd-category--dairy" href="{{ routes.all_products_collection_url }}">
-          <strong>Dairy<br>Delights</strong><span>Fresh &amp; pure<br>essentials</span><i aria-hidden="true">&#8594;</i><img src="{{ 'dairy-delights.png' | asset_url }}" alt="Dairy Delights" width="300" height="275" loading="lazy">
-        </a>
-        <a class="kd-category kd-category--home" href="{{ routes.all_products_collection_url }}">
-          <strong>Home<br>Essentials</strong><span>Everything for<br>your home</span><i aria-hidden="true">&#8594;</i><img src="{{ 'home-essentials.png' | asset_url }}" alt="Home Essentials" width="300" height="200" loading="lazy">
-        </a>
-      </div>
-    </section>
-
-    <section class="kd-promo kd-container" aria-label="Weekend deals">
-      <div><span class="kd-promo-kicker">Weekend deals</span><h2>Save more on your everyday groceries</h2><p>Up to 30% off selected groceries and top brands.</p></div>
-      <a class="kd-button yellow" href="{{ products_url }}?sort_by=best-selling">Shop offers &rarr;</a>
-    </section>
-
-    {%- assign desktop_sections = 'Popular this week|Fresh picks and customer favourites,Todays deals|Daily fresh savings and discounts,Kerala favourites|Authentic flavours from home' | split: ',' -%}
-    {%- for section_data in desktop_sections -%}
-      {%- assign section_parts = section_data | split: '|' -%}
-      {%- assign section_offset = forloop.index0 | times: 6 -%}
-      <section class="kd-section kd-products-section kd-container" aria-labelledby="kd-products-{{ forloop.index }}">
-        <div class="kd-section-heading"><div><h2 id="kd-products-{{ forloop.index }}">{{ section_parts[0] }}</h2><p>{{ section_parts[1] }}</p></div><a href="{{ products_url }}">See all</a></div>
-        {%- if products_collection != blank and products_collection.products_count > 0 -%}
-          <div class="kd-product-grid">
-            {%- for product in products_collection.products offset: section_offset limit: 6 -%}
-              {% render 'karthika-card-product', card_product: product, section_id: section.id %}
-            {%- endfor -%}
-          </div>
-        {%- else -%}
-          <div class="kd-empty"><p>No products are available in this collection yet.</p><a href="{{ routes.all_products_collection_url }}">Browse all products</a></div>
+    {%- if cat_1 != blank or cat_2 != blank or cat_3 != blank or request.design_mode -%}
+      <section class="kd-section kd-category-section kd-container" aria-labelledby="kd-category-title">
+        <div class="kd-section-heading"><h2 id="kd-category-title">Shop by category</h2><a href="{{ routes.collections_url }}">See all</a></div>
+        <div class="kd-category-row">
+          {%- if cat_1 != blank -%}
+            <a class="kd-category kd-category--masala" href="{{ cat_1.url }}">
+              <strong>{{ section.settings.category_title_1 | default: cat_1.title | escape }}</strong>
+              {%- if section.settings.category_subtitle_1 != blank -%}<span>{{ section.settings.category_subtitle_1 | escape }}</span>{%- endif -%}
+              <i aria-hidden="true">&#8594;</i>
+              {%- if cat_1.featured_image -%}
+                <img src="{{ cat_1.featured_image | image_url: width: 300 }}" alt="{{ cat_1.title | escape }}" width="300" height="275" loading="lazy">
+              {%- else -%}
+                <img src="{{ 'masala-snacks.png' | asset_url }}" alt="{{ cat_1.title | escape }}" width="300" height="275" loading="lazy">
+              {%- endif -%}
+            </a>
+          {%- endif -%}
+          {%- if cat_2 != blank -%}
+            <a class="kd-category kd-category--dairy" href="{{ cat_2.url }}">
+              <strong>{{ section.settings.category_title_2 | default: cat_2.title | escape }}</strong>
+              {%- if section.settings.category_subtitle_2 != blank -%}<span>{{ section.settings.category_subtitle_2 | escape }}</span>{%- endif -%}
+              <i aria-hidden="true">&#8594;</i>
+              {%- if cat_2.featured_image -%}
+                <img src="{{ cat_2.featured_image | image_url: width: 300 }}" alt="{{ cat_2.title | escape }}" width="300" height="275" loading="lazy">
+              {%- else -%}
+                <img src="{{ 'dairy-delights.png' | asset_url }}" alt="{{ cat_2.title | escape }}" width="300" height="275" loading="lazy">
+              {%- endif -%}
+            </a>
+          {%- endif -%}
+          {%- if cat_3 != blank -%}
+            <a class="kd-category kd-category--home" href="{{ cat_3.url }}">
+              <strong>{{ section.settings.category_title_3 | default: cat_3.title | escape }}</strong>
+              {%- if section.settings.category_subtitle_3 != blank -%}<span>{{ section.settings.category_subtitle_3 | escape }}</span>{%- endif -%}
+              <i aria-hidden="true">&#8594;</i>
+              {%- if cat_3.featured_image -%}
+                <img src="{{ cat_3.featured_image | image_url: width: 300 }}" alt="{{ cat_3.title | escape }}" width="300" height="275" loading="lazy">
+              {%- else -%}
+                <img src="{{ 'home-essentials.png' | asset_url }}" alt="{{ cat_3.title | escape }}" width="300" height="200" loading="lazy">
+              {%- endif -%}
+            </a>
+          {%- endif -%}
+        </div>
+        {%- if request.design_mode and cat_1 == blank and cat_2 == blank and cat_3 == blank -%}
+          <p class="kd-empty">Select category collections in the theme editor.</p>
         {%- endif -%}
       </section>
-    {%- endfor -%}
+    {%- endif -%}
+
+    {%- if products_url != blank -%}
+      <section class="kd-promo kd-container" aria-label="Weekend deals">
+        <div><span class="kd-promo-kicker">Weekend deals</span><h2>Save more on your everyday groceries</h2><p>Up to 30% off selected groceries and top brands.</p></div>
+        <a class="kd-button yellow" href="{{ products_url }}">Shop offers &rarr;</a>
+      </section>
+    {%- endif -%}
+
+    {%- if shelf_1 != blank or shelf_2 != blank or shelf_3 != blank -%}
+      {%- for i in (1..3) -%}
+        {%- liquid
+          if i == 1
+            assign shelf_col = shelf_1
+            assign shelf_title = section.settings.shelf_title_1 | default: 'Popular this week'
+            assign shelf_sub = section.settings.shelf_subtitle_1 | default: 'Fresh picks and customer favourites'
+          elsif i == 2
+            assign shelf_col = shelf_2
+            assign shelf_title = section.settings.shelf_title_2 | default: 'Todays deals'
+            assign shelf_sub = section.settings.shelf_subtitle_2 | default: 'Daily fresh savings and discounts'
+          else
+            assign shelf_col = shelf_3
+            assign shelf_title = section.settings.shelf_title_3 | default: 'Kerala favourites'
+            assign shelf_sub = section.settings.shelf_subtitle_3 | default: 'Authentic flavours from home'
+          endif
+        -%}
+        {%- if shelf_col != blank -%}
+          <section class="kd-section kd-products-section kd-container" aria-labelledby="kd-products-{{ i }}">
+            <div class="kd-section-heading">
+              <div>
+                <h2 id="kd-products-{{ i }}">{{ shelf_title }}</h2>
+                <p>{{ shelf_sub }}</p>
+              </div>
+              <a href="{{ shelf_col.url }}">See all</a>
+            </div>
+            {%- if shelf_col.products_count > 0 -%}
+              <div class="kd-product-grid">
+                {%- for product in shelf_col.products limit: 6 -%}
+                  {% render 'karthika-card-product', card_product: product, section_id: section.id %}
+                {%- endfor -%}
+              </div>
+            {%- else -%}
+              <div class="kd-empty"><p>No products are available in this collection yet.</p></div>
+            {%- endif -%}
+          </section>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- elsif request.design_mode -%}
+      <p class="kd-empty kd-container">Select a collection for each product shelf in the theme editor.</p>
+    {%- endif -%}
 
   </main>
 </div>
@@ -185,5 +249,27 @@ body:has(.kd-home) .karthika-desktop-home-section ~ .shopify-section{display:non
 }
 </style>
 {% schema %}
-{"name":"Karthika Desktop Homepage","tag":"section","class":"karthika-desktop-home-section","settings":[{"type":"collection","id":"products_collection","label":"Product collection"}],"presets":[{"name":"Karthika Desktop Homepage"}]}
+{"name":"Karthika Desktop Homepage","tag":"section","class":"karthika-desktop-home-section","settings":[
+  {"type":"collection","id":"products_collection","label":"Offers collection","info":"Used by the weekend deals button. Hidden if empty."},
+  {"type":"header","content":"Category cards"},
+  {"type":"collection","id":"category_collection_1","label":"Category 1 collection"},
+  {"type":"text","id":"category_title_1","label":"Category 1 title","default":"Masala snacks"},
+  {"type":"text","id":"category_subtitle_1","label":"Category 1 subtitle","default":"Spicy and crunchy favorites"},
+  {"type":"collection","id":"category_collection_2","label":"Category 2 collection"},
+  {"type":"text","id":"category_title_2","label":"Category 2 title","default":"Dairy delights"},
+  {"type":"text","id":"category_subtitle_2","label":"Category 2 subtitle","default":"Fresh and pure essentials"},
+  {"type":"collection","id":"category_collection_3","label":"Category 3 collection"},
+  {"type":"text","id":"category_title_3","label":"Category 3 title","default":"Home essentials"},
+  {"type":"text","id":"category_subtitle_3","label":"Category 3 subtitle","default":"Everything for your home"},
+  {"type":"header","content":"Product shelves"},
+  {"type":"collection","id":"shelf_collection_1","label":"Shelf 1 collection","info":"Popular this week. Hidden if empty."},
+  {"type":"text","id":"shelf_title_1","label":"Shelf 1 title","default":"Popular this week"},
+  {"type":"text","id":"shelf_subtitle_1","label":"Shelf 1 subtitle","default":"Fresh picks and customer favourites"},
+  {"type":"collection","id":"shelf_collection_2","label":"Shelf 2 collection","info":"Today's deals. Hidden if empty. Select a different collection than shelf 1."},
+  {"type":"text","id":"shelf_title_2","label":"Shelf 2 title","default":"Todays deals"},
+  {"type":"text","id":"shelf_subtitle_2","label":"Shelf 2 subtitle","default":"Daily fresh savings and discounts"},
+  {"type":"collection","id":"shelf_collection_3","label":"Shelf 3 collection","info":"Kerala favourites. Hidden if empty."},
+  {"type":"text","id":"shelf_title_3","label":"Shelf 3 title","default":"Kerala favourites"},
+  {"type":"text","id":"shelf_subtitle_3","label":"Shelf 3 subtitle","default":"Authentic flavours from home"}
+],"presets":[{"name":"Karthika Desktop Homepage"}]}
 {% endschema %}
