@@ -30,6 +30,9 @@
   if storefront_login contains 'customer_authentication'
     assign new_customer_accounts = true
   endif
+
+  assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
+  assign contact_url = pages.contact.url | default: '/pages/contact'
 -%}
 
 <div class="kap" data-kap>
@@ -41,7 +44,6 @@
     <span class="kap-avatar kap-avatar--sm" aria-hidden="true">{{ avatar_initial }}</span>
   </header>
 
-  {%- if has_orders -%}
     <div class="kap-tabs" role="tablist" aria-label="Account sections">
       <button
         type="button"
@@ -51,8 +53,9 @@
         data-kap-tab="orders"
         aria-controls="kap-panel-orders"
         aria-selected="false"
+        tabindex="-1"
       >
-        Orders
+        {{ 'karthika.account.orders' | t }}
       </button>
       <button
         type="button"
@@ -62,11 +65,11 @@
         data-kap-tab="profile"
         aria-controls="kap-panel-profile"
         aria-selected="true"
+        tabindex="0"
       >
-        Profile
+        {{ 'karthika.account.profile' | t }}
       </button>
     </div>
-  {%- endif -%}
 
   <div class="kap-panel" id="kap-panel-profile" role="tabpanel" aria-labelledby="kap-tab-profile" data-kap-panel="profile">
     <section class="kap-card kap-profile" aria-labelledby="kap-profile-name">
@@ -93,38 +96,39 @@
       {%- endif -%}
     </section>
 
-    {%- if has_orders -%}
-      <section class="kap-section" aria-labelledby="kap-recent-orders-title">
-        <div class="kap-section__head">
-          <h2 class="kap-section__title" id="kap-recent-orders-title">Recent Orders</h2>
+    <section class="kap-section" aria-labelledby="kap-recent-orders-title">
+      <div class="kap-section__head">
+        <h2 class="kap-section__title" id="kap-recent-orders-title">{{ 'customer.orders.title' | t }}</h2>
+        {%- if has_orders -%}
           <button type="button" class="kap-section__link" data-kap-tab="orders">
             View all orders <span aria-hidden="true">&rsaquo;</span>
           </button>
-        </div>
+        {%- endif -%}
+      </div>
+      {%- if has_orders -%}
         <div class="kap-order-list">
           {%- for order in customer.orders limit: 2 -%}
             {%- render 'karthika-account-order-card', order: order -%}
           {%- endfor -%}
         </div>
-      </section>
-    {%- endif -%}
+      {%- else -%}
+        <div class="kap-empty" role="status">
+          <p>{{ 'customer.orders.none' | t }}</p>
+          <p>{{ 'karthika.account.empty_orders_hint' | t }}</p>
+          <a class="kap-btn kap-btn--primary" href="{{ routes.all_products_collection_url }}">{{ 'karthika.account.shop_now' | t }}</a>
+        </div>
+      {%- endif -%}
+    </section>
 
     <section class="kap-section" aria-labelledby="kap-quick-actions-title">
       <div class="kap-section__head">
         <h2 class="kap-section__title" id="kap-quick-actions-title">Quick Actions</h2>
       </div>
       <div class="kap-actions">
-        {%- if has_orders -%}
-          <button type="button" class="kap-action" data-kap-tab="orders">
-            {%- render 'karthika-account-icon', icon: 'bag' -%}
-            <span>My Orders</span>
-          </button>
-        {%- else -%}
-          <a class="kap-action" href="{{ routes.all_products_collection_url }}">
-            {%- render 'karthika-account-icon', icon: 'bag' -%}
-            <span>Start shopping</span>
-          </a>
-        {%- endif -%}
+        <button type="button" class="kap-action" data-kap-tab="orders">
+          {%- render 'karthika-account-icon', icon: 'bag' -%}
+          <span>{{ 'karthika.account.orders' | t }}</span>
+        </button>
 
         <a class="kap-action" href="{{ routes.account_addresses_url }}">
           {%- render 'karthika-account-icon', icon: 'pin' -%}
@@ -177,7 +181,7 @@
       </section>
     {%- endif -%}
 
-    <a class="kap-card kap-privacy" href="/policies/privacy-policy">
+    <a class="kap-card kap-privacy" href="{{ privacy_url }}">
       <span class="kap-privacy__icon" aria-hidden="true">
         {%- render 'karthika-account-icon', icon: 'shield' -%}
       </span>
@@ -190,23 +194,23 @@
       </span>
     </a>
 
-    <p class="kap-footer-link"><a href="/policies/privacy-policy">Privacy policy</a></p>
+    <p class="kap-footer-link"><a href="{{ privacy_url }}">Privacy policy</a></p>
   </div>
 
-  {%- if has_orders -%}
-    <div
-      class="kap-panel"
-      id="kap-panel-orders"
-      role="tabpanel"
-      aria-labelledby="kap-tab-orders"
-      data-kap-panel="orders"
-      hidden
-    >
-      <section class="kap-section" aria-labelledby="kap-all-orders-title">
-        <div class="kap-section__head">
-          <h2 class="kap-section__title" id="kap-all-orders-title">All Orders</h2>
-          <span class="kap-section__count">{{ customer.orders_count }}</span>
-        </div>
+  <div
+    class="kap-panel"
+    id="kap-panel-orders"
+    role="tabpanel"
+    aria-labelledby="kap-tab-orders"
+    data-kap-panel="orders"
+    hidden
+  >
+    <section class="kap-section" aria-labelledby="kap-all-orders-title">
+      <div class="kap-section__head">
+        <h2 class="kap-section__title" id="kap-all-orders-title">{{ 'customer.orders.title' | t }}</h2>
+        <span class="kap-section__count">{{ customer.orders_count }}</span>
+      </div>
+      {%- if has_orders -%}
         {%- paginate customer.orders by 5 -%}
           <div class="kap-order-list">
             {%- for order in customer.orders -%}
@@ -217,11 +221,17 @@
             <div class="kap-pagination">{{ paginate | default_pagination }}</div>
           {%- endif -%}
         {%- endpaginate -%}
-      </section>
+      {%- else -%}
+        <div class="kap-empty" role="status">
+          <p>{{ 'customer.orders.none' | t }}</p>
+          <p>{{ 'karthika.account.empty_orders_hint' | t }}</p>
+          <a class="kap-btn kap-btn--primary" href="{{ routes.all_products_collection_url }}">{{ 'karthika.account.shop_now' | t }}</a>
+        </div>
+      {%- endif -%}
+    </section>
 
-      <p class="kap-footer-link"><a href="/policies/privacy-policy">Privacy policy</a></p>
-    </div>
-  {%- endif -%}
+    <p class="kap-footer-link"><a href="{{ privacy_url }}">Privacy policy</a></p>
+  </div>
 </div>
 
 {%- comment -%} Account settings sheet: carries every menu row the redesign displaces. {%- endcomment -%}
@@ -239,12 +249,12 @@
           <span><strong>Offers &amp; Coupons</strong><small>Browse current store offers</small></span>
           <b aria-hidden="true">&rsaquo;</b>
         </a>
-        <a href="/pages/contact" class="kap-menu__row">
+        <a href="{{ contact_url }}" class="kap-menu__row">
           <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'chat' -%}</span>
           <span><strong>Help &amp; Support</strong><small>Contact the Karthika team</small></span>
           <b aria-hidden="true">&rsaquo;</b>
         </a>
-        <a href="/policies/privacy-policy" class="kap-menu__row">
+        <a href="{{ privacy_url }}" class="kap-menu__row">
           <span class="kap-menu__icon">{%- render 'karthika-account-icon', icon: 'lock' -%}</span>
           <span><strong>Privacy &amp; Security</strong><small>Read our privacy policy</small></span>
           <b aria-hidden="true">&rsaquo;</b>

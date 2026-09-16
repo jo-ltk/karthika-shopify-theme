@@ -5,6 +5,13 @@
     <div>
       <p>{{ 'customer.order.date_html' | t: date: order_date }}</p>
       <h1>{{ 'customer.order.title' | t: name: order.name }}</h1>
+      {%- if order.cancelled -%}
+        {%- assign cancelled_date = order.cancelled_at | date: '%d %b %Y' -%}
+        <p role="status">{{ 'customer.order.cancelled_html' | t: date: cancelled_date }}</p>
+        {%- if order.cancel_reason != blank -%}
+          <p>{{ 'customer.order.cancelled_reason' | t: reason: order.cancel_reason }}</p>
+        {%- endif -%}
+      {%- endif -%}
     </div>
   </header>
 
@@ -101,16 +108,77 @@
         <div><strong>{{ 'customer.order.subtotal' | t }}</strong></div>
         <div><span>{{ order.subtotal_price | money }}</span></div>
       </article>
-      {%- if order.shipping_price > 0 -%}
+      {%- if order.shipping_price != blank -%}
         <article class="karthika-order-card">
           <div><strong>{{ 'customer.order.shipping' | t }}</strong></div>
           <div><span>{{ order.shipping_price | money }}</span></div>
+        </article>
+      {%- endif -%}
+      {%- for tax_line in order.tax_lines -%}
+        <article class="karthika-order-card">
+          <div>
+            <strong>{{ 'customer.order.tax' | t }}</strong>
+            {%- if tax_line.title != blank -%}
+              <span>{{ tax_line.title | escape }}</span>
+            {%- endif -%}
+          </div>
+          <div><span>{{ tax_line.price | money }}</span></div>
+        </article>
+      {%- endfor -%}
+      {%- if order.total_refunded > 0 -%}
+        <article class="karthika-order-card">
+          <div><strong>{{ 'customer.order.total_refunded' | t }}</strong></div>
+          <div><span>{{ order.total_refunded | money }}</span></div>
         </article>
       {%- endif -%}
       <article class="karthika-order-card">
         <div><strong>{{ 'customer.order.total' | t }}</strong></div>
         <div><span>{{ order.total_price | money }}</span></div>
       </article>
+    </div>
+  </section>
+
+  {%- liquid
+    assign tracking_available = false
+    for line_item in order.line_items
+      if line_item.fulfillment and line_item.fulfillment.tracking_number != blank
+        assign tracking_available = true
+      elsif line_item.fulfillment and line_item.fulfillment.tracking_url != blank
+        assign tracking_available = true
+      endif
+    endfor
+  -%}
+  <section class="karthika-account-section" aria-labelledby="KarthikaTrackingTitle">
+    <div class="karthika-account-section__heading">
+      <h2 id="KarthikaTrackingTitle">{{ 'customer.order.tracking_title' | t }}</h2>
+    </div>
+    <div class="karthika-order-list">
+      {%- if tracking_available -%}
+        {%- for line_item in order.line_items -%}
+          {%- if line_item.fulfillment.tracking_number != blank or line_item.fulfillment.tracking_url != blank -%}
+            <article class="karthika-order-card">
+              <div>
+                <strong>{{ line_item.title | escape }}</strong>
+                {%- if line_item.fulfillment.tracking_company != blank -%}
+                  <span>{{ 'customer.order.tracking_company' | t }}: {{ line_item.fulfillment.tracking_company | escape }}</span>
+                {%- endif -%}
+                {%- if line_item.fulfillment.tracking_number != blank -%}
+                  <span>{{ 'customer.order.tracking_number' | t }}: {{ line_item.fulfillment.tracking_number | escape }}</span>
+                {%- endif -%}
+              </div>
+              {%- if line_item.fulfillment.tracking_url != blank -%}
+                <a href="{{ line_item.fulfillment.tracking_url }}">{{ 'customer.order.track_shipment' | t }}</a>
+              {%- endif -%}
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        <article class="karthika-order-card">
+          <div>
+            <span>{{ 'customer.order.tracking_unavailable' | t }}</span>
+          </div>
+        </article>
+      {%- endif -%}
     </div>
   </section>
 

@@ -562,7 +562,10 @@
       "delivery_address": "Delivery address",
       "recipient_name": "Recipient",
       "recipient_phone": "Recipient phone",
-      "gift_message": "Gift message"
+      "gift_message": "Gift message",
+      "cancelled_status": "Cancelled",
+      "tracking_unavailable": "Tracking information is not available yet.",
+      "tracking_title": "Tracking"
     },
     "orders": {
       "title": "Order history",
@@ -650,6 +653,26 @@
       "ai_invalid_product": "That product is currently unavailable.",
       "items_matched": "{{ count }} store items",
       "add_matched": "Add available items ({{ count }})"
+    },
+    "checkout": {
+      "loading": "Redirecting to checkout…",
+      "empty": "Your cart is empty. Add items before checking out.",
+      "unavailable": "An item in your cart is no longer available. Update your cart and try again.",
+      "network": "We couldn't reach checkout. Check your connection and try again.",
+      "failed": "Checkout could not start. No order was placed.",
+      "order_now": "Order now",
+      "track_order": "Track order"
+    },
+    "account": {
+      "empty_orders_hint": "When you complete a purchase, it will show up here.",
+      "shop_now": "Start shopping",
+      "orders": "Orders",
+      "profile": "Profile",
+      "buy_again": "Buy again",
+      "buy_again_adding": "Adding…",
+      "buy_again_unavailable": "Unavailable",
+      "buy_again_retry": "Try again",
+      "buy_again_added": "[count] added"
     }
   },
   "recipient": {

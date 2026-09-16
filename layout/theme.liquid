@@ -304,6 +304,7 @@
     {{ 'base.css' | asset_url | stylesheet_tag }}
     {{ 'karthika-grocery.css' | asset_url | stylesheet_tag }}
     <script src="{{ 'karthika-grocery.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'karthika-checkout.js' | asset_url }}" defer="defer"></script>
     <link rel="stylesheet" href="{{ 'component-cart-items.css' | asset_url }}" media="print" onload="this.media='all'">
 
     {%- if settings.cart_type == 'drawer' -%}
@@ -397,6 +398,13 @@
       window.cartStrings = {
         error: `{{ 'sections.cart.cart_error' | t }}`,
         quantityError: `{{ 'sections.cart.cart_quantity_error_html' | t: quantity: '[quantity]' }}`,
+      };
+
+      window.karthikaAccountStrings = {
+        buyAgainUnavailable: {{ 'karthika.account.buy_again_unavailable' | t | json }},
+        buyAgainAdding: {{ 'karthika.account.buy_again_adding' | t | json }},
+        buyAgainRetry: {{ 'karthika.account.buy_again_retry' | t | json }},
+        buyAgainAdded: {{ 'karthika.account.buy_again_added' | t | json }},
       };
 
       window.variantStrings = {

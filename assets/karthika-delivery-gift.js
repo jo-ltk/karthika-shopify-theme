@@ -477,8 +477,13 @@
       document.addEventListener(
         'click',
         async (event) => {
-          const button = event.target.closest('[name="checkout"]');
-          if (!button || button.disabled) return;
+          const button = event.target.closest('button[name="checkout"], [data-karthika-checkout]');
+          if (!button) return;
+          if (window.Karthika?.Checkout?.lock) {
+            event.preventDefault();
+            return;
+          }
+          if (button.disabled) return;
           const roots = [...document.querySelectorAll('karthika-delivery-gift')];
           if (!roots.length) return;
           const root = roots.find((node) => node.dataset.compact !== 'true') || roots[0];
@@ -499,9 +504,15 @@
             return;
           }
           event.preventDefault();
-          button.disabled = true;
+          const Checkout = window.Karthika?.Checkout;
+          if (Checkout && !Checkout.begin()) return;
           try {
+            if (Checkout?.validateCart) await Checkout.validateCart();
             await root.persist();
+            if (Checkout?.submitForm) {
+              Checkout.submitForm(button);
+              return;
+            }
             const form = button.form || document.getElementById(button.getAttribute('form') || root.formId);
             if (!form) return;
             if (!form.querySelector('input[name="checkout"]')) {
@@ -513,8 +524,15 @@
             }
             form.submit();
           } catch (err) {
-            button.disabled = false;
-            root.showError(root.dataset.errorSave || 'Could not save delivery details. Try again.');
+            const message =
+              err && err.message
+                ? err.message
+                : root.dataset.errorSave || 'Could not save delivery details. Try again.';
+            if (Checkout?.fail) Checkout.fail(message);
+            else {
+              button.disabled = false;
+              root.showError(message);
+            }
           }
         },
         true

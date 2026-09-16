@@ -57,9 +57,9 @@
     {%- unless customer -%}
     <p class="kas-terms">
       By tapping, I accept the
-      <a href="/policies/terms-of-service" class="kas-terms__link">terms of service</a>
+      <a href="{{ shop.terms_of_service.url | default: '/policies/terms-of-service' }}" class="kas-terms__link">terms of service</a>
       &amp;
-      <a href="/policies/privacy-policy" class="kas-terms__link">privacy policy</a>
+      <a href="{{ shop.privacy_policy.url | default: '/policies/privacy-policy' }}" class="kas-terms__link">privacy policy</a>
     </p>
     {%- endunless -%}
 

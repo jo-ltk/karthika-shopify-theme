@@ -86,7 +86,22 @@
         <strong class="karthika-delivery-address">{% if store_location_label != blank %}{{ store_location_label | escape }}{% else %}{{ 'general.location.unconfigured' | t }}{% endif %}</strong>
       </button>
       <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#128241;</span> Download App</span>
-      <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#9716;</span> Track Order</span>
+      {%- liquid
+        assign track_order_url = routes.account_login_url
+        if customer
+          assign track_order_url = routes.account_url | append: '#orders'
+        elsif routes.storefront_login_url contains 'customer_authentication'
+          assign track_return = routes.account_url | append: '#orders' | url_encode
+          assign track_order_url = routes.storefront_login_url | append: '?return_to=' | append: track_return
+        endif
+      -%}
+      <a
+        class="karthika-desktop-header__utility-item{% unless customer %} karthika-login-home-link{% endunless %}"
+        href="{{ track_order_url }}"
+        data-karthika-stay-account
+      >
+        <span aria-hidden="true">&#9716;</span> {{ 'karthika.checkout.track_order' | t }}
+      </a>
     </div>
   </div>
   <div class="karthika-desktop-header__main">
@@ -116,7 +131,17 @@
         </svg>
         <span id="KarthikaDesktopSearchPlaceholder" class="karthika-search-placeholder-text karthika-search-placeholder-target">Search for milk…</span>
       </button>
-      <a class="karthika-desktop-header__order" href="{{ routes.all_products_collection_url }}">Order Now</a>
+      <a
+        class="karthika-desktop-header__order karthika-cart-trigger"
+        href="{{ routes.cart_url }}"
+        {% if settings.cart_type == 'drawer' %}
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="CartDrawer"
+        {% endif %}
+      >
+        {{ 'karthika.checkout.order_now' | t }}
+      </a>
       <a
         class="karthika-desktop-header__cart karthika-cart-trigger"
         href="{{ routes.cart_url }}"

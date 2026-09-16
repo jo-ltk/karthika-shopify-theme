@@ -48,8 +48,8 @@
   endif
 
   assign status_label = order.fulfillment_status_label | default: order.financial_status_label
-  if order.cancelled_at != blank
-    assign status_label = 'Cancelled'
+  if order.cancelled or order.cancelled_at != blank
+    assign status_label = 'customer.order.cancelled_status' | t
   endif
 
   assign order_date = order.created_at | date: '%b %-d, %Y'
@@ -100,7 +100,7 @@
         data-kap-order-items='[{{ buy_json }}]'
         data-kap-order-name="{{ order.name | escape }}"
       >
-        <span class="kap-order__buy-label">Buy again</span>
+        <span class="kap-order__buy-label">{{ 'karthika.account.buy_again' | t }}</span>
       </button>
     {%- endif -%}
   </div>

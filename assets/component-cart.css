@@ -236,6 +236,28 @@ cart-items {
 
 .cart__checkout-button {
   max-width: 36rem;
+  position: relative;
+}
+
+.cart__checkout-button .loading__spinner {
+  width: 1.8rem;
+  margin-left: 0.6rem;
+}
+
+.cart__checkout-button[aria-busy='true'] .loading__spinner.hidden {
+  display: inline-flex;
+}
+
+.cart-errors {
+  min-height: 0;
+  margin: 0.8rem 0 0;
+  color: #8a1f1f;
+  font-size: 1.3rem;
+  line-height: 1.4;
+}
+
+.cart-errors:empty {
+  display: none;
 }
 
 .cart__ctas {

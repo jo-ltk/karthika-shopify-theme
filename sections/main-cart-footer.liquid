@@ -142,12 +142,15 @@
                   id="checkout"
                   class="cart__checkout-button button"
                   name="checkout"
+                  data-karthika-checkout
                   {% if cart == empty %}
                     disabled
+                    data-checkout-empty
                   {% endif %}
                   form="cart"
                 >
-                  {{ 'sections.cart.checkout' | t }}
+                  <span data-checkout-label>{{ 'sections.cart.checkout' | t }}</span>
+                  {%- render 'loading-spinner' -%}
                 </button>
               </div>
 
@@ -159,7 +162,7 @@
           {%- endcase -%}
         {% endfor %}
 
-        <div id="cart-errors"></div>
+        <div id="cart-errors" class="cart-errors" role="alert" aria-live="assertive" tabindex="-1"></div>
       </div>
     </div>
   </div>

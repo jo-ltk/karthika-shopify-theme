@@ -44,8 +44,14 @@
           {{- 'general.cart.view_empty_cart' | t -}}
         </a>
         <form action="{{ routes.cart_url }}" method="post" id="cart-notification-form">
-          <button class="button button--primary button--full-width" name="checkout">
-            {{ 'sections.cart.checkout' | t }}
+          <button
+            type="submit"
+            class="button button--primary button--full-width cart__checkout-button"
+            name="checkout"
+            data-karthika-checkout
+          >
+            <span data-checkout-label>{{ 'sections.cart.checkout' | t }}</span>
+            {%- render 'loading-spinner' -%}
           </button>
         </form>
         <button type="button" class="link button-label">{{ 'general.continue_shopping' | t }}</button>

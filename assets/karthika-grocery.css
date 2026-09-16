@@ -247,6 +247,13 @@ textarea {
     gap: 8px;
     min-width: 0;
     white-space: nowrap;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a.karthika-desktop-header__utility-item:focus-visible {
+    outline: 2px solid #2775D9;
+    outline-offset: 2px;
   }
 
   .karthika-desktop-header__location {
@@ -6304,6 +6311,29 @@ a.karthika-quick-tab:focus-visible {
   font-weight: var(--karthika-weight-bold);
 }
 
+.kap-tab:focus-visible {
+  outline: 2px solid var(--karthika-red);
+  outline-offset: 3px;
+}
+
+.kap-empty {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 18px 4px 8px;
+}
+
+.kap-empty p {
+  margin: 0;
+  color: var(--karthika-text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.kap-empty .kap-btn {
+  margin-top: 8px;
+}
+
 .kap-panel[hidden] {
   display: none;
 }
@@ -6688,6 +6718,31 @@ a.karthika-quick-tab:focus-visible {
   font-weight: var(--karthika-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+@media screen and (max-width: 479px) {
+  .kap-order {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kap-order__actions {
+    justify-content: flex-start;
+  }
+
+  .kap-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kap-profile,
+  .kap-address {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .kap-profile__edit,
+  .kap-address__manage {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
 }
 
 /* ---- Bottom sheets (Account settings / Edit profile) ---- */

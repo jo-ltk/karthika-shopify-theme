@@ -2318,6 +2318,7 @@
   document.addEventListener('click', function (e) {
     var link = e.target.closest('a[href], .karthika-login-home-link');
     if (!link) return;
+    if (link.hasAttribute('data-karthika-stay-account')) return;
     markReturnHome(link.getAttribute('href') || '');
   });
 })();
@@ -2355,6 +2356,23 @@
         event.preventDefault();
         this.showTab(trigger.dataset.kapTab, true);
       });
+
+      this.root.addEventListener('keydown', (event) => {
+        const tab = event.target.closest('[role="tab"][data-kap-tab]');
+        if (!tab) return;
+        const tabs = [...this.root.querySelectorAll('[role="tab"][data-kap-tab]')];
+        const index = tabs.indexOf(tab);
+        if (index < 0) return;
+        let next = -1;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % tabs.length;
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === 'Home') next = 0;
+        if (event.key === 'End') next = tabs.length - 1;
+        if (next < 0) return;
+        event.preventDefault();
+        tabs[next].focus();
+        this.showTab(tabs[next].dataset.kapTab, false);
+      });
     },
 
     restoreTab() {
@@ -2385,6 +2403,7 @@
         const isMatch = tab.dataset.kapTab === name;
         tab.classList.toggle('is-active', isMatch);
         tab.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+        tab.tabIndex = isMatch ? 0 : -1;
       });
 
       try {
@@ -2421,7 +2440,7 @@
       const originalText = label.textContent;
 
       if (!items.length) {
-        label.textContent = 'Unavailable';
+        label.textContent = window.karthikaAccountStrings?.buyAgainUnavailable || 'Unavailable';
         setTimeout(() => {
           label.textContent = originalText;
         }, 2000);
@@ -2429,7 +2448,8 @@
       }
 
       btn.disabled = true;
-      label.textContent = 'Adding\u2026';
+      label.textContent = window.karthikaAccountStrings?.buyAgainAdding || 'Adding\u2026';
+      let lastError = '';
 
       const root = window.Shopify?.routes?.root || window.routes?.root || '/';
       const base = root.endsWith('/') ? root : root + '/';
@@ -2447,12 +2467,15 @@
             body: formData,
           });
 
+          let payload = null;
+          try {
+            payload = await res.json();
+          } catch (err) {}
           if (res.ok) {
             successCount++;
-            try {
-              const added = await res.json();
-              if (added?.key) addedKeysNewestFirst.unshift(added.key);
-            } catch (err) {}
+            if (payload?.key) addedKeysNewestFirst.unshift(payload.key);
+          } else if (payload && (payload.description || payload.message)) {
+            lastError = String(payload.description || payload.message).slice(0, 180);
           }
         } catch (err) {}
       }
@@ -2471,15 +2494,16 @@
 
       if (!successCount) {
         btn.disabled = false;
-        label.textContent = 'Try again';
+        label.textContent = lastError || window.karthikaAccountStrings?.buyAgainRetry || 'Try again';
         setTimeout(() => {
           label.textContent = originalText;
-        }, 2200);
+        }, 2800);
         return;
       }
 
       btn.classList.add('is-done');
-      label.textContent = `${successCount} added`;
+      const addedTpl = window.karthikaAccountStrings?.buyAgainAdded || '[count] added';
+      label.textContent = addedTpl.replace('[count]', String(successCount));
 
       setTimeout(() => {
         if (window.Karthika?.Cart?.openCartDrawer) window.Karthika.Cart.openCartDrawer();

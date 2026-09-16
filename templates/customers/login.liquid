@@ -36,7 +36,7 @@
         <button class="karthika-secondary-button" type="submit">Send recovery email</button>
       {% endform %}
     </div>
-    <p class="karthika-auth-legal">By continuing, you accept the <a href="/policies/terms-of-service">terms of service</a> and <a href="/policies/privacy-policy">privacy policy</a>.</p>
+    <p class="karthika-auth-legal">By continuing, you accept the <a href="{{ shop.terms_of_service.url | default: '/policies/terms-of-service' }}">terms of service</a> and <a href="{{ shop.privacy_policy.url | default: '/policies/privacy-policy' }}">privacy policy</a>.</p>
   </section>
 </div>
 

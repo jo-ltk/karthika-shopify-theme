@@ -522,7 +522,7 @@
               {{ 'accessibility.loading' | t }}
             </p>
           </div>
-          <div id="CartDrawer-CartErrors" role="alert"></div>
+          <div id="CartDrawer-CartErrors" class="cart-errors" role="alert" aria-live="assertive" tabindex="-1"></div>
         </form>
       </cart-drawer-items>
       <div class="drawer__footer">
@@ -618,12 +618,20 @@
             class="cart__checkout-button button"
             name="checkout"
             form="CartDrawer-Form"
+            data-karthika-checkout
             {% if cart == empty %}
               disabled
+              data-checkout-empty
             {% endif %}
           >
-            {{ 'sections.cart.checkout' | t }}
+            <span data-checkout-label>{{ 'sections.cart.checkout' | t }}</span>
+            {%- render 'loading-spinner' -%}
           </button>
+          {%- if additional_checkout_buttons -%}
+            <div class="cart__dynamic-checkout-buttons additional-checkout-buttons">
+              {{ content_for_additional_checkout_buttons }}
+            </div>
+          {%- endif -%}
         </div>
       </div>
     </div>
