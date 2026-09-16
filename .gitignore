@@ -37,3 +37,23 @@ desktop.ini
 
 # Local Agent Skills repository
 agent-skills/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Local catalog/image pipeline scratch (not part of the Shopify theme)
+.tmp_*
+.tmp_karthika_*/
+
+# Machine-local catalog import tools (hardcoded local paths; keep on disk, do not publish)
+assign_itemlist_karthika_images.py
+assign_shopify_product_images.py
+fill_all_verified_images.py
+karthika_image_test_random50.py
+karthika_image_test_random50.csv
+karthika_image_test_random50_report.txt
+match_karthika_livesite_images.py
+recover_karthika_cache_images.py
+assets/product-placeholders/
