@@ -21,11 +21,11 @@
       "type": "karthika-quick-tabs",
       "blocks": {
         "tab_1": { "type": "tab_item", "settings": { "label": "All", "icon": "🛍️", "link_all_products": true } },
-        "tab_2": { "type": "tab_item", "settings": { "label": "Rice", "icon": "🍚", "collection": "rice-grains" } },
-        "tab_3": { "type": "tab_item", "settings": { "label": "Spices", "icon": "🌶️", "collection": "spices-masala" } },
-        "tab_4": { "type": "tab_item", "settings": { "label": "Snacks", "icon": "🍪", "collection": "indian-snacks" } },
-        "tab_5": { "type": "tab_item", "settings": { "label": "Beverages", "icon": "🥤", "collection": "beverages" } },
-        "tab_6": { "type": "tab_item", "settings": { "label": "Dairy", "icon": "🥛", "collection": "dairy-eggs" } }
+        "tab_2": { "type": "tab_item", "settings": { "label": "Rice", "icon": "🍚", "collection": "rice-grains", "collection_handle": "rice-grains" } },
+        "tab_3": { "type": "tab_item", "settings": { "label": "Spices", "icon": "🌶️", "collection": "spices-masala", "collection_handle": "spices-masala" } },
+        "tab_4": { "type": "tab_item", "settings": { "label": "Snacks", "icon": "🍪", "collection": "indian-snacks", "collection_handle": "indian-snacks" } },
+        "tab_5": { "type": "tab_item", "settings": { "label": "Beverages", "icon": "🥤", "collection": "beverages", "collection_handle": "beverages" } },
+        "tab_6": { "type": "tab_item", "settings": { "label": "Dairy", "icon": "🥛", "collection": "dairy-eggs", "collection_handle": "dairy-eggs" } }
       },
       "block_order": ["tab_1", "tab_2", "tab_3", "tab_4", "tab_5", "tab_6"],
       "settings": { "title": "Shop by category" }

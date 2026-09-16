@@ -4374,6 +4374,17 @@ body.karthika-location-open {
   text-decoration: none;
   color: inherit;
 }
+.karthika-quick-tab > :not(.karthika-quick-tab-icon):not(.karthika-quick-tab-label),
+.karthika-quick-tab small,
+.karthika-quick-tab .badge,
+.karthika-quick-tab .karthika-quick-tab-count,
+.karthika-quick-tab [data-count],
+.karthika-quick-tab [data-product-count],
+.karthika-quick-tab .karthika-card-badge,
+.karthika-quick-tab .karthika-stock-badge,
+.karthika-quick-tab .karthika-nav-badge {
+  display: none !important;
+}
 a.karthika-quick-tab:focus-visible {
   outline: 2px solid var(--karthika-red, #3F7D2E);
   outline-offset: 3px;
