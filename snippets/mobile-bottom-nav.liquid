@@ -6,16 +6,16 @@
 
 <nav class="karthika-bottom-nav" aria-label="Mobile Navigation">
   <!-- 1. Home -->
-  <a href="{{ routes.root_url | default: '/' }}" class="karthika-nav-item {% if template.name == 'index' %}is-active{% endif %}">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <a href="{{ routes.root_url | default: '/' }}" class="karthika-nav-item {% if template.name == 'index' %}is-active{% endif %}"{% if template.name == 'index' %} aria-current="page"{% endif %}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
       <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"></path>
     </svg>
     <span>Home</span>
   </a>
 
   <!-- 2. Categories -->
-  <a href="{{ routes.collections_url }}" class="karthika-nav-item {% if template.name contains 'collection' or template.name == 'list-collections' %}is-active{% endif %}">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <a href="{{ routes.collections_url }}" class="karthika-nav-item {% if template.name contains 'collection' or template.name == 'list-collections' %}is-active{% endif %}"{% if template.name contains 'collection' or template.name == 'list-collections' %} aria-current="page"{% endif %}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
       <rect x="3" y="3" width="7" height="7" rx="2"></rect>
       <rect x="14" y="3" width="7" height="7" rx="2"></rect>
       <rect x="14" y="14" width="7" height="7" rx="2"></rect>
@@ -25,8 +25,8 @@
   </a>
 
   <!-- 3. Search -->
-  <button type="button" class="karthika-nav-item karthika-nav-reset karthika-nav-search-trigger karthika-search-bar-trigger {% if template.name == 'search' %}is-active{% endif %}" aria-haspopup="dialog" aria-expanded="false" aria-controls="KarthikaSearchModal" aria-label="Search groceries">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <button type="button" class="karthika-nav-item karthika-nav-reset karthika-nav-search-trigger karthika-search-bar-trigger {% if template.name == 'search' %}is-active{% endif %}" aria-haspopup="dialog" aria-expanded="false" aria-controls="KarthikaSearchModal" aria-label="Search groceries"{% if template.name == 'search' %} aria-current="page"{% endif %}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
       <circle cx="11" cy="11" r="7"></circle>
       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
@@ -38,13 +38,14 @@
     href="{{ routes.cart_url }}"
     class="karthika-nav-item karthika-cart-trigger {% if template.name == 'cart' %}is-active{% endif %}"
     aria-label="Cart ({{ cart.item_count }} items)"
+    {% if template.name == 'cart' %}aria-current="page"{% endif %}
     {% if settings.cart_type == 'drawer' %}
     aria-haspopup="dialog"
     aria-expanded="false"
     aria-controls="CartDrawer"
     {% endif %}
   >
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
       <circle cx="9" cy="20" r="1.5"></circle>
       <circle cx="18" cy="20" r="1.5"></circle>
       <path d="M2 3h3l2.5 13h12l3-9H6"></path>
@@ -56,8 +57,8 @@
   </a>
 
   <!-- 5. Account -->
-  <a href="{% if customer %}{{ routes.account_url }}{% else %}#karthika-account-screen{% endif %}" class="karthika-nav-item karthika-account-trigger {% if request.path contains '/account' %}is-active{% endif %}" data-account-href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{% render 'karthika-login-home', destination: 'account' %}{%- endif -%}" data-customer-state="{% if customer %}signed-in{% else %}guest{% endif %}" aria-label="Account" aria-haspopup="dialog">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <a href="{% if customer %}{{ routes.account_url }}{% else %}#karthika-account-screen{% endif %}" class="karthika-nav-item karthika-account-trigger {% if request.path contains '/account' %}is-active{% endif %}" data-account-href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{% render 'karthika-login-home', destination: 'account' %}{%- endif -%}" data-customer-state="{% if customer %}signed-in{% else %}guest{% endif %}" aria-label="Account"{% unless customer %} aria-haspopup="dialog"{% endunless %}{% if request.path contains '/account' %} aria-current="page"{% endif %}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
       <circle cx="12" cy="7" r="4"></circle>
     </svg>

@@ -41,7 +41,7 @@
   /* ---- Text colors ---- */
   --karthika-text-dark: #171717;
   --karthika-text-muted: #5C6B52;
-  --karthika-text-light: #8B9481;
+  --karthika-text-light: #5A6454;
 
   /* ---- Radius scale (soft, rounded UI) ---- */
   --karthika-radius-xs: 8px;
@@ -171,7 +171,7 @@ textarea {
   min-height: 100vh;
   box-sizing: border-box;
   padding: 0 0 28px 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   position: relative;
 }
 
@@ -569,8 +569,8 @@ textarea {
 
 .karthika-delivery-label {
   flex-shrink: 0;
-  color: #6B7280;
-  font-size: 11px;
+  color: #4B5563;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1;
   letter-spacing: 0;
@@ -610,8 +610,8 @@ textarea {
 .karthika-header-account {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   background: transparent;
   color: #222222;
   border: none;
@@ -637,8 +637,8 @@ textarea {
 .karthika-header-notification {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   background: transparent;
   color: #222222;
   border: none;
@@ -665,8 +665,8 @@ textarea {
 .karthika-header-cart-icon {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   background: transparent;
   color: #222222;
   text-decoration: none;
@@ -832,6 +832,7 @@ textarea {
   color: var(--karthika-red);
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.09), 0 0 0 1px rgba(0,0,0,0.04);
   font-weight: 700;
+  cursor: default;
 }
 
 /* ==========================================================================
@@ -1490,6 +1491,7 @@ textarea {
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
   box-sizing: border-box;
   height: 100%;
+  min-width: 0;
 }
 
 .karthika-compact-card:hover {
@@ -1624,6 +1626,8 @@ textarea {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   margin-bottom: 8px;
   min-height: 34px;
   transition: color 0.15s ease;
@@ -1690,7 +1694,8 @@ textarea {
 .karthika-compact-add-wrap {
   position: relative;
   width: 100%;
-  height: 38px;
+  min-height: 44px;
+  height: 44px;
   border-radius: 12px;
   box-sizing: border-box;
   overflow: hidden;
@@ -2634,7 +2639,7 @@ textarea {
   align-items: center;
   justify-content: center;
   width: auto;
-  max-width: calc(100vw - 32px);
+  max-width: calc(100% - 32px);
   min-height: 48px;
   padding: 8px 16px;
   gap: 9px;
@@ -3063,7 +3068,7 @@ textarea {
   justify-content: center;
   flex: 1;
   height: 100%;
-  color: #737373;
+  color: #525252;
   text-decoration: none;
   font-size: 10px;
   font-weight: 550;
@@ -7074,7 +7079,7 @@ cart-drawer.drawer {
 @media screen and (max-width: 749px) {
   cart-drawer .drawer__inner {
     width: 100%;
-    max-width: 100vw;
+    max-width: 100%;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
@@ -7104,7 +7109,7 @@ cart-drawer.drawer {
   left: 50%;
   bottom: calc(88px + env(safe-area-inset-bottom, 0px));
   z-index: 5000;
-  max-width: min(420px, calc(100vw - 32px));
+  max-width: min(420px, calc(100% - 32px));
   padding: 10px 14px;
   border-radius: 12px;
   background: #2b2b2b;
@@ -7231,4 +7236,220 @@ cart-drawer.drawer {
     gap: 20px;
   }
 }
+
+/* ==========================================================================
+   Responsive + accessibility hardening (theme-wide, identity-preserving)
+   ========================================================================== */
+html {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+}
+
+.product__title,
+.product__text,
+.cart-item__name,
+.karthika-pdp-title-row h1,
+.karthika-ai-item-name {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.product__media img,
+.product__media-item img,
+.product-media img {
+  height: auto;
+}
+
+.karthika-desktop-header__utility-item--static {
+  opacity: 0.78;
+  cursor: default;
+  pointer-events: none;
+}
+
+.karthika-header-notification[disabled],
+.karthika-header-notification[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+.karthika-header-notification[disabled]:hover,
+.karthika-header-notification[aria-disabled="true"]:hover,
+.karthika-header-notification[disabled]:active,
+.karthika-header-notification[aria-disabled="true"]:active {
+  opacity: 0.42;
+}
+
+.karthika-nav-item:focus-visible,
+.karthika-header-search:focus-visible,
+.karthika-header-cart-icon:focus-visible,
+.karthika-header-account:focus-visible,
+.kcb2-pill-btn:focus-visible,
+.kcb2-back-btn:focus-visible,
+.kcb2-search-btn:focus-visible,
+.kcb2-cat-item:focus-visible,
+.karthika-segmented-btn:focus-visible {
+  outline: 2px solid var(--karthika-red);
+  outline-offset: 2px;
+}
+
+.karthika-search-modal {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.karthika-search-modal-back,
+.karthika-search-modal-reset,
+.karthika-search-modal-submit {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.kcb2-layout,
+.kcb2-main,
+.karthika-category-browser,
+.karthika-two-col-grid {
+  min-width: 0;
+}
+
+.kcb2-back-btn,
+.kcb2-search-btn,
+.kcb2-tune-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.kcb2-pill-btn {
+  min-height: 44px;
+}
+
+.kcb2-cat-item {
+  min-height: 44px;
+}
+
+.template-product #MainContent,
+.template-page #MainContent,
+.template-blog #MainContent,
+.template-article #MainContent,
+.template-gift_card #MainContent {
+  padding-bottom: calc(var(--karthika-bottom-nav-height) + 24px + env(safe-area-inset-bottom, 0px));
+}
+
+table {
+  max-width: 100%;
+}
+
+.karthika-account-section,
+.karthika-order-card,
+.rte table,
+.customer table {
+  overflow-x: auto;
+}
+
+@media screen and (max-width: 479px) {
+  .karthika-category-browser__need-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .karthika-header-icons {
+    gap: 8px;
+  }
+}
+
+@media screen and (max-width: 359px) {
+  .karthika-bottom-nav,
+  .karthika-search-bottom-nav {
+    left: 8px;
+    right: 8px;
+  }
+
+  .karthika-mobile-header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+@media screen and (min-width: 990px) and (max-width: 1199px) {
+  .karthika-desktop-header__main {
+    flex-wrap: wrap;
+    gap: 16px;
+    min-height: 0;
+    padding: 12px 0 16px;
+  }
+
+  .karthika-desktop-header__nav {
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .karthika-desktop-header__actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .karthika-desktop-header__search .karthika-search-placeholder-text {
+    max-width: 140px;
+  }
+
+  .karthika-desktop-header__order {
+    min-width: 0;
+    padding: 0 16px;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .template-product #MainContent,
+  .template-page #MainContent,
+  .template-blog #MainContent,
+  .template-article #MainContent,
+  .template-gift_card #MainContent {
+    padding-bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  .karthika-compact-card,
+  .karthika-compact-img,
+  .karthika-nav-item,
+  .karthika-nav-item svg,
+  .karthika-wishlist-btn,
+  .karthika-segmented-btn,
+  .karthika-desktop-header__search,
+  .karthika-collections-desktop__card,
+  .kcb2-pill-btn,
+  .kcb2-dropdown-menu {
+    transition: none;
+    animation: none;
+  }
+
+  .karthika-compact-card:hover,
+  .karthika-nav-item:active,
+  .karthika-wishlist-btn:hover,
+  .karthika-collections-desktop__card:hover {
+    transform: none;
+  }
+
+  .karthika-compact-card:hover .karthika-compact-img,
+  .karthika-nav-item.is-active svg {
+    transform: none;
+  }
+
+  .karthika-nav-badge {
+    animation: none;
+  }
+}
+
 

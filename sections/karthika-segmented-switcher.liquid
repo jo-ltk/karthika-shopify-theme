@@ -4,25 +4,9 @@
 {%- endcomment -%}
 
 <div class="karthika-segmented-wrapper">
-  <div class="karthika-segmented-control" role="tablist" aria-label="Catalog View Mode">
-    <button
-      type="button"
-      class="karthika-segmented-btn is-active"
-      role="tab"
-      aria-selected="true"
-      onclick="document.querySelectorAll('.karthika-segmented-btn').forEach(b => b.classList.remove('is-active')); this.classList.add('is-active');"
-    >
-      Items
-    </button>
-    <a
-      href="{{ routes.collections_url }}"
-      class="karthika-segmented-btn"
-      role="tab"
-      aria-selected="false"
-      onclick="document.querySelectorAll('.karthika-segmented-btn').forEach(b => b.classList.remove('is-active')); this.classList.add('is-active');"
-    >
-      Shop
-    </a>
+  <div class="karthika-segmented-control" aria-label="Catalog view">
+    <span class="karthika-segmented-btn is-active" aria-current="page">Items</span>
+    <a href="{{ routes.collections_url }}" class="karthika-segmented-btn">Shop</a>
   </div>
 </div>
 

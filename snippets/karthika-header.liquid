@@ -88,7 +88,9 @@
         {{ 'general.location.delivering_to' | t }}
         <strong class="karthika-delivery-address">{% if store_location_label != blank %}{{ store_location_label | escape }}{% else %}{{ 'general.location.unconfigured' | t }}{% endif %}</strong>
       </button>
-      <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#128241;</span> Download App</span>
+      <span class="karthika-desktop-header__utility-item karthika-desktop-header__utility-item--static" title="Mobile app is not available yet">
+        <span aria-hidden="true">&#128241;</span> App coming soon
+      </span>
       {%- if customer -%}
         {%- assign track_order_url = routes.account_url | append: '#orders' -%}
       {%- else -%}
@@ -170,7 +172,9 @@
       <button
         type="button"
         class="karthika-header-notification"
-        aria-label="Notifications"
+        disabled
+        aria-disabled="true"
+        aria-label="Notifications are not available"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
