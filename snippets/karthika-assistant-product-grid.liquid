@@ -1,0 +1,22 @@
+{% doc %}
+  Renders Karthika compact product cards from a Shopify collection.
+  @param {object} collection - Shopify collection
+  @param {number} [limit] - Maximum products to show
+  @example
+  {% render 'karthika-assistant-product-grid', collection: collection, limit: 8 %}
+{% enddoc %}
+
+{%- liquid
+  assign show_limit = limit | default: 8
+-%}
+{%- if collection != blank and collection.products_count > 0 -%}
+  <ul class="karthika-two-col-grid karthika-assistant-product-grid" role="list">
+    {%- for product in collection.products limit: show_limit -%}
+      <li>
+        {% render 'karthika-card-product', card_product: product %}
+      </li>
+    {%- endfor -%}
+  </ul>
+{%- else -%}
+  <p class="karthika-assistant-empty" role="status">{{ 'karthika.assistant.empty_collection' | t }}</p>
+{%- endif -%}

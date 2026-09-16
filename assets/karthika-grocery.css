@@ -2318,6 +2318,182 @@ textarea {
   }
 }
 
+.karthika-assistant [hidden] {
+  display: none !important;
+}
+
+.karthika-assistant-label {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--karthika-text-dark);
+}
+
+.karthika-assistant-hint,
+.karthika-assistant-empty,
+.karthika-assistant-unmapped-note,
+.karthika-assistant-kicker {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--karthika-text-muted);
+}
+
+.karthika-assistant-unmapped-note {
+  color: #9a3412;
+  background: #fff7ed;
+  padding: 8px 10px;
+  border-radius: var(--karthika-radius-md);
+}
+
+.karthika-assistant-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.karthika-assistant-panel-title {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.karthika-assistant-back,
+.karthika-ai-chip:focus-visible,
+.karthika-assistant-recipe-card:focus-visible,
+.karthika-assistant-back:focus-visible,
+.karthika-ai-submit-btn:focus-visible,
+.karthika-ai-build-btn:focus-visible {
+  outline: 2px solid var(--karthika-red);
+  outline-offset: 2px;
+}
+
+.karthika-assistant-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--karthika-border);
+  border-radius: var(--karthika-radius-pill);
+  background: #fff;
+  color: var(--karthika-text-dark);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.karthika-assistant-recipe-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.karthika-assistant-recipe-card {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 8px;
+  border: 1px solid var(--karthika-border);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  color: inherit;
+}
+
+.karthika-assistant-recipe-card img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: #F4F5EF;
+}
+
+.karthika-assistant-recipe-card span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.karthika-assistant-recipe-card strong {
+  font-size: 14px;
+}
+
+.karthika-assistant-recipe-card span span {
+  font-size: 12px;
+  color: var(--karthika-text-muted);
+}
+
+.karthika-assistant-ingredients {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.karthika-assistant-ingredient-label {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.karthika-assistant-ingredient--missing {
+  padding: 10px;
+  border: 1px dashed var(--karthika-border);
+  border-radius: 10px;
+  color: var(--karthika-text-muted);
+}
+
+.karthika-assistant-product-grid {
+  margin-bottom: 8px;
+}
+
+.karthika-ai-chip,
+.karthika-ai-submit-btn,
+.karthika-ai-build-btn {
+  min-height: 36px;
+}
+
+.karthika-ai-build-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 414px) {
+  .karthika-ai-assistant-card {
+    padding: 14px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .karthika-ai-input-wrap {
+    flex-wrap: wrap;
+    border-radius: 16px;
+    padding: 8px;
+  }
+
+  .karthika-ai-submit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .karthika-ai-chips-wrap {
+    margin-left: -4px;
+    margin-right: -4px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
+
 /* ==========================================================================
    8. SMART BUNDLES ("Complete your meal")
    ========================================================================== */

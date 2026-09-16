@@ -1,93 +1,395 @@
 {%- comment -%}
-  Karthika AI Shopping Assistant & Recipe Meal Builder Section
-  Calls Remix app via Shopify App Proxy (/apps/karthika/recommend).
+  Karthika Shopping Assistant. Manual collection/recipe flow is always available.
+  Optional AI mode uses the App Proxy only after the customer submits a request.
 {%- endcomment -%}
 
-<div
-  class="karthika-ai-assistant-card"
-  data-ai-endpoint="{{ section.settings.ai_endpoint | default: '/apps/karthika/recommend' }}"
->
-  <div class="karthika-ai-badge">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-    </svg>
-    <span>Karthika AI Assistant</span>
-  </div>
+{%- liquid
+  assign products_to_show = section.settings.products_to_show | default: 8
+  assign enable_ai = section.settings.enable_ai_mode
+  assign heading = section.settings.heading
+  if heading == blank
+    assign heading = 'karthika.assistant.heading_default' | t
+  endif
+  assign description = section.settings.subheading
+  if description == blank
+    assign description = 'karthika.assistant.description_default' | t
+  endif
 
-  <h3 class="karthika-ai-title">{{ section.settings.heading | default: "Not sure what to cook?" }}</h3>
-  <p class="karthika-ai-desc">{{ section.settings.subheading | default: "Tell Karthika what you're making and we'll find the fresh ingredients." }}</p>
+  assign visible_categories = 0
+  assign visible_intents = 0
+  assign visible_recipes = 0
 
-  <form id="KarthikaAIPromptForm" class="karthika-ai-prompt-form">
-    <div class="karthika-ai-input-wrap">
-      <input
-        type="text"
-        id="KarthikaAIPromptInput"
-        class="karthika-ai-input"
-        placeholder="e.g. Fish Curry for 4 people, Beef Roast..."
-        autocomplete="off"
-      />
-      <button type="submit" id="KarthikaAISubmitBtn" class="karthika-ai-submit-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-        </svg>
-        <span>Ask AI</span>
-      </button>
-    </div>
-  </form>
+  for block in section.blocks
+    if block.type == 'category'
+      if block.settings.collection != blank
+        if block.settings.collection.url != blank
+          assign visible_categories = visible_categories | plus: 1
+        endif
+      endif
+    elsif block.type == 'intent'
+      if block.settings.collection != blank
+        if block.settings.collection.url != blank
+          assign visible_intents = visible_intents | plus: 1
+        endif
+      endif
+    elsif block.type == 'recipe'
+      assign recipe_ready = false
+      if block.settings.title != blank
+        assign slots = '1,2,3,4,5,6' | split: ','
+        for slot in slots
+          assign product_key = 'ingredient_' | append: slot | append: '_product'
+          assign collection_key = 'ingredient_' | append: slot | append: '_collection'
+          assign mapped_product = block.settings[product_key]
+          assign mapped_collection = block.settings[collection_key]
+          if mapped_product != blank
+            assign recipe_ready = true
+          endif
+          if mapped_collection != blank
+            if mapped_collection.products_count > 0
+              assign recipe_ready = true
+            endif
+          endif
+        endfor
+      endif
+      if recipe_ready
+        assign visible_recipes = visible_recipes | plus: 1
+      endif
+    endif
+  endfor
 
-  <div class="karthika-ai-chips-wrap karthika-hide-scrollbar">
-    <button type="button" class="karthika-ai-chip is-active karthika-ai-pill-btn" data-dish="Chicken Biryani">
-      🍗 Chicken Biryani
-    </button>
-    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-dish="Kerala Breakfast">
-      🥞 Kerala Breakfast
-    </button>
-    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-dish="Sambar & Rasam">
-      🍛 Sambar & Rasam
-    </button>
-    <button type="button" class="karthika-ai-chip karthika-ai-pill-btn" data-dish="Tea Time Snacks">
-      ☕ Tea Time Snacks
-    </button>
-  </div>
+  assign has_manual = false
+  if visible_categories > 0 or visible_intents > 0 or visible_recipes > 0
+    assign has_manual = true
+  endif
+-%}
 
-  <div id="KarthikaAIFallbackMsg" class="karthika-ai-fallback-msg" style="display: none;">
-    Karthika AI couldn't finish that request in time — try again or tap a recipe chip below.
-  </div>
-
-  <div class="karthika-ai-basket-box">
-    <div class="karthika-ai-basket-head">
-      <div>
-        <span id="KarthikaAIRecipeTitle" class="karthika-ai-basket-dish">
-          Select a recipe
-        </span>
-        <span class="karthika-ai-basket-matched-count" id="KarthikaAIMatchedCount">Choose a dish to see matched items</span>
-      </div>
-      <span id="KarthikaAIRecipePrice" class="karthika-ai-basket-price">
-        $0.00
-      </span>
-    </div>
-
-    <div id="KarthikaAIIngredientList" class="karthika-ai-ingredients-list karthika-ai-product-items"></div>
-
-    <button
-      type="button"
-      id="KarthikaAIBuildBtn"
-      class="karthika-ai-build-btn karthika-ai-add-all-btn"
-      disabled
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <path d="M16 10a4 4 0 0 1-8 0"></path>
+{%- if has_manual or enable_ai or request.design_mode -%}
+  <section
+    class="karthika-ai-assistant-card karthika-assistant"
+    id="KarthikaAssistant-{{ section.id }}"
+    data-karthika-assistant
+    data-karthika-ai-enabled="{% if enable_ai %}true{% else %}false{% endif %}"
+    {% if enable_ai %}
+      data-ai-endpoint="{{ section.settings.ai_endpoint | default: '/apps/karthika/recommend' | escape }}"
+    {% endif %}
+    aria-labelledby="KarthikaAssistantHeading-{{ section.id }}"
+  >
+    <div class="karthika-ai-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
       </svg>
-      <span>Build my basket & Go to Cart</span>
-    </button>
-  </div>
-</div>
+      <span>{{ 'karthika.assistant.badge' | t }}</span>
+    </div>
+
+    <h2 class="karthika-ai-title" id="KarthikaAssistantHeading-{{ section.id }}">{{ heading | escape }}</h2>
+    {%- if description != blank -%}
+      <p class="karthika-ai-desc">{{ description | escape }}</p>
+    {%- endif -%}
+
+    <div class="karthika-assistant-live visually-hidden" data-assistant-live role="status" aria-live="polite" aria-atomic="true"></div>
+
+    {%- if enable_ai -%}
+      <form class="karthika-ai-prompt-form" data-karthika-ai-form>
+        <div class="karthika-ai-input-wrap">
+          <label class="visually-hidden" for="KarthikaAIPromptInput-{{ section.id }}">{{ 'karthika.assistant.ai_placeholder' | t }}</label>
+          <input
+            type="text"
+            id="KarthikaAIPromptInput-{{ section.id }}"
+            class="karthika-ai-input"
+            name="assistant_query"
+            maxlength="200"
+            placeholder="{{ 'karthika.assistant.ai_placeholder' | t }}"
+            autocomplete="off"
+          >
+          <button type="submit" class="karthika-ai-submit-btn" data-karthika-ai-submit>
+            <span>{{ 'karthika.assistant.ai_submit' | t }}</span>
+          </button>
+        </div>
+      </form>
+      <p class="karthika-ai-fallback-msg" data-karthika-ai-error hidden>{{ 'karthika.assistant.ai_unavailable' | t }}</p>
+      <div class="karthika-ai-basket-box" data-karthika-ai-basket hidden>
+        <div class="karthika-ai-basket-head">
+          <div>
+            <span class="karthika-ai-basket-dish" data-karthika-ai-title></span>
+            <span class="karthika-ai-basket-matched-count" data-karthika-ai-count></span>
+          </div>
+        </div>
+        <div class="karthika-ai-ingredients-list karthika-ai-product-items" data-karthika-ai-list></div>
+        <button type="button" class="karthika-ai-build-btn" data-karthika-ai-add disabled>
+          {{ 'karthika.assistant.add_matched' | t: count: 0 }}
+        </button>
+      </div>
+    {%- else -%}
+      <form class="karthika-ai-prompt-form" data-assistant-suggest-form>
+        <div class="karthika-ai-input-wrap">
+          <label class="visually-hidden" for="KarthikaAssistantSuggest-{{ section.id }}">{{ 'karthika.assistant.search_label' | t }}</label>
+          <input
+            type="text"
+            id="KarthikaAssistantSuggest-{{ section.id }}"
+            class="karthika-ai-input"
+            maxlength="200"
+            placeholder="{{ 'karthika.assistant.search_placeholder' | t }}"
+            autocomplete="off"
+          >
+          <button type="submit" class="karthika-ai-submit-btn">{{ 'karthika.assistant.search_submit' | t }}</button>
+        </div>
+      </form>
+      <p class="karthika-assistant-hint" data-assistant-hint hidden>{{ 'karthika.assistant.search_hint' | t }}</p>
+    {%- endif -%}
+
+    <div data-assistant-view="home">
+      {%- unless has_manual -%}
+        {%- if request.design_mode -%}
+          <p class="karthika-assistant-empty" role="status">{{ 'karthika.assistant.empty_config' | t }}</p>
+        {%- endif -%}
+      {%- endunless -%}
+
+      {%- if visible_categories > 0 -%}
+        <h3 class="karthika-assistant-label">{{ 'karthika.assistant.shop_categories' | t }}</h3>
+        <div class="karthika-ai-chips-wrap karthika-hide-scrollbar" role="group" aria-label="{{ 'karthika.assistant.shop_categories' | t }}">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'category' and block.settings.collection != blank and block.settings.collection.url != blank -%}
+              <button
+                type="button"
+                class="karthika-ai-chip"
+                data-assistant-open="category-{{ block.id }}"
+                aria-expanded="false"
+                aria-controls="KarthikaAssistantPanel-category-{{ block.id }}"
+                {{ block.shopify_attributes }}
+              >
+                {%- if block.settings.icon != blank -%}
+                  <span aria-hidden="true">{{ block.settings.icon | escape }}</span>
+                {%- endif -%}
+                {{ block.settings.label | default: block.settings.collection.title | escape }}
+              </button>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if visible_intents > 0 -%}
+        <h3 class="karthika-assistant-label">{{ 'karthika.assistant.shop_need' | t }}</h3>
+        <div class="karthika-ai-chips-wrap karthika-hide-scrollbar" role="group" aria-label="{{ 'karthika.assistant.shop_need' | t }}">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'intent' and block.settings.collection != blank and block.settings.collection.url != blank -%}
+              <button
+                type="button"
+                class="karthika-ai-chip"
+                data-assistant-open="intent-{{ block.id }}"
+                aria-expanded="false"
+                aria-controls="KarthikaAssistantPanel-intent-{{ block.id }}"
+                {{ block.shopify_attributes }}
+              >
+                {{ block.settings.label | default: block.settings.collection.title | escape }}
+              </button>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if visible_recipes > 0 -%}
+        <h3 class="karthika-assistant-label">{{ 'karthika.assistant.recipe_ideas' | t }}</h3>
+        <div class="karthika-assistant-recipe-list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'recipe' -%}
+              {%- liquid
+                assign recipe_ready = false
+                if block.settings.title != blank
+                  assign slots = '1,2,3,4,5,6' | split: ','
+                  for slot in slots
+                    assign product_key = 'ingredient_' | append: slot | append: '_product'
+                    assign collection_key = 'ingredient_' | append: slot | append: '_collection'
+                    assign mapped_product = block.settings[product_key]
+                    assign mapped_collection = block.settings[collection_key]
+                    if mapped_product != blank
+                      assign recipe_ready = true
+                    endif
+                    if mapped_collection != blank
+                      if mapped_collection.products_count > 0
+                        assign recipe_ready = true
+                      endif
+                    endif
+                  endfor
+                endif
+              -%}
+              {%- if recipe_ready -%}
+                <button
+                  type="button"
+                  class="karthika-assistant-recipe-card"
+                  data-assistant-open="recipe-{{ block.id }}"
+                  aria-expanded="false"
+                  aria-controls="KarthikaAssistantPanel-recipe-{{ block.id }}"
+                  {{ block.shopify_attributes }}
+                >
+                  {%- if block.settings.image != blank -%}
+                    <img
+                      src="{{ block.settings.image | image_url: width: 240 }}"
+                      alt=""
+                      width="72"
+                      height="72"
+                      loading="lazy"
+                    >
+                  {%- endif -%}
+                  <span>
+                    <strong>{{ block.settings.title | escape }}</strong>
+                    {%- if block.settings.description != blank -%}
+                      <span>{{ block.settings.description | escape }}</span>
+                    {%- endif -%}
+                  </span>
+                </button>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'category' and block.settings.collection != blank and block.settings.collection.url != blank -%}
+        {%- assign panel_collection = block.settings.collection -%}
+        <div
+          id="KarthikaAssistantPanel-category-{{ block.id }}"
+          class="karthika-assistant-panel"
+          data-assistant-view="category-{{ block.id }}"
+          hidden
+        >
+          <button type="button" class="karthika-assistant-back" data-assistant-back>{{ 'karthika.assistant.back' | t }}</button>
+          <div class="karthika-assistant-panel-head">
+            <h3 class="karthika-assistant-panel-title">{{ block.settings.label | default: panel_collection.title | escape }}</h3>
+            <p class="karthika-assistant-kicker">{{ 'karthika.assistant.recommended' | t }}</p>
+            <a class="karthika-section-head-link" href="{{ panel_collection.url }}">{{ 'karthika.assistant.see_all' | t }}</a>
+          </div>
+          {% render 'karthika-assistant-product-grid', collection: panel_collection, limit: products_to_show %}
+        </div>
+      {%- elsif block.type == 'intent' and block.settings.collection != blank and block.settings.collection.url != blank -%}
+        {%- assign panel_collection = block.settings.collection -%}
+        <div
+          id="KarthikaAssistantPanel-intent-{{ block.id }}"
+          class="karthika-assistant-panel"
+          data-assistant-view="intent-{{ block.id }}"
+          hidden
+        >
+          <button type="button" class="karthika-assistant-back" data-assistant-back>{{ 'karthika.assistant.back' | t }}</button>
+          <div class="karthika-assistant-panel-head">
+            <h3 class="karthika-assistant-panel-title">{{ block.settings.label | default: panel_collection.title | escape }}</h3>
+            <p class="karthika-assistant-kicker">{{ 'karthika.assistant.shop_category' | t }}</p>
+            <a class="karthika-section-head-link" href="{{ panel_collection.url }}">{{ 'karthika.assistant.see_all' | t }}</a>
+          </div>
+          {% render 'karthika-assistant-product-grid', collection: panel_collection, limit: products_to_show %}
+        </div>
+      {%- elsif block.type == 'recipe' -%}
+        {%- liquid
+          assign recipe_ready = false
+          assign unmapped_count = 0
+          assign mapped_count = 0
+          assign slots = '1,2,3,4,5,6' | split: ','
+          if block.settings.title != blank
+            for slot in slots
+              assign product_key = 'ingredient_' | append: slot | append: '_product'
+              assign collection_key = 'ingredient_' | append: slot | append: '_collection'
+              assign label_key = 'ingredient_' | append: slot | append: '_label'
+              assign mapped_product = block.settings[product_key]
+              assign mapped_collection = block.settings[collection_key]
+              assign mapped_label = block.settings[label_key]
+              assign slot_mapped = false
+              if mapped_product != blank
+                assign slot_mapped = true
+              endif
+              if mapped_collection != blank
+                if mapped_collection.products_count > 0
+                  assign slot_mapped = true
+                endif
+              endif
+              if slot_mapped
+                assign recipe_ready = true
+                assign mapped_count = mapped_count | plus: 1
+              elsif mapped_label != blank
+                assign unmapped_count = unmapped_count | plus: 1
+              endif
+            endfor
+          endif
+        -%}
+        {%- if recipe_ready -%}
+          <div
+            id="KarthikaAssistantPanel-recipe-{{ block.id }}"
+            class="karthika-assistant-panel"
+            data-assistant-view="recipe-{{ block.id }}"
+            hidden
+          >
+            <button type="button" class="karthika-assistant-back" data-assistant-back>{{ 'karthika.assistant.back' | t }}</button>
+            <div class="karthika-assistant-panel-head">
+              <h3 class="karthika-assistant-panel-title">{{ block.settings.title | escape }}</h3>
+              {%- if block.settings.description != blank -%}
+                <p class="karthika-ai-desc">{{ block.settings.description | escape }}</p>
+              {%- endif -%}
+            </div>
+
+            {%- if unmapped_count > 0 -%}
+              <p class="karthika-assistant-unmapped-note" role="status">{{ 'karthika.assistant.unmapped_notice' | t }}</p>
+            {%- endif -%}
+
+            <ul class="karthika-assistant-ingredients" role="list">
+              {%- for slot in slots -%}
+                {%- liquid
+                  assign product_key = 'ingredient_' | append: slot | append: '_product'
+                  assign collection_key = 'ingredient_' | append: slot | append: '_collection'
+                  assign label_key = 'ingredient_' | append: slot | append: '_label'
+                  assign mapped_product = block.settings[product_key]
+                  assign mapped_collection = block.settings[collection_key]
+                  assign mapped_label = block.settings[label_key]
+                -%}
+                {%- if mapped_product != blank -%}
+                  <li class="karthika-assistant-ingredient">
+                    {%- if mapped_label != blank -%}
+                      <p class="karthika-assistant-ingredient-label">{{ mapped_label | escape }}</p>
+                    {%- endif -%}
+                    {% render 'karthika-card-product', card_product: mapped_product %}
+                  </li>
+                {%- elsif mapped_collection != blank -%}
+                  {%- if mapped_collection.products_count > 0 -%}
+                    <li class="karthika-assistant-ingredient">
+                      <p class="karthika-assistant-ingredient-label">
+                        {{ mapped_label | default: mapped_collection.title | escape }}
+                      </p>
+                      {% render 'karthika-assistant-product-grid', collection: mapped_collection, limit: 2 %}
+                      <a class="karthika-section-head-link" href="{{ mapped_collection.url }}">
+                        {{ 'karthika.assistant.shop_ingredient' | t: label: mapped_collection.title }}
+                      </a>
+                    </li>
+                  {%- elsif mapped_label != blank -%}
+                    <li class="karthika-assistant-ingredient karthika-assistant-ingredient--missing">
+                      <p>{{ mapped_label | escape }}</p>
+                      <p>{{ 'karthika.assistant.unmapped_item' | t }}</p>
+                    </li>
+                  {%- endif -%}
+                {%- elsif mapped_label != blank -%}
+                  <li class="karthika-assistant-ingredient karthika-assistant-ingredient--missing">
+                    <p>{{ mapped_label | escape }}</p>
+                    <p>{{ 'karthika.assistant.unmapped_item' | t }}</p>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+
+            {%- if mapped_count > 0 -%}
+              <button
+                type="button"
+                class="karthika-ai-build-btn"
+                data-assistant-bulk
+              >
+                {{ 'karthika.assistant.add_available' | t }}
+              </button>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </section>
+{%- endif -%}
 
 {% schema %}
 {
-  "name": "Karthika AI Assistant",
+  "name": "Shopping Assistant",
   "tag": "section",
   "class": "section",
   "settings": [
@@ -95,25 +397,126 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Not sure what to cook?"
+      "default": "What are you shopping for?"
     },
     {
       "type": "textarea",
       "id": "subheading",
-      "label": "Subheading",
-      "default": "Tell Karthika what you're making and we'll find the fresh ingredients."
+      "label": "Description",
+      "default": "Choose a category, a meal, or a recipe. Products come from this store."
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 8,
+      "label": "Products per category"
+    },
+    {
+      "type": "header",
+      "content": "Optional AI"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_ai_mode",
+      "label": "Enable AI requests",
+      "default": false,
+      "info": "Off by default. When on, the customer can submit a question to the App Proxy. Manual shopping still works if AI fails. The homepage never calls AI until the customer submits."
     },
     {
       "type": "text",
       "id": "ai_endpoint",
-      "label": "AI API endpoint",
+      "label": "AI App Proxy path",
       "default": "/apps/karthika/recommend",
-      "info": "Shopify App Proxy path for the Karthika Remix app recommend route."
+      "info": "Used only when AI mode is enabled. Do not put API keys here."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "limit": 12,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Rice & Grains" },
+        { "type": "text", "id": "icon", "label": "Icon (emoji)", "default": "🍚" },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection",
+          "info": "Required. This option is hidden on the storefront until a collection is selected."
+        }
+      ]
+    },
+    {
+      "type": "intent",
+      "name": "Shopping need",
+      "limit": 12,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Breakfast" },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection",
+          "info": "Required. This option is hidden until a collection is selected."
+        }
+      ]
+    },
+    {
+      "type": "recipe",
+      "name": "Recipe",
+      "limit": 8,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Recipe title", "default": "Kerala vegetable curry" },
+        { "type": "textarea", "id": "description", "label": "Description" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "header", "content": "Ingredient 1" },
+        { "type": "text", "id": "ingredient_1_label", "label": "Label" },
+        { "type": "product", "id": "ingredient_1_product", "label": "Product" },
+        { "type": "collection", "id": "ingredient_1_collection", "label": "Collection", "info": "Used when no product is selected." },
+        { "type": "header", "content": "Ingredient 2" },
+        { "type": "text", "id": "ingredient_2_label", "label": "Label" },
+        { "type": "product", "id": "ingredient_2_product", "label": "Product" },
+        { "type": "collection", "id": "ingredient_2_collection", "label": "Collection" },
+        { "type": "header", "content": "Ingredient 3" },
+        { "type": "text", "id": "ingredient_3_label", "label": "Label" },
+        { "type": "product", "id": "ingredient_3_product", "label": "Product" },
+        { "type": "collection", "id": "ingredient_3_collection", "label": "Collection" },
+        { "type": "header", "content": "Ingredient 4" },
+        { "type": "text", "id": "ingredient_4_label", "label": "Label" },
+        { "type": "product", "id": "ingredient_4_product", "label": "Product" },
+        { "type": "collection", "id": "ingredient_4_collection", "label": "Collection" },
+        { "type": "header", "content": "Ingredient 5" },
+        { "type": "text", "id": "ingredient_5_label", "label": "Label" },
+        { "type": "product", "id": "ingredient_5_product", "label": "Product" },
+        { "type": "collection", "id": "ingredient_5_collection", "label": "Collection" },
+        { "type": "header", "content": "Ingredient 6" },
+        { "type": "text", "id": "ingredient_6_label", "label": "Label" },
+        { "type": "product", "id": "ingredient_6_product", "label": "Product" },
+        { "type": "collection", "id": "ingredient_6_collection", "label": "Collection" }
+      ]
     }
   ],
   "presets": [
     {
-      "name": "Karthika AI Assistant"
+      "name": "Shopping Assistant",
+      "blocks": [
+        { "type": "category", "settings": { "label": "Rice & Grains", "icon": "🍚" } },
+        { "type": "category", "settings": { "label": "Spices", "icon": "🌶️" } },
+        { "type": "category", "settings": { "label": "Snacks", "icon": "🍪" } },
+        { "type": "category", "settings": { "label": "Vegetables", "icon": "🥬" } },
+        { "type": "category", "settings": { "label": "Dairy", "icon": "🥛" } },
+        { "type": "category", "settings": { "label": "Beverages", "icon": "🥤" } },
+        { "type": "category", "settings": { "label": "Household", "icon": "🧹" } },
+        { "type": "intent", "settings": { "label": "Breakfast" } },
+        { "type": "intent", "settings": { "label": "Lunch" } },
+        { "type": "intent", "settings": { "label": "Dinner" } },
+        { "type": "intent", "settings": { "label": "Snacks" } },
+        { "type": "intent", "settings": { "label": "Kerala cooking" } },
+        { "type": "intent", "settings": { "label": "Baking" } },
+        { "type": "intent", "settings": { "label": "Everyday essentials" } }
+      ]
     }
   ]
 }

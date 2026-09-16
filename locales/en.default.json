@@ -610,6 +610,48 @@
       "expired": "Expired"
     }
   },
+  "karthika": {
+    "assistant": {
+      "badge": "Shopping assistant",
+      "heading_default": "What are you shopping for?",
+      "description_default": "Choose a category, a meal, or a recipe. Products come from this store.",
+      "shop_categories": "Shop by category",
+      "shop_need": "Shop by need",
+      "recipe_ideas": "Recipe ideas",
+      "try_one": "Try one of these:",
+      "search_label": "Looking for something?",
+      "search_placeholder": "Try a category or recipe below",
+      "search_submit": "Show suggestions",
+      "search_hint": "This assistant does not answer free-text questions. Choose a category, need, or recipe.",
+      "back": "Back",
+      "recommended": "Popular choices",
+      "shop_category": "Shop this category",
+      "see_all": "See all",
+      "empty_collection": "No products are available in this collection yet.",
+      "empty_config": "Add collections and recipes for this assistant in the theme editor.",
+      "unmapped_notice": "Some ingredients are not available in this store.",
+      "unmapped_item": "Not available in this store",
+      "shop_ingredient": "Shop {{ label }}",
+      "add_available": "Add available ingredients",
+      "adding": "Adding items…",
+      "add_partial": "{{ added }} items added. {{ failed }} item could not be added.",
+      "add_partial_one_fail": "{{ added }} items added. 1 item could not be added.",
+      "add_all_ok": "{{ added }} items added.",
+      "add_none": "No items could be added.",
+      "add_one_ok": "1 item added.",
+      "none_available": "No available ingredients to add.",
+      "ai_badge": "Optional AI",
+      "ai_submit": "Ask",
+      "ai_placeholder": "e.g. Fish curry for 4",
+      "ai_unavailable": "Sorry, the assistant is unavailable right now. Please try again, or shop by category below.",
+      "ai_empty": "Enter a short question or tap a suggestion.",
+      "ai_loading": "Looking up store items…",
+      "ai_no_match": "No matching products in this store.",
+      "ai_invalid_product": "That product is currently unavailable.",
+      "items_matched": "{{ count }} store items",
+      "add_matched": "Add available items ({{ count }})"
+    }
+  },
   "recipient": {
     "form": {
       "checkbox": "I want to send this as a gift",

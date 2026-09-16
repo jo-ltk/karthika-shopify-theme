@@ -502,7 +502,7 @@
       if (openDrawer) this.openCartDrawer();
     },
 
-    async addNow(variantId, quantity = 1) {
+    async addNow(variantId, quantity = 1, options = {}) {
       const vId = Number(variantId);
       const qty = Number(quantity) || 1;
       if (!vId) return { ok: false, reason: 'invalid', message: CART_CUSTOMER_ERROR };
@@ -523,7 +523,7 @@
         const responseData = await this.readCartJson(response);
         if (this.isCartResponseFailure(response, responseData)) {
           const message = this.customerCartMessage(responseData);
-          this.showCartError(message);
+          if (!options.silent) this.showCartError(message);
           await this.refreshCartState(false);
           return { ok: false, reason: 'http', message };
         }
@@ -541,13 +541,32 @@
         this.announce(`Cart updated. ${this.state.item_count} ${this.state.item_count === 1 ? 'item' : 'items'}.`);
         return { ok: true };
       } catch (err) {
-        this.showCartError(CART_NETWORK_ERROR);
+        if (!options.silent) this.showCartError(CART_NETWORK_ERROR);
         await this.refreshCartState(false);
         return { ok: false, reason: 'network', message: CART_NETWORK_ERROR };
       } finally {
         delete this._addNowLocks[vId];
         this.setStepperPending(vId, false);
       }
+    },
+
+    async addMany(items) {
+      const list = Array.isArray(items) ? items : [];
+      let added = 0;
+      let failed = 0;
+      for (let i = 0; i < list.length; i += 1) {
+        const item = list[i] || {};
+        const variantId = Number(item.id || item.variantId);
+        const quantity = Number(item.quantity) || 1;
+        if (!variantId || quantity < 1) {
+          failed += 1;
+          continue;
+        }
+        const result = await this.addNow(variantId, quantity, { silent: true });
+        if (result && result.ok) added += 1;
+        else failed += 1;
+      }
+      return { added, failed, total: list.length };
     },
 
     async change(variantId, quantity) {
@@ -1300,221 +1319,328 @@
   };
 
   /* --------------------------------------------------------------------------
-     4. AI Shopping Assistant (Remix App Proxy)
+     4. Shopping Assistant (manual) + optional AI App Proxy
      -------------------------------------------------------------------------- */
+  const ShoppingAssistantManager = {
+    _root: null,
+    _busy: false,
+
+    init() {
+      this._root = document.querySelector('[data-karthika-assistant]');
+      if (!this._root) return;
+
+      this._root.addEventListener('click', (event) => {
+        const opener = event.target.closest('[data-assistant-open]');
+        if (opener && this._root.contains(opener)) {
+          event.preventDefault();
+          this.openView(opener.getAttribute('data-assistant-open'), opener);
+          return;
+        }
+        const back = event.target.closest('[data-assistant-back]');
+        if (back && this._root.contains(back)) {
+          event.preventDefault();
+          this.openView('home');
+          return;
+        }
+        const bulk = event.target.closest('[data-assistant-bulk]');
+        if (bulk && this._root.contains(bulk)) {
+          event.preventDefault();
+          this.addAvailableFromPanel(bulk);
+        }
+      });
+
+      this._root.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        const home = this._root.querySelector('[data-assistant-view="home"]');
+        if (home && !home.hidden) return;
+        this.openView('home');
+      });
+
+      const suggestForm = this._root.querySelector('[data-assistant-suggest-form]');
+      if (suggestForm) {
+        suggestForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const hint = this._root.querySelector('[data-assistant-hint]');
+          if (hint) hint.hidden = false;
+          this.announce('Try one of the category, need, or recipe options below.');
+          const firstChip = this._root.querySelector('[data-assistant-view="home"] [data-assistant-open]');
+          if (firstChip) firstChip.focus();
+        });
+      }
+    },
+
+    announce(message) {
+      const live = this._root?.querySelector('[data-assistant-live]');
+      if (!live) return;
+      live.textContent = '';
+      window.requestAnimationFrame(() => {
+        live.textContent = message;
+      });
+    },
+
+    openView(viewId, trigger) {
+      if (!viewId || !this._root) return;
+      const views = this._root.querySelectorAll('[data-assistant-view]');
+      let shown = null;
+      views.forEach((view) => {
+        const match = view.getAttribute('data-assistant-view') === viewId;
+        view.hidden = !match;
+        if (match) shown = view;
+      });
+
+      this._root.querySelectorAll('[data-assistant-open]').forEach((btn) => {
+        const expanded = btn.getAttribute('data-assistant-open') === viewId;
+        btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        btn.classList.toggle('is-active', expanded);
+      });
+
+      if (shown) {
+        const heading = shown.querySelector('.karthika-assistant-panel-title, .karthika-ai-title');
+        if (heading) {
+          heading.setAttribute('tabindex', '-1');
+          heading.focus({ preventScroll: false });
+        }
+        shown.scrollIntoView({ block: 'nearest' });
+      } else if (trigger) {
+        trigger.focus();
+      }
+    },
+
+    collectAvailableVariants(panel) {
+      const cards = panel.querySelectorAll('.karthika-compact-card[data-variant-id]');
+      const items = [];
+      const seen = new Set();
+      cards.forEach((card) => {
+        const variantId = Number(card.getAttribute('data-variant-id'));
+        if (!variantId || seen.has(variantId)) return;
+        const stepper = card.querySelector('.karthika-stepper[data-product-available="true"]');
+        if (!stepper) return;
+        seen.add(variantId);
+        items.push({ id: variantId, quantity: 1 });
+      });
+      return items;
+    },
+
+    summarizeAdd(added, failed) {
+      if (added > 0 && failed > 0) {
+        return failed === 1
+          ? `${added} items added. 1 item could not be added.`
+          : `${added} items added. ${failed} item could not be added.`;
+      }
+      if (added === 1 && failed === 0) return '1 item added.';
+      if (added > 1 && failed === 0) return `${added} items added.`;
+      return 'No items could be added.';
+    },
+
+    async addAvailableFromPanel(button) {
+      if (this._busy) return;
+      const panel = button.closest('[data-assistant-view]');
+      if (!panel || !window.Karthika?.Cart?.addMany) return;
+
+      const items = this.collectAvailableVariants(panel);
+      if (!items.length) {
+        this.announce('No available ingredients to add.');
+        window.Karthika.Cart.showCartError('No available ingredients to add.');
+        return;
+      }
+
+      this._busy = true;
+      const original = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Adding items…';
+
+      try {
+        const result = await window.Karthika.Cart.addMany(items);
+        const message = this.summarizeAdd(result.added, result.failed);
+        this.announce(message);
+        if (result.failed > 0) {
+          window.Karthika.Cart.showCartError(message);
+        } else {
+          window.Karthika.Cart.announce(message);
+        }
+        if (result.added > 0) {
+          window.Karthika.Cart.openCartDrawer(button);
+        }
+      } finally {
+        this._busy = false;
+        button.disabled = false;
+        button.textContent = original;
+      }
+    }
+  };
+
   const AIAssistantManager = {
     _isLoading: false,
     _requestSeq: 0,
     _matchedProducts: [],
-    _loadingPhraseTimer: null,
+    _abort: null,
+    MAX_QUERY: 200,
+    TIMEOUT_MS: 20000,
+
+    isEnabled() {
+      const root = document.querySelector('[data-karthika-assistant][data-karthika-ai-enabled="true"]');
+      return Boolean(root);
+    },
+
+    getRoot() {
+      return document.querySelector('[data-karthika-assistant][data-karthika-ai-enabled="true"]');
+    },
 
     getProxyUrl() {
-      const cardEl = document.querySelector('.karthika-ai-assistant-card');
-      return cardEl?.getAttribute('data-ai-endpoint') || '/apps/karthika/recommend';
+      const root = this.getRoot();
+      return root?.getAttribute('data-ai-endpoint') || '/apps/karthika/recommend';
     },
 
-    setLoading(isLoading) {
-      this._isLoading = isLoading;
-      const submitBtn = document.getElementById('KarthikaAISubmitBtn');
-      const basketEl = document.querySelector('.karthika-ai-basket-box');
-
-      if (!isLoading) this.stopLoadingPhrases();
-      if (basketEl) basketEl.classList.toggle('is-ai-loading', !!isLoading);
-
-      if (!submitBtn) return;
-
-      if (isLoading) {
-        if (!submitBtn.dataset.originalHtml) {
-          submitBtn.dataset.originalHtml = submitBtn.innerHTML;
-        }
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>Thinking...</span>';
-      } else {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = submitBtn.dataset.originalHtml || '<span>Ask AI</span>';
-      }
+    escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     },
 
-    stopLoadingPhrases() {
-      if (this._loadingPhraseTimer) {
-        clearInterval(this._loadingPhraseTimer);
-        this._loadingPhraseTimer = null;
-      }
-    },
-
-    startLoadingPhrases(titleEl, countEl, copyEl) {
-      this.stopLoadingPhrases();
-
-      const phrases = [
-        { title: 'Finding ingredients...', sub: 'Searching store catalog...' },
-        { title: 'Finding the best matches...', sub: 'Matching items to your dish...' },
-        { title: 'Checking what’s fresh...', sub: 'Looking at what’s in stock...' },
-        { title: 'Putting your basket together...', sub: 'Picking quantities and prices...' },
-        { title: 'Almost ready...', sub: 'Finishing up...' },
-      ];
-
-      const apply = (phrase, animate) => {
-        if (titleEl) titleEl.textContent = phrase.title;
-        if (countEl) countEl.textContent = phrase.sub;
-        if (copyEl) {
-          copyEl.textContent = phrase.title;
-          if (animate) {
-            copyEl.classList.remove('is-swapping');
-            void copyEl.offsetWidth;
-            copyEl.classList.add('is-swapping');
+    parseResponse(text) {
+      if (!text || typeof text !== 'string') return null;
+      const trimmed = text.trim();
+      try {
+        return JSON.parse(trimmed);
+      } catch (err) {
+        const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+        if (fenced) {
+          try {
+            return JSON.parse(fenced[1].trim());
+          } catch (err2) {
+            return null;
           }
         }
-      };
-
-      apply(phrases[0], false);
-
-      let index = 0;
-      this._loadingPhraseTimer = setInterval(() => {
-        if (!this._isLoading) {
-          this.stopLoadingPhrases();
-          return;
-        }
-        if (index >= phrases.length - 1) {
-          this.stopLoadingPhrases();
-          return;
-        }
-        index += 1;
-        apply(phrases[index], true);
-      }, 1600);
-    },
-
-    showBasketBox(show) {
-      const basketEl = document.querySelector('.karthika-ai-basket-box');
-      if (basketEl) basketEl.style.display = show ? '' : 'none';
-    },
-
-    showFallback(show) {
-      const fallbackEl = document.getElementById('KarthikaAIFallbackMsg');
-      if (fallbackEl) fallbackEl.style.display = show ? 'block' : 'none';
-      this.showBasketBox(!show);
-    },
-
-    renderItemThumb(item) {
-      const alt = (item.title || 'Product').replace(/"/g, '&quot;');
-      if (item.image) {
-        return `<img src="${item.image}" alt="${alt}" class="karthika-ai-item-thumb" width="44" height="44" loading="lazy">`;
+        return null;
       }
-      return `<div class="karthika-ai-item-thumb karthika-compact-media-placeholder" aria-label="Product image unavailable" role="img"></div>`;
+    },
+
+    sanitizeMatched(list) {
+      if (!Array.isArray(list)) return [];
+      const out = [];
+      list.forEach((item) => {
+        if (!item || typeof item !== 'object') return;
+        let rawId = item.variantId || item.variant_id || item.id;
+        if (typeof rawId === 'string' && rawId.includes('/')) {
+          rawId = rawId.split('/').pop();
+        }
+        const variantId = Number(rawId);
+        if (!Number.isInteger(variantId) || variantId <= 0) return;
+        const qty = Number(item.qty || item.quantity || 1);
+        out.push({
+          variantId,
+          qty: qty > 0 && qty < 100 ? qty : 1,
+          title: typeof item.title === 'string' ? item.title : 'Store item',
+          image: typeof item.image === 'string' && item.image.startsWith('https://') ? item.image : '',
+          handle: typeof item.handle === 'string' ? item.handle : '',
+        });
+      });
+      return out;
+    },
+
+    setState(state, message) {
+      const root = this.getRoot();
+      if (!root) return;
+      const submitBtn = root.querySelector('[data-karthika-ai-submit]');
+      const basketEl = root.querySelector('[data-karthika-ai-basket]');
+      const errorEl = root.querySelector('[data-karthika-ai-error]');
+      const live = root.querySelector('[data-assistant-live]');
+
+      this._isLoading = state === 'loading';
+      if (submitBtn) submitBtn.disabled = this._isLoading;
+      if (basketEl) basketEl.classList.toggle('is-ai-loading', this._isLoading);
+      if (errorEl) {
+        errorEl.hidden = state !== 'error';
+        if (state === 'error' && message) errorEl.textContent = message;
+      }
+      if (live && message) {
+        live.textContent = '';
+        window.requestAnimationFrame(() => {
+          live.textContent = message;
+        });
+      }
+    },
+
+    customerError(status) {
+      if (status === 401 || status === 403) {
+        return 'Sorry, the assistant is unavailable right now. Please try again, or shop by category below.';
+      }
+      if (status === 429) {
+        return 'Sorry, the assistant is unavailable right now. Please try again, or shop by category below.';
+      }
+      return 'Sorry, the assistant is unavailable right now. Please try again, or shop by category below.';
     },
 
     renderRecommendation(data) {
-      const titleEl = document.getElementById('KarthikaAIRecipeTitle');
-      const countEl = document.getElementById('KarthikaAIMatchedCount');
-      const priceEl = document.getElementById('KarthikaAIRecipePrice');
-      const listEl = document.getElementById('KarthikaAIIngredientList');
-      const buildBtn = document.getElementById('KarthikaAIBuildBtn');
-
-      if (!data || !data.dishName) return;
-
-      const matched = data.matched || [];
-      const unmatched = data.unmatched || [];
+      const root = this.getRoot();
+      if (!root || !data) return;
+      const titleEl = root.querySelector('[data-karthika-ai-title]');
+      const countEl = root.querySelector('[data-karthika-ai-count]');
+      const listEl = root.querySelector('[data-karthika-ai-list]');
+      const buildBtn = root.querySelector('[data-karthika-ai-add]');
+      const basketEl = root.querySelector('[data-karthika-ai-basket]');
+      const matched = this.sanitizeMatched(data.matched);
+      const unmatched = Array.isArray(data.unmatched)
+        ? data.unmatched.filter((name) => typeof name === 'string' && name.trim())
+        : [];
       this._matchedProducts = matched;
 
-      if (titleEl) titleEl.textContent = data.dishName;
-      if (priceEl) priceEl.textContent = `$${parseFloat(data.total || 0).toFixed(2)}`;
-
+      if (basketEl) basketEl.hidden = false;
+      if (titleEl) titleEl.textContent = data.dishName || 'Recommended for you';
       if (countEl) {
-        if (matched.length > 0) {
-          countEl.textContent = `${matched.length} store item${matched.length > 1 ? 's' : ''} matched`;
-          countEl.style.color = 'var(--karthika-green, #16A34A)';
-        } else {
-          countEl.textContent = 'No matching products in store';
-          countEl.style.color = '#dc2626';
-        }
+        countEl.textContent = matched.length
+          ? `${matched.length} store item${matched.length === 1 ? '' : 's'}`
+          : 'No matching products in this store.';
       }
-
       if (listEl) {
-        if (matched.length === 0 && unmatched.length === 0) {
-          listEl.innerHTML = `
-            <div class="karthika-ai-item-row" style="padding: 16px; text-align: center;">
-              <span class="karthika-ai-item-name">No ingredients matched for this dish yet.</span>
-            </div>
-          `;
-        } else {
-          listEl.innerHTML = matched.map((item) => `
-            <div class="karthika-ai-item-row">
-              ${this.renderItemThumb(item)}
-              <div class="karthika-ai-item-info">
-                <span class="karthika-ai-item-name">${item.title}</span>
-                <span class="karthika-ai-item-tag" style="color: var(--karthika-green, #16A34A);">
-                  ✓ In stock (x${item.qty || 1})
-                </span>
-              </div>
-              <span class="karthika-ai-item-price">$${parseFloat(item.price || 0).toFixed(2)}</span>
-            </div>
-          `).join('');
-
-          if (unmatched.length > 0) {
-            listEl.innerHTML += `
-              <div class="karthika-ai-item-row" style="opacity: 0.75; background: #fafafa;">
-                <div class="karthika-ai-item-info">
-                  <span class="karthika-ai-item-name">Not currently available</span>
-                  <span class="karthika-ai-item-tag" style="color: #6b7280;">
-                    ${unmatched.join(', ')}
-                  </span>
-                </div>
-              </div>
-            `;
-          }
-        }
+        const rows = matched.map((item) => {
+          const thumb = item.image
+            ? `<img src="${this.escapeHtml(item.image)}" alt="" class="karthika-ai-item-thumb" width="44" height="44" loading="lazy">`
+            : '<div class="karthika-ai-item-thumb karthika-compact-media-placeholder" aria-hidden="true"></div>';
+          const href = item.handle ? `/products/${encodeURIComponent(item.handle)}` : '';
+          const name = href
+            ? `<a href="${href}">${this.escapeHtml(item.title)}</a>`
+            : this.escapeHtml(item.title);
+          return `<div class="karthika-ai-item-row">${thumb}<div class="karthika-ai-item-info"><span class="karthika-ai-item-name">${name}</span></div></div>`;
+        }).join('');
+        const missing = unmatched.length
+          ? `<div class="karthika-ai-item-row"><div class="karthika-ai-item-info"><span class="karthika-ai-item-name">Some ingredients are not available in this store.</span><span class="karthika-ai-item-tag">${this.escapeHtml(unmatched.join(', '))}</span></div></div>`
+          : '';
+        listEl.innerHTML = rows || missing || '<p class="karthika-assistant-empty">No matching products in this store.</p>';
       }
-
       if (buildBtn) {
-        const canAdd = matched.length > 0;
-        buildBtn.disabled = !canAdd;
-        buildBtn.style.opacity = canAdd ? '1' : '0.5';
-        buildBtn.style.cursor = canAdd ? 'pointer' : 'not-allowed';
-        buildBtn.innerHTML = canAdd
-          ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <path d="M16 10a4 4 0 0 1-8 0"></path>
-            </svg>
-            <span>Add Available Items to Cart (${matched.length})</span>`
-          : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="15" y1="9" x2="9" y2="15"></line>
-              <line x1="9" y1="9" x2="15" y2="15"></line>
-            </svg>
-            <span>Items not available in store</span>`;
+        buildBtn.disabled = matched.length === 0;
+        buildBtn.textContent = matched.length
+          ? `Add available items (${matched.length})`
+          : 'Items not available in store';
       }
     },
 
     async sendRecommendationRequest(payload) {
-      const requestId = ++this._requestSeq;
-
-      this.showFallback(false);
-      this.setLoading(true);
-
-      const titleEl = document.getElementById('KarthikaAIRecipeTitle');
-      const countEl = document.getElementById('KarthikaAIMatchedCount');
-      const priceEl = document.getElementById('KarthikaAIRecipePrice');
-      const listEl = document.getElementById('KarthikaAIIngredientList');
-
-      if (priceEl) priceEl.textContent = '...';
-      if (listEl) {
-        listEl.innerHTML = `
-          <div class="karthika-ai-loading" role="status" aria-live="polite">
-            <div class="karthika-ai-loading-status">
-              <span class="karthika-ai-loading-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-              <span class="karthika-ai-loading-copy">Finding ingredients...</span>
-            </div>
-            <div class="karthika-ai-loading-skel"><b></b><span><i></i><i></i></span></div>
-            <div class="karthika-ai-loading-skel"><b></b><span><i></i><i></i></span></div>
-            <div class="karthika-ai-loading-skel"><b></b><span><i></i><i></i></span></div>
-          </div>
-        `;
+      if (!this.isEnabled() || this._isLoading) return;
+      const query = String(payload.query || payload.dishName || '').trim().slice(0, this.MAX_QUERY);
+      if (!query) {
+        this.setState('error', 'Enter a short question or tap a suggestion.');
+        return;
       }
-      this.startLoadingPhrases(
-        titleEl,
-        countEl,
-        listEl?.querySelector('.karthika-ai-loading-copy')
-      );
+
+      if (this._abort) this._abort.abort();
+      this._abort = new AbortController();
+      const requestId = ++this._requestSeq;
+      this._matchedProducts = [];
+      this.setState('loading', 'Looking up store items…');
+
+      const root = this.getRoot();
+      const listEl = root?.querySelector('[data-karthika-ai-list]');
+      const basketEl = root?.querySelector('[data-karthika-ai-basket]');
+      if (basketEl) basketEl.hidden = false;
+      if (listEl) {
+        listEl.innerHTML = '<p class="karthika-assistant-empty" role="status">Looking up store items…</p>';
+      }
+
+      const timer = window.setTimeout(() => this._abort.abort(), this.TIMEOUT_MS);
 
       try {
         const response = await fetch(this.getProxyUrl(), {
@@ -1523,179 +1649,104 @@
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            type: payload.type || 'text',
+            query,
+            dishName: payload.dishName || query,
+          }),
+          signal: this._abort.signal,
         });
 
-        const contentType = response.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) {
-          console.warn('[Karthika AI] Non-JSON proxy response', response.status, contentType);
-          this.showFallback(true);
-          return;
-        }
-
-        const data = await response.json();
-
+        const raw = await response.text();
         if (requestId !== this._requestSeq) return;
 
-        if (response.status === 401) {
-          console.warn('[Karthika AI] App proxy auth failed (401)');
-          this.showFallback(true);
+        if (!response.ok) {
+          this.setState('error', this.customerError(response.status));
           return;
         }
 
-        if (data.fallback) {
-          this.showFallback(true);
+        const data = this.parseResponse(raw);
+        if (!data || typeof data !== 'object') {
+          this.setState('error', this.customerError(0));
           return;
         }
 
-        if (response.status === 404 || data.error === 'not found') {
-          if (titleEl) titleEl.textContent = payload.dishName || 'Recipe not found';
-          if (countEl) countEl.textContent = 'No recipe configured for this dish yet';
-          if (priceEl) priceEl.textContent = '$0.00';
-          if (listEl) {
-            listEl.innerHTML = `
-              <div class="karthika-ai-item-row" style="padding: 16px; text-align: center;">
-                <span class="karthika-ai-item-name">This dish is not in the recipe catalog yet.</span>
-              </div>
-            `;
-          }
-          this._matchedProducts = [];
-          const buildBtn = document.getElementById('KarthikaAIBuildBtn');
-          if (buildBtn) buildBtn.disabled = true;
+        if (data.fallback || data.error) {
+          this.setState('error', this.customerError(0));
           return;
         }
 
-        if (response.ok && data.dishName) {
-          this.renderRecommendation(data);
-        } else {
-          this.showFallback(true);
-        }
+        this.setState('success', 'Recommendations ready.');
+        this.renderRecommendation(data);
       } catch (err) {
-        if (requestId === this._requestSeq) {
-          this.showFallback(true);
-        }
+        if (requestId !== this._requestSeq) return;
+        this.setState('error', this.customerError(0));
       } finally {
+        window.clearTimeout(timer);
         if (requestId === this._requestSeq) {
-          this.setLoading(false);
+          this._isLoading = false;
+          const submitBtn = this.getRoot()?.querySelector('[data-karthika-ai-submit]');
+          if (submitBtn) submitBtn.disabled = false;
         }
       }
     },
 
     async buildAndAddBasket(btn) {
-      const originalText = btn.innerHTML;
-      btn.disabled = true;
-
-      const itemsToAdd = (this._matchedProducts || [])
-        .map((item) => {
-          let rawId = item.variantId;
-          if (typeof rawId === 'string' && rawId.includes('/')) {
-            rawId = rawId.split('/').pop();
-          }
-          return {
-            id: rawId,
-            quantity: parseInt(item.qty, 10) || 1,
-          };
-        })
+      if (!window.Karthika?.Cart?.addMany) return;
+      const items = (this._matchedProducts || [])
+        .map((item) => ({ id: item.variantId, quantity: item.qty || 1 }))
         .filter((item) => item.id);
-
-      if (!itemsToAdd.length) {
-        btn.disabled = false;
-        btn.innerHTML = '<span style="font-size:12px;color:#c00">No items available in store</span>';
-        setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+      if (!items.length) {
+        this.setState('error', 'That product is currently unavailable.');
         return;
       }
 
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="karthika-spin"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle></svg><span>Adding ${itemsToAdd.length} items to cart...</span>`;
-
-      const root = window.Shopify?.routes?.root || window.routes?.root || '/';
-      const base = root.endsWith('/') ? root : root + '/';
-      let successCount = 0;
-      const addedKeysNewestFirst = [];
-
-      for (const item of itemsToAdd) {
-        try {
-          const formData = new FormData();
-          formData.append('id', String(item.id));
-          formData.append('quantity', String(item.quantity));
-
-          const res = await fetch(`${base}cart/add.js`, {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (res.ok) {
-            successCount++;
-            try {
-              const added = await res.json();
-              if (added?.key) addedKeysNewestFirst.unshift(added.key);
-            } catch (e) {}
-          }
-        } catch (e) {}
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Adding items…';
+      try {
+        const result = await window.Karthika.Cart.addMany(items);
+        const failed = result.failed;
+        const added = result.added;
+        let message = 'No items could be added.';
+        if (added > 0 && failed > 0) {
+          message = failed === 1
+            ? `${added} items added. 1 item could not be added.`
+            : `${added} items added. ${failed} item could not be added.`;
+        } else if (added === 1) {
+          message = '1 item added.';
+        } else if (added > 1) {
+          message = `${added} items added.`;
+        }
+        this.setState(failed ? 'error' : 'success', message);
+        if (failed) window.Karthika.Cart.showCartError(message);
+        if (added > 0) window.Karthika.Cart.openCartDrawer(btn);
+      } finally {
+        btn.disabled = items.length === 0;
+        btn.textContent = original;
       }
-
-      if (addedKeysNewestFirst.length && window.CartItemOrder?.promoteKeys) {
-        try {
-          await window.CartItemOrder.promoteKeys(addedKeysNewestFirst);
-        } catch (e) {}
-      }
-
-      if (window.Karthika?.Cart?.refreshCartState) {
-        try {
-          await window.Karthika.Cart.refreshCartState(false);
-        } catch (e) {}
-      }
-
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>${successCount} item${successCount !== 1 ? 's' : ''} added! Redirecting...</span>`;
-      btn.style.background = 'var(--karthika-green, #16A34A)';
-
-      setTimeout(() => {
-        const cartUrl = window.routes?.cart_url || '/cart';
-        window.location.href = cartUrl;
-      }, 700);
     },
 
     init() {
-      const cardEl = document.querySelector('.karthika-ai-assistant-card');
-      if (!cardEl) return;
+      const root = this.getRoot();
+      if (!root) return;
 
-      document.addEventListener('click', (e) => {
-        const chip = e.target.closest('.karthika-ai-chip[data-dish]');
-        if (!chip) return;
-        e.preventDefault();
-
-        document.querySelectorAll('.karthika-ai-chip').forEach((c) => c.classList.remove('is-active'));
-        chip.classList.add('is-active');
-
-        const dishName = chip.getAttribute('data-dish');
-        if (dishName) {
-          this.sendRecommendationRequest({ type: 'chip', dishName });
-        }
-      });
-
-      const form = document.getElementById('KarthikaAIPromptForm');
+      const form = root.querySelector('[data-karthika-ai-form]');
       if (form) {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const input = document.getElementById('KarthikaAIPromptInput');
+        form.addEventListener('submit', (event) => {
+          event.preventDefault();
+          if (this._isLoading) return;
+          const input = form.querySelector('.karthika-ai-input');
           const query = input ? input.value.trim() : '';
-          if (query) {
-            document.querySelectorAll('.karthika-ai-chip').forEach((c) => c.classList.remove('is-active'));
-            this.sendRecommendationRequest({ type: 'text', query });
-          }
+          this.sendRecommendationRequest({ type: 'text', query });
         });
       }
 
-      document.addEventListener('click', (e) => {
-        const btn = e.target.closest('#KarthikaAIBuildBtn');
-        if (!btn || btn.disabled) return;
-        this.buildAndAddBasket(btn);
+      root.addEventListener('click', (event) => {
+        const addBtn = event.target.closest('[data-karthika-ai-add]');
+        if (!addBtn || addBtn.disabled) return;
+        this.buildAndAddBasket(addBtn);
       });
-
-      const defaultChip = document.querySelector('.karthika-ai-chip.is-active[data-dish]');
-      const defaultDish = defaultChip?.getAttribute('data-dish');
-      if (defaultDish) {
-        this.sendRecommendationRequest({ type: 'chip', dishName: defaultDish });
-      }
     }
   };
 
@@ -2142,6 +2193,7 @@
   window.Karthika.Cart = CartManager;
   window.Karthika.Location = LocationManager;
   window.Karthika.Search = SearchManager;
+  window.Karthika.ShoppingAssistant = ShoppingAssistantManager;
   window.Karthika.AI = AIAssistantManager;
   window.Karthika.SearchPlaceholder = SearchPlaceholderRotator;
   window.Karthika.Wishlist = WishlistManager;
@@ -2151,6 +2203,7 @@
     CartManager.init();
     LocationManager.init();
     SearchManager.init();
+    ShoppingAssistantManager.init();
     AIAssistantManager.init();
     SearchPlaceholderRotator.init();
     WishlistManager.init();

@@ -93,9 +93,44 @@
     },
     "karthika_ai": {
       "type": "karthika-ai-assistant",
+      "blocks": {
+        "cat_rice": { "type": "category", "settings": { "label": "Rice & Grains", "icon": "🍚" } },
+        "cat_spices": { "type": "category", "settings": { "label": "Spices", "icon": "🌶️" } },
+        "cat_snacks": { "type": "category", "settings": { "label": "Snacks", "icon": "🍪" } },
+        "cat_veg": { "type": "category", "settings": { "label": "Vegetables", "icon": "🥬" } },
+        "cat_dairy": { "type": "category", "settings": { "label": "Dairy", "icon": "🥛" } },
+        "cat_bev": { "type": "category", "settings": { "label": "Beverages", "icon": "🥤" } },
+        "cat_home": { "type": "category", "settings": { "label": "Household", "icon": "🧹" } },
+        "need_breakfast": { "type": "intent", "settings": { "label": "Breakfast" } },
+        "need_lunch": { "type": "intent", "settings": { "label": "Lunch" } },
+        "need_dinner": { "type": "intent", "settings": { "label": "Dinner" } },
+        "need_snacks": { "type": "intent", "settings": { "label": "Snacks" } },
+        "need_kerala": { "type": "intent", "settings": { "label": "Kerala cooking" } },
+        "need_baking": { "type": "intent", "settings": { "label": "Baking" } },
+        "need_essentials": { "type": "intent", "settings": { "label": "Everyday essentials" } }
+      },
+      "block_order": [
+        "cat_rice",
+        "cat_spices",
+        "cat_snacks",
+        "cat_veg",
+        "cat_dairy",
+        "cat_bev",
+        "cat_home",
+        "need_breakfast",
+        "need_lunch",
+        "need_dinner",
+        "need_snacks",
+        "need_kerala",
+        "need_baking",
+        "need_essentials"
+      ],
       "settings": {
-        "heading": "Not sure what to cook?",
-        "subheading": "Tell Karthika what you're making and we'll find the ingredients."
+        "heading": "What are you shopping for?",
+        "subheading": "Choose a category, a meal, or a recipe. Products come from this store.",
+        "products_to_show": 8,
+        "enable_ai_mode": false,
+        "ai_endpoint": "/apps/karthika/recommend"
       }
     },
     "new_arrivals": {
