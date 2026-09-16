@@ -74,8 +74,22 @@
     border: 1.5px solid var(--karthika-border, #E1E8D3);
     border-radius: var(--karthika-radius-pill, 9999px);
     padding: 0 6px 0 14px;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: var(--karthika-shadow-subtle);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .ks-search-pill input[type="search"]:focus,
+  .ks-search-pill input[type="text"]:focus,
+  .ks-search-pill input[type="search"]:focus-visible,
+  .ks-search-pill input[type="text"]:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .ks-search-pill:has(input:focus-visible) {
+    border-color: var(--karthika-red, #3F7D2E);
+    box-shadow: 0 0 0 3px rgba(63, 125, 46, 0.18);
   }
 
   .ks-search-pill-label {
@@ -139,9 +153,45 @@
     background: var(--karthika-red-hover, #336524);
   }
 
-  .ks-search-submit-btn svg {
-    width: 18px;
-    height: 18px;
+  .ks-search-submit-btn:focus,
+  .ks-search-submit-btn:focus-visible,
+  .ks-pill-clear-btn:focus,
+  .ks-pill-clear-btn:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .ks-search-submit-btn:focus-visible,
+  .ks-pill-clear-btn:focus-visible {
+    box-shadow: 0 0 0 3px rgba(63, 125, 46, 0.18);
+  }
+
+  .ks-live-search {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .ks-search-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .ks-facets-wrap {
+    padding: 0 16px 12px;
+  }
+
+  .ks-facets-wrap .facets-container,
+  .ks-facets-wrap .page-width {
+    padding-left: 0;
+    padding-right: 0;
+    margin: 0;
+    max-width: none;
   }
 
   /* --- Filter/sort pill row --- */
@@ -485,7 +535,12 @@
   assign sort_by = search.sort_by | default: search.default_sort_by
   assign terms = search.terms | escape
   assign search_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
-  assign results_count = search.results_count | default: search.products_count | default: 0
+  assign has_active_filters = false
+  for filter in search.filters
+    if filter.active_values.size > 0
+      assign has_active_filters = true
+    endif
+  endfor
 -%}
 
 {% paginate search.results by 24 %}
@@ -506,19 +561,19 @@
   <!-- ── Pill-style search input ───────────────────────────── -->
   <div class="ks-search-row">
     {%- if settings.predictive_search_enabled -%}
-      <predictive-search data-loading-text="{{ 'accessibility.loading' | t }}" style="flex:1;display:flex;align-items:center;gap:8px;">
+      <predictive-search class="karthika-live-search ks-live-search" data-loading-text="{{ 'accessibility.loading' | t }}">
     {%- endif -%}
-    <main-search style="flex:1;">
-      <form action="{{ routes.search_url }}" method="get" role="search" style="display:flex;align-items:center;gap:8px;width:100%;">
+    <main-search class="ks-live-search">
+      <form action="{{ routes.search_url }}" method="get" role="search" class="ks-search-form" id="KarthikaSearchPageForm">
         <div class="ks-search-pill">
-          <span class="ks-search-pill-label">Search</span>
+          <label class="ks-search-pill-label" for="Search-In-Template">Search</label>
           <input
             class="search__input"
             id="Search-In-Template"
             type="search"
             name="q"
             value="{{ search.terms | escape }}"
-            placeholder="Banana Chips"
+            placeholder="Search for groceries, spices, snacks..."
             {%- if settings.predictive_search_enabled -%}
               role="combobox"
               aria-expanded="false"
@@ -559,57 +614,37 @@
     {%- endif -%}
   </div>
 
-  <!-- ── Filter / sort pill row ────────────────────────────── -->
+  <div id="KarthikaSearchPageError" class="karthika-search-error" hidden role="alert"></div>
+
   {%- if search.performed -%}
-  <div class="ks-filter-row" role="toolbar" aria-label="Filter and sort options">
-    <!-- Filters pill (active / decorative placeholder — no live filter panel attached yet) -->
-    <button type="button" class="ks-filter-pill ks-filter-pill--active" id="ks-filters-btn" aria-pressed="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <line x1="4" y1="6" x2="20" y2="6"></line>
-        <line x1="8" y1="12" x2="16" y2="12"></line>
-        <line x1="11" y1="18" x2="13" y2="18"></line>
-      </svg>
-      Filters
-    </button>
-
-    <!-- Sort by (decorative placeholder — wraps existing sort_by param) -->
-    <button type="button" class="ks-filter-pill ks-filter-pill--chevron" id="ks-sortby-btn">
-      Sort by: Relevance
-    </button>
-
-    <!-- Price pill (decorative placeholder) -->
-    <button type="button" class="ks-filter-pill" id="ks-price-btn">
-      Price
-    </button>
-
-    <!-- Brand pill (decorative placeholder) -->
-    <button type="button" class="ks-filter-pill" id="ks-brand-btn">
-      Brand
-    </button>
-
-    <!-- Dietary pill (decorative placeholder) -->
-    <button type="button" class="ks-filter-pill" id="ks-dietary-btn">
-      Dietary
-    </button>
-
-    <!-- Results count -->
-    <span class="ks-result-count" role="status">
-      {%- if results_count > 0 -%}
-        {{ results_count }} result{% if results_count != 1 %}s{% endif %}
-      {%- endif -%}
-    </span>
-  </div>
+    {%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
+      <div class="ks-facets-wrap" id="main-search-filters">
+        {% render 'facets',
+          results: search,
+          enable_filtering: section.settings.enable_filtering,
+          enable_sorting: section.settings.enable_sorting,
+          filter_type: section.settings.filter_type,
+          paginate: paginate
+        %}
+      </div>
+    {%- endif -%}
   {%- endif -%}
 
   <!-- ── Product Grid ───────────────────────────────────────── -->
   {%- if search.performed -%}
-    {%- if search.results_count == 0 and search.filters == empty -%}
-      <div class="ks-no-results" role="status">
-        <p>No results found for <strong>"{{ search.terms | escape }}"</strong>.</p>
-        <p>Try a different search term or browse our categories.</p>
+    {%- if search.results_count == 0 -%}
+      <div class="ks-product-grid-wrap collection" id="ProductGridContainer">
+        <div class="loading-overlay gradient"></div>
+        <div class="ks-no-results" id="product-grid" data-id="{{ section.id }}" role="status">
+          <p>No results found{% if search.terms != blank %} for <strong>"{{ search.terms | escape }}"</strong>{% endif %}.</p>
+          <p>Try a different search term{% if section.settings.enable_filtering %}, clear filters,{% endif %} or browse our categories.</p>
+          {%- if has_active_filters -%}
+            <p><a href="{{ search_url }}">Clear filters</a></p>
+          {%- endif -%}
+        </div>
       </div>
     {%- else -%}
-      <div class="ks-product-grid-wrap" id="ProductGridContainer">
+      <div class="ks-product-grid-wrap collection" id="ProductGridContainer">
         <div class="loading-overlay gradient"></div>
         <ul
           class="ks-product-grid"
@@ -676,50 +711,18 @@
       </div>
     {%- endif -%}
 
-    <!-- ── Special Offer Banner ───────────────────────────── -->
-    <div class="ks-offer-banner" aria-label="Special offer promotion">
-      <div class="ks-offer-banner-left">
-        <div class="ks-offer-tag-row">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <path d="M16 10a4 4 0 0 1-8 0"></path>
-          </svg>
-          Special Offer
-        </div>
-        <p class="ks-offer-headline">Crispy snacks<br>you'll love!</p>
-        <p class="ks-offer-subtext">Up to <strong>25% off</strong> on select snacks</p>
-        <a href="{{ routes.collections_url }}/snacks" class="ks-offer-cta">
-          Shop Now →
-        </a>
-      </div>
-
-      <!-- Leaf SVG decorations -->
-      <svg class="ks-offer-leaf ks-offer-leaf--1" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <ellipse cx="20" cy="20" rx="8" ry="18" fill="#6EBE52" transform="rotate(-20 20 20)"/>
-      </svg>
-      <svg class="ks-offer-leaf ks-offer-leaf--2" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <ellipse cx="20" cy="20" rx="6" ry="14" fill="#4CAF35" transform="rotate(30 20 20)"/>
-      </svg>
-      <svg class="ks-offer-leaf ks-offer-leaf--3" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <ellipse cx="20" cy="20" rx="7" ry="16" fill="#7DCB5E" transform="rotate(-40 20 20)"/>
-      </svg>
-
-      <div class="ks-offer-banner-right">
-        <img
-          src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=320&q=80"
-          alt="Banana Chips snack packaging"
-          class="ks-offer-product-img"
-          loading="lazy"
-          width="155"
-          height="160"
-        >
-      </div>
-    </div>
-
     <!-- ── Cart Summary Bar ───────────────────────────────── -->
-    {%- if cart.item_count > 0 -%}
-    <a href="{{ routes.cart_url }}" class="ks-cart-bar" aria-label="View cart — {{ cart.item_count }} items">
+    <a
+      href="{{ routes.cart_url }}"
+      class="ks-cart-bar karthika-cart-trigger{% if cart.item_count == 0 %} is-empty{% endif %}"
+      aria-label="View cart — {{ cart.item_count }} items"
+      {% if settings.cart_type == 'drawer' %}
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-controls="CartDrawer"
+      {% endif %}
+      {% if cart.item_count == 0 %}hidden{% endif %}
+    >
       <div class="ks-cart-bar-left">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -743,7 +746,7 @@
             {%- if item.key == cart_line_key and item.image -%}
               <img
                 src="{{ item.image | image_url: width: 64 }}"
-                alt="{{ item.title | escape }}"
+                alt=""
                 class="ks-cart-thumb"
                 loading="lazy"
                 width="32"
@@ -754,14 +757,10 @@
             {%- endif -%}
           {%- endfor -%}
         {%- endfor -%}
-        {%- if cart.item_count > shown -%}
-          <span class="ks-cart-more">+{{ cart.item_count | minus: shown }}</span>
-        {%- endif -%}
       </div>
 
       <span class="ks-cart-bar-right">View cart →</span>
     </a>
-    {%- endif -%}
 
   {%- endif -%}
 </div>
@@ -770,18 +769,6 @@
 {% if section.settings.image_shape == 'arch' %}
   {{ 'mask-arch.svg' | inline_asset_content }}
 {%- endif -%}
-
-<script>
-  // Toggle filter pills between active/inactive (visual-only — no live filtering yet)
-  document.querySelectorAll('.ks-filter-pill[id]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var isFilters = btn.id === 'ks-filters-btn';
-      if (isFilters) {
-        btn.classList.toggle('ks-filter-pill--active');
-      }
-    });
-  });
-</script>
 
 {% schema %}
 {

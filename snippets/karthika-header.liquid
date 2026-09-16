@@ -77,21 +77,33 @@
       <a href="{{ about_url }}"{% if is_about %} class="is-active" aria-current="page"{% endif %}>About Us</a>
     </nav>
     <div class="karthika-desktop-header__actions">
-      <a
-        class="karthika-desktop-header__search{% if is_search %} is-active{% endif %}"
-        href="{{ search_url }}"
+      <button
+        type="button"
+        class="karthika-desktop-header__search karthika-search-bar-trigger karthika-search-placeholder-host{% if is_search %} is-active{% endif %}"
         aria-label="Search products"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="KarthikaSearchModal"
         data-search-terms="Search for milk…|Search for bananas…|Search for basmati rice…|Search for vegetables…|Search for coconut oil…|Search for spices…|Search for snacks…|Search for dal…|Search for rice flour…|Search for Kerala snacks…"
       >
         <svg class="karthika-desktop-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <span class="karthika-search-placeholder-text">Search for milk…</span>
-      </a>
+        <span id="KarthikaDesktopSearchPlaceholder" class="karthika-search-placeholder-text karthika-search-placeholder-target">Search for milk…</span>
+      </button>
       <a class="karthika-desktop-header__order" href="{{ routes.all_products_collection_url }}">Order Now</a>
-      <a class="karthika-desktop-header__cart" href="{{ routes.cart_url }}" aria-label="Cart ({{ cart_count }} items)">
-        <span aria-hidden="true">&#128722;</span><b>{{ cart_count }}</b>
+      <a
+        class="karthika-desktop-header__cart karthika-cart-trigger"
+        href="{{ routes.cart_url }}"
+        aria-label="Cart ({{ cart_count }} items)"
+        {% if settings.cart_type == 'drawer' %}
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="CartDrawer"
+        {% endif %}
+      >
+        <span aria-hidden="true">&#128722;</span><b class="karthika-cart-badge"{% if cart_count == 0 %} hidden{% endif %}>{{ cart_count }}</b>
       </a>
       <a class="karthika-desktop-header__account" href="{% if customer %}{{ routes.account_url }}{% else %}{% render 'karthika-login-home' %}{% endif %}"><span aria-hidden="true">&#128100;</span> Account</a>
     </div>
@@ -117,13 +129,22 @@
         <span class="karthika-header-badge karthika-notification-badge" style="display: none;">1</span>
       </button>
 
-      <a href="{{ routes.cart_url }}" class="karthika-header-cart-icon" aria-label="Cart ({{ cart.item_count }} items)">
+      <a
+        href="{{ routes.cart_url }}"
+        class="karthika-header-cart-icon karthika-cart-trigger"
+        aria-label="Cart ({{ cart.item_count }} items)"
+        {% if settings.cart_type == 'drawer' %}
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="CartDrawer"
+        {% endif %}
+      >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="9" cy="21" r="1"></circle>
           <circle cx="20" cy="21" r="1"></circle>
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
         </svg>
-        <span class="karthika-header-badge karthika-cart-badge" {% if cart.item_count == 0 %}style="display: none;"{% endif %}>{{ cart.item_count }}</span>
+        <span class="karthika-header-badge karthika-cart-badge" {% if cart.item_count == 0 %}hidden{% endif %}>{{ cart.item_count }}</span>
       </a>
 
       {% if customer %}
@@ -165,24 +186,20 @@
       assign header_search_placeholder = 'Search for milk…'
     endif
   -%}
-  <div
-    class="karthika-header-search karthika-search-bar-trigger"
-    role="search"
-    tabindex="0"
+  <button
+    type="button"
+    class="karthika-header-search karthika-search-bar-trigger karthika-search-placeholder-host"
     aria-label="Search groceries"
+    aria-haspopup="dialog"
+    aria-expanded="false"
+    aria-controls="KarthikaSearchModal"
     data-search-terms="{{ header_search_terms }}"
   >
     <svg class="karthika-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <circle cx="11" cy="11" r="8"></circle>
       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
-    <span id="KarthikaSearchPlaceholder" class="karthika-search-placeholder">{{ header_search_placeholder }}</span>
-    <svg class="karthika-search-viewfinder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <path d="M4 9V4h5"></path>
-      <path d="M20 9V4h-5"></path>
-      <path d="M4 15v5h5"></path>
-      <path d="M20 15v5h-5"></path>
-    </svg>
-  </div>
+    <span id="KarthikaMobileSearchPlaceholder" class="karthika-search-placeholder karthika-search-placeholder-target">{{ header_search_placeholder }}</span>
+  </button>
 </header>
 {%- endunless -%}

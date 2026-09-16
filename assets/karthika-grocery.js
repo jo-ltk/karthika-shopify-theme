@@ -8,6 +8,18 @@
 
   window.Karthika = window.Karthika || {};
 
+  const CART_CUSTOMER_ERROR = "We couldn't update your cart. Please try again.";
+  const CART_UNAVAILABLE_ERROR = 'This item is unavailable.';
+  const CART_NETWORK_ERROR = "We couldn't reach the cart. Check your connection and try again.";
+  const CART_TRIGGER_SELECTOR = [
+    '.karthika-cart-trigger',
+    '.karthika-header-cart-icon',
+    '.karthika-desktop-header__cart',
+    '.karthika-floating-cart',
+    '.ks-cart-bar',
+  ].join(', ');
+  const CART_BADGE_SELECTOR = '.karthika-nav-badge, .karthika-cart-badge, .karthika-desktop-header__cart b, .cart-count-bubble span';
+
   const CartManager = {
     state: {
       item_count: 0,
@@ -18,7 +30,12 @@
 
     // Per-variant debounce timers and pending network promise chains
     _pendingTimers: {},
+    _desiredQty: {},
     _activeRequests: {},
+    _addNowLocks: {},
+    _dawnSubscribed: false,
+    _eventsBound: false,
+    _drawerObserver: null,
 
     getRoot() {
       return window.Shopify?.routes?.root || window.routes?.root || '/';
@@ -34,6 +51,7 @@
       await this.refreshCartState(true);
       this.bindEvents();
       this.bindCartSummary();
+      this.bindDrawerObserver();
       this.bindScrollNavigation();
       this.syncAllSteppers();
     },
@@ -64,18 +82,138 @@
       return window.CartItemOrder.promoteLine(cart, lineKey);
     },
 
-    async refreshCartState(isInit = false) {
+    async refreshCartState(isInit = false, options = {}) {
       try {
-        const response = await fetch(this.getCartEndpoint('cart'));
-        if (!response.ok) return;
+        const response = await fetch(this.getCartEndpoint('cart'), {
+          cache: 'no-store',
+          credentials: 'same-origin',
+        });
+        if (!response.ok) return null;
         const cart = await response.json();
-        this.processCartData(cart, isInit);
+        this.processCartData(cart, isInit, options);
+        return cart;
       } catch (err) {
-        // Refresh failed silently
+        return null;
       }
     },
 
-    processCartData(cart, isInit = false) {
+    customerCartMessage(payload, fallback = CART_CUSTOMER_ERROR) {
+      if (!payload) return fallback;
+      const raw = payload.description || payload.message;
+      if (typeof raw !== 'string' || !raw.trim()) return fallback;
+      const text = raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (/sold out|unavailable|inventory|not enough/i.test(text)) return CART_UNAVAILABLE_ERROR;
+      if (text.length > 160) return fallback;
+      return text || fallback;
+    },
+
+    ensureLiveRegion() {
+      let live = document.getElementById('KarthikaCartLive');
+      if (!live) {
+        live = document.createElement('div');
+        live.id = 'KarthikaCartLive';
+        live.className = 'visually-hidden';
+        live.setAttribute('role', 'status');
+        live.setAttribute('aria-live', 'polite');
+        live.setAttribute('aria-atomic', 'true');
+        document.body.appendChild(live);
+      }
+      return live;
+    },
+
+    announce(message) {
+      const live = this.ensureLiveRegion();
+      live.textContent = '';
+      window.requestAnimationFrame(() => {
+        live.textContent = message;
+      });
+    },
+
+    showCartError(message) {
+      const text = message || CART_CUSTOMER_ERROR;
+      this.announce(text);
+      let toast = document.getElementById('KarthikaCartErrorToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'KarthikaCartErrorToast';
+        toast.className = 'karthika-cart-error-toast';
+        toast.setAttribute('role', 'alert');
+        document.body.appendChild(toast);
+      }
+      toast.textContent = text;
+      toast.hidden = false;
+      toast.classList.add('is-visible');
+      window.clearTimeout(this._errorTimer);
+      this._errorTimer = window.setTimeout(() => {
+        toast.classList.remove('is-visible');
+        toast.hidden = true;
+      }, 4200);
+    },
+
+    getCartDrawer() {
+      return document.querySelector('cart-drawer');
+    },
+
+    isCartResponseFailure(response, data) {
+      return !response.ok || Boolean(data && (data.status || data.errors));
+    },
+
+    async readCartJson(response) {
+      try {
+        return await response.json();
+      } catch (err) {
+        return null;
+      }
+    },
+
+    publishDawnCartUpdate(cart, extra = {}) {
+      if (typeof publish !== 'function' || !window.PUB_SUB_EVENTS?.cartUpdate) return;
+      publish(PUB_SUB_EVENTS.cartUpdate, {
+        source: 'karthika',
+        cartData: cart,
+        ...extra,
+      });
+    },
+
+    scheduleDrawerRefresh() {
+      if (!this.getCartDrawer()) return;
+      if (this._drawerRefreshTimer) window.clearTimeout(this._drawerRefreshTimer);
+      this._drawerRefreshTimer = window.setTimeout(() => {
+        this._drawerRefreshTimer = null;
+        this.renderDrawerFromSection();
+      }, 0);
+    },
+
+    async renderDrawerFromSection() {
+      const drawer = this.getCartDrawer();
+      const cartUrl = window.routes?.cart_url;
+      if (!drawer || !cartUrl) return;
+      try {
+        const response = await fetch(`${cartUrl}?section_id=cart-drawer`, {
+          credentials: 'same-origin',
+          cache: 'no-store',
+        });
+        if (!response.ok) return;
+        const html = new DOMParser().parseFromString(await response.text(), 'text/html');
+        const nextInner = html.querySelector('#CartDrawer .drawer__inner') || html.querySelector('.drawer__inner');
+        const currentInner = drawer.querySelector('.drawer__inner');
+        if (nextInner && currentInner) currentInner.replaceWith(nextInner);
+        drawer.classList.toggle('is-empty', this.state.item_count === 0);
+        const overlay = drawer.querySelector('#CartDrawer-Overlay');
+        if (overlay && typeof drawer.close === 'function') {
+          overlay.addEventListener('click', () => drawer.close());
+        }
+      } catch (err) {}
+    },
+
+    setStepperPending(variantId, pending) {
+      document.querySelectorAll(`.karthika-stepper[data-variant-id="${variantId}"]`).forEach((stepper) => {
+        stepper.classList.toggle('is-pending', pending);
+        stepper.setAttribute('aria-busy', pending ? 'true' : 'false');
+      });
+    },
+
+    processCartData(cart, isInit = false, options = {}) {
       let recents = [];
       try {
         recents = JSON.parse(localStorage.getItem('karthika_recent_variants')) || [];
@@ -116,21 +254,61 @@
       });
 
       this.updateBadges();
-      this.syncAllSteppers();
+      if (!options.skipUi) this.syncAllSteppers();
       document.dispatchEvent(new CustomEvent('karthika:cart-updated', { detail: cart }));
+
+      const drawer = this.getCartDrawer();
+      if (drawer) drawer.classList.toggle('is-empty', this.state.item_count === 0);
+
+      if (!isInit && !options.skipPublish) {
+        this.publishDawnCartUpdate(cart);
+        this.scheduleDrawerRefresh();
+      }
     },
 
     updateBadges() {
       const count = this.state.item_count || 0;
-      document.querySelectorAll('.karthika-nav-badge, .karthika-cart-badge, .cart-count-bubble span').forEach((badge) => {
+      const label = `Cart (${count} ${count === 1 ? 'item' : 'items'})`;
+      document.querySelectorAll(CART_BADGE_SELECTOR).forEach((badge) => {
         badge.textContent = String(count);
         if (count > 0) {
-          badge.style.display = 'flex';
+          badge.hidden = false;
+          badge.removeAttribute('hidden');
+          badge.style.removeProperty('display');
           badge.classList.remove('hidden');
         } else {
+          badge.hidden = true;
           badge.style.display = 'none';
         }
       });
+      document.querySelectorAll(CART_TRIGGER_SELECTOR).forEach((trigger) => {
+        trigger.setAttribute('aria-label', label);
+      });
+      const searchBar = document.querySelector('.ks-cart-bar');
+      if (searchBar) {
+        const barLabel = searchBar.querySelector('.ks-cart-bar-label');
+        if (barLabel) barLabel.textContent = `CART ${count} ITEM${count === 1 ? '' : 'S'}`;
+        searchBar.hidden = count === 0;
+        searchBar.classList.toggle('is-empty', count === 0);
+        const thumbs = searchBar.querySelector('.ks-cart-bar-thumbs');
+        if (thumbs) {
+          const items = this.state.items || [];
+          const sortedItems = window.CartItemOrder
+            ? window.CartItemOrder.sortItems(items, null)
+            : [...items].reverse();
+          const images = sortedItems.filter((item) => item.image).slice(0, 3).map((item) => {
+            const image = document.createElement('img');
+            image.src = item.image;
+            image.alt = '';
+            image.width = 32;
+            image.height = 32;
+            image.className = 'ks-cart-thumb';
+            image.loading = 'lazy';
+            return image;
+          });
+          thumbs.replaceChildren(...images);
+        }
+      }
     },
 
     syncAllSteppers() {
@@ -178,16 +356,14 @@
       const nextQty = Math.max(0, Number(targetQty));
       if (currentQty === nextQty && this._pendingTimers[vId] == null) return;
 
-      // 1. Optimistic memory state update
       const diff = nextQty - currentQty;
       this.state.variantMap[vId] = nextQty;
+      this._desiredQty[vId] = nextQty;
       this.state.item_count = Math.max(0, (this.state.item_count || 0) + diff);
 
-      // 2. Instant zero-latency UI update across all matching steppers & badges
       this.syncVariantSteppers(vId, nextQty);
       this.updateBadges();
 
-      // Dispatch optimistic cart updated event for summary/floating cart
       document.dispatchEvent(new CustomEvent('karthika:cart-updated', {
         detail: {
           item_count: this.state.item_count,
@@ -196,12 +372,10 @@
         }
       }));
 
-      // 3. Clear existing debounce timer for this variant
       if (this._pendingTimers[vId]) {
         clearTimeout(this._pendingTimers[vId]);
       }
 
-      // 4. Set debounce delay (~350ms) to coalesce rapid multi-clicks into 1 network call
       this._pendingTimers[vId] = setTimeout(() => {
         delete this._pendingTimers[vId];
         this._dispatchQueuedChange(vId, nextQty);
@@ -214,7 +388,6 @@
      */
     async _dispatchQueuedChange(variantId, finalQty) {
       const vId = Number(variantId);
-      // Chain onto existing active request for this variant if one is currently in-flight
       const previousPromise = this._activeRequests[vId] || Promise.resolve();
 
       const currentRequest = (async () => {
@@ -222,62 +395,91 @@
           await previousPromise;
         } catch (e) {}
 
-        // If another debounce was queued while waiting, let that newer one handle it
         if (this._pendingTimers[vId]) return;
 
-        // Check if item is already in Shopify server cart
         const existingItem = (this.state.items || []).find(
           (item) => Number(item.variant_id) === vId || Number(item.id) === vId
         );
         const previousQty = existingItem?.quantity || 0;
         const isCurrentlyInCart = Boolean(existingItem);
+        this.setStepperPending(vId, true);
 
         try {
           let response;
           if (finalQty > 0 && !isCurrentlyInCart) {
-            // New item being added to cart for the first time -> use /cart/add.js
             const formData = new FormData();
             formData.append('id', String(vId));
             formData.append('quantity', String(finalQty));
             response = await fetch(this.getCartEndpoint('cart/add'), {
               method: 'POST',
-              body: formData
+              body: formData,
+              credentials: 'same-origin',
             });
           } else {
-            // Existing item being updated (or reduced to 0) -> use /cart/change.js
             response = await fetch(this.getCartEndpoint('cart/change'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
               body: JSON.stringify({ id: String(vId), quantity: finalQty })
             });
           }
 
-          if (!response.ok) {
-            // If another change was queued in the meantime, don't rollback
-            if (!this._pendingTimers[vId]) {
-              await this.refreshCartState();
+          const responseData = await this.readCartJson(response);
+          const hasPending = Boolean(this._pendingTimers[vId]);
+
+          if (this.isCartResponseFailure(response, responseData)) {
+            if (!hasPending) {
+              this.showCartError(this.customerCartMessage(responseData));
+              await this.refreshCartState(false);
             }
             return;
           }
 
-          let responseData = await response.json();
-
-          // If another debounce was queued while request was in-flight, let that newer one proceed
-          if (this._pendingTimers[vId]) return;
-
+          let cartPayload = responseData;
           if (finalQty > previousQty && window.CartItemOrder) {
-            responseData = await this.promoteAddedVariant(vId, responseData);
+            cartPayload = await this.promoteAddedVariant(vId, responseData);
           }
 
-          // /cart/change returns full cart (with .items array).
-          // /cart/add returns the added item object (without .items array), so we fetch fresh cart state.
-          if (responseData && Array.isArray(responseData.items)) {
-            this.processCartData(responseData, false);
-          } else {
+          if (cartPayload && Array.isArray(cartPayload.items)) {
+            this.processCartData(cartPayload, false, {
+              skipPublish: hasPending,
+              skipUi: hasPending,
+            });
+          } else if (cartPayload && (cartPayload.variant_id || cartPayload.id)) {
+            const lineQty = Number(cartPayload.quantity) || finalQty;
+            this.state.items = [
+              ...(this.state.items || []).filter(
+                (item) => Number(item.variant_id) !== vId && Number(item.id) !== vId
+              ),
+              {
+                ...cartPayload,
+                variant_id: Number(cartPayload.variant_id || cartPayload.id),
+                quantity: lineQty,
+              },
+            ];
+            if (!hasPending) await this.refreshCartState(false);
+          } else if (!hasPending) {
             await this.refreshCartState(false);
           }
+
+          if (hasPending && this._desiredQty[vId] != null) {
+            this.syncVariantSteppers(vId, this._desiredQty[vId]);
+            this.updateBadges();
+          } else {
+            delete this._desiredQty[vId];
+            if (!hasPending) this.announce(`Cart updated. ${this.state.item_count} ${this.state.item_count === 1 ? 'item' : 'items'}.`);
+          }
         } catch (err) {
-          // Silent catch on cart refresh
+          if (!this._pendingTimers[vId]) {
+            this.showCartError(CART_NETWORK_ERROR);
+            await this.refreshCartState(false);
+          }
+        } finally {
+          if (!this._pendingTimers[vId] && !this._activeRequests[vId]) {
+            this.setStepperPending(vId, false);
+          } else if (!this._pendingTimers[vId]) {
+            this.setStepperPending(vId, false);
+          }
         }
       })();
 
@@ -288,14 +490,63 @@
         if (this._activeRequests[vId] === currentRequest) {
           delete this._activeRequests[vId];
         }
+        if (!this._pendingTimers[vId] && !this._activeRequests[vId]) {
+          this.setStepperPending(vId, false);
+        }
       }
     },
 
     async add(variantId, quantity = 1, openDrawer = false) {
       const currentQty = this.state.variantMap[Number(variantId)] || 0;
       this.setQuantityOptimistic(variantId, currentQty + Number(quantity));
-      if (openDrawer) {
-        this.openCartDrawer();
+      if (openDrawer) this.openCartDrawer();
+    },
+
+    async addNow(variantId, quantity = 1) {
+      const vId = Number(variantId);
+      const qty = Number(quantity) || 1;
+      if (!vId) return { ok: false, reason: 'invalid', message: CART_CUSTOMER_ERROR };
+      if (this._addNowLocks[vId]) return { ok: false, reason: 'pending' };
+
+      this._addNowLocks[vId] = true;
+      this.setStepperPending(vId, true);
+      try {
+        const formData = new FormData();
+        formData.append('id', String(vId));
+        formData.append('quantity', String(qty));
+        const response = await fetch(this.getCartEndpoint('cart/add'), {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin',
+        });
+
+        const responseData = await this.readCartJson(response);
+        if (this.isCartResponseFailure(response, responseData)) {
+          const message = this.customerCartMessage(responseData);
+          this.showCartError(message);
+          await this.refreshCartState(false);
+          return { ok: false, reason: 'http', message };
+        }
+
+        let cartPayload = responseData;
+        if (window.CartItemOrder) {
+          cartPayload = await this.promoteAddedVariant(vId, responseData);
+        }
+
+        if (cartPayload && Array.isArray(cartPayload.items)) {
+          this.processCartData(cartPayload, false);
+        } else {
+          await this.refreshCartState(false);
+        }
+        this.announce(`Cart updated. ${this.state.item_count} ${this.state.item_count === 1 ? 'item' : 'items'}.`);
+        return { ok: true };
+      } catch (err) {
+        this.showCartError(CART_NETWORK_ERROR);
+        await this.refreshCartState(false);
+        return { ok: false, reason: 'network', message: CART_NETWORK_ERROR };
+      } finally {
+        delete this._addNowLocks[vId];
+        this.setStepperPending(vId, false);
       }
     },
 
@@ -303,29 +554,64 @@
       this.setQuantityOptimistic(variantId, quantity);
     },
 
-    openCartDrawer() {
-      window.location.href = window.routes?.cart_url || '/cart';
+    syncDrawerTriggerState(isOpen) {
+      document.querySelectorAll(CART_TRIGGER_SELECTOR).forEach((trigger) => {
+        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    },
+
+    bindDrawerObserver() {
+      const drawer = this.getCartDrawer();
+      if (!drawer || this._drawerObserver) return;
+      this.syncDrawerTriggerState(drawer.classList.contains('active'));
+      this._drawerObserver = new MutationObserver(() => {
+        this.syncDrawerTriggerState(drawer.classList.contains('active'));
+      });
+      this._drawerObserver.observe(drawer, { attributes: true, attributeFilter: ['class'] });
+    },
+
+    openCartDrawer(triggeredBy) {
+      if (window.Karthika?.Search?.close) {
+        const search = document.querySelector('#KarthikaSearchModal.is-open');
+        if (search) window.Karthika.Search.close({ restoreFocus: false });
+      }
+
+      const account = document.querySelector('.karthika-account-screen.is-open');
+      if (account) {
+        account.classList.remove('is-open');
+        account.setAttribute('hidden', '');
+      }
+
+      const drawer = this.getCartDrawer();
+      if (drawer && typeof drawer.open === 'function') {
+        drawer.open(triggeredBy || document.activeElement);
+        return;
+      }
+
+      const cartUrl = window.routes?.cart_url || '/cart';
+      const current = window.location.pathname.replace(/\/$/, '');
+      const target = String(cartUrl).replace(/\/$/, '');
+      if (current !== target) window.location.href = cartUrl;
+    },
+
+    bindDawnCartSync() {
+      if (this._dawnSubscribed) return;
+      this._dawnSubscribed = true;
+      if (!window.PUB_SUB_EVENTS || typeof subscribe !== 'function') return;
+      subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
+        if (event?.source === 'karthika') return;
+        const cart = event?.cartData;
+        if (cart?.items) this.processCartData(cart, false, { skipPublish: true });
+        else this.refreshCartState(false, { skipPublish: true });
+      });
     },
 
     bindCartSummary() {
       const summary = document.querySelector('.karthika-floating-cart');
-      if (!summary) return;
-
       document.addEventListener('karthika:cart-updated', (event) => {
-        this.renderCartSummary(event.detail, summary);
+        if (summary) this.renderCartSummary(event.detail, summary);
       });
-
-      if (window.PUB_SUB_EVENTS && typeof subscribe === 'function') {
-        subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
-          const cart = event?.cartData;
-          if (cart?.items) this.processCartData(cart, false);
-          else this.refreshCartState(false);
-        });
-      }
-
-      summary.addEventListener('click', () => {
-        window.location.href = window.routes?.cart_url || '/cart';
-      });
+      this.bindDawnCartSync();
     },
 
     renderCartSummary(cart, summary) {
@@ -382,13 +668,19 @@
     },
 
     bindEvents() {
+      if (this._eventsBound) return;
+      this._eventsBound = true;
+
       document.addEventListener('click', (e) => {
         const addBtn = e.target.closest('.karthika-stepper-add-btn');
         if (addBtn) {
           const stepper = addBtn.closest('.karthika-stepper');
           const variantId = stepper?.dataset?.variantId;
-          if (variantId) {
+          const available = stepper?.dataset?.productAvailable !== 'false';
+          if (variantId && available) {
             this.setQuantityOptimistic(variantId, (this.state.variantMap[Number(variantId)] || 0) + 1);
+          } else if (!available) {
+            this.showCartError(CART_UNAVAILABLE_ERROR);
           }
           return;
         }
@@ -402,8 +694,7 @@
             const currentQty = this.state.variantMap[vId] != null
               ? this.state.variantMap[vId]
               : parseInt(stepper.querySelector('.karthika-stepper-qty')?.textContent || '1', 10);
-            const nextQty = Math.max(0, currentQty - 1);
-            this.setQuantityOptimistic(vId, nextQty);
+            this.setQuantityOptimistic(vId, Math.max(0, currentQty - 1));
           }
           return;
         }
@@ -417,20 +708,28 @@
             const currentQty = this.state.variantMap[vId] != null
               ? this.state.variantMap[vId]
               : parseInt(stepper.querySelector('.karthika-stepper-qty')?.textContent || '1', 10);
-            const nextQty = currentQty + 1;
-            this.setQuantityOptimistic(vId, nextQty);
+            this.setQuantityOptimistic(vId, currentQty + 1);
           }
           return;
         }
 
-        const cartTrigger = e.target.closest('.karthika-cart-trigger');
+        const cartTrigger = e.target.closest(CART_TRIGGER_SELECTOR);
         if (cartTrigger) {
-          const href = cartTrigger.getAttribute('href');
-          if (href && href !== '#' && !href.startsWith('javascript:')) {
-            return;
-          }
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
           e.preventDefault();
-          this.openCartDrawer();
+          this.openCartDrawer(cartTrigger);
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const cartTrigger = e.target.closest(CART_TRIGGER_SELECTOR);
+        if (!cartTrigger) return;
+        if (cartTrigger.tagName === 'A' || cartTrigger.tagName === 'BUTTON') {
+          if (e.key === ' ') {
+            e.preventDefault();
+            this.openCartDrawer(cartTrigger);
+          }
         }
       });
     }
@@ -492,12 +791,21 @@
      3. Search Modal Overlay
      -------------------------------------------------------------------------- */
   const SearchManager = {
+    RECENT_KEY: 'karthika_recent_searches',
+    MAX_RECENTS: 8,
+    _lastTrigger: null,
+    _inertTargets: [],
+    _onDocumentKeydown: null,
+
     init() {
+      this._onDocumentKeydown = (event) => this.onDocumentKeydown(event);
+      document.addEventListener('keydown', this._onDocumentKeydown);
+
       document.addEventListener('click', (e) => {
         const trigger = e.target.closest('.karthika-search-bar-trigger, .karthika-nav-search-trigger');
         if (trigger) {
           e.preventDefault();
-          this.open();
+          this.open(trigger);
           return;
         }
 
@@ -513,60 +821,221 @@
           return;
         }
 
-        // Clear recent searches
         const clearRecentBtn = e.target.closest('#karthikaClearRecentBtn');
         if (clearRecentBtn) {
-          const recentGroup = document.querySelector('#karthikaRecentSearchesGroup');
-          if (recentGroup) {
-            recentGroup.style.display = 'none';
-          }
+          this.clearRecents();
           return;
         }
 
-        // Remove single recent card
         const removeRecentBtn = e.target.closest('.karthika-recent-remove-btn');
         if (removeRecentBtn) {
-          const card = removeRecentBtn.closest('.karthika-recent-card');
-          if (card) {
-            card.remove();
-            const remaining = document.querySelectorAll('.karthika-recent-card');
-            if (remaining.length === 0) {
-              const recentGroup = document.querySelector('#karthikaRecentSearchesGroup');
-              if (recentGroup) recentGroup.style.display = 'none';
-            }
-          }
+          const query = removeRecentBtn.getAttribute('data-query');
+          this.removeRecent(query);
           return;
         }
 
-        // Query trigger clicks (recent cards, popular icons, category shortcuts)
-        const searchChip = e.target.closest('.karthika-search-chip, .karthika-search-category, .karthika-recent-card-btn, .karthika-popular-icon-btn, .karthika-cat-card');
+        const addBtn = e.target.closest('.karthika-need-card-add-btn');
+        if (addBtn) {
+          this.addRecommendedProduct(addBtn);
+          return;
+        }
+
+        const searchChip = e.target.closest('.karthika-search-chip, .karthika-search-category, .karthika-recent-card-btn, .karthika-popular-icon-btn');
         if (searchChip) {
           const query = searchChip.dataset.query;
-          if (query) {
-            const input = document.querySelector('.karthika-search-modal-input');
-            if (input) {
-              input.value = query;
-              input.dispatchEvent(new Event('input', { bubbles: true }));
-              input.closest('form')?.requestSubmit();
-            }
-          }
+          if (query) this.submitQuery(query);
         }
       });
 
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-          const modal = document.querySelector('#KarthikaSearchModal');
-          if (modal?.classList.contains('is-open')) {
-            this.close();
-          }
-        }
+      document.addEventListener('submit', (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || form.getAttribute('role') !== 'search') return;
+        const input = form.querySelector('[name="q"]');
+        this.saveRecent(input?.value);
       });
 
       document.addEventListener('input', (event) => {
-        const input = event.target.closest('.karthika-search-modal-input');
+        const input = event.target.closest('.karthika-search-modal-input, #Search-In-Template');
         if (!input) return;
         this.syncEmptyState();
+        this.hideError();
+        const pageError = document.querySelector('#KarthikaSearchPageError');
+        if (pageError) {
+          pageError.hidden = true;
+          pageError.textContent = '';
+        }
       });
+
+      document.addEventListener('change', (event) => {
+        if (!event.target.closest('facet-filters-form')) return;
+        const pageError = document.querySelector('#KarthikaSearchPageError');
+        if (pageError) {
+          pageError.hidden = true;
+          pageError.textContent = '';
+        }
+      });
+
+      document.addEventListener('karthika:search-request-failed', (event) => {
+        const source = event.detail?.source;
+        if (source === 'predictive') {
+          this.showError("We couldn't load suggestions. Check your connection and try again.");
+        } else if (source === 'facets') {
+          this.showPageError("We couldn't update those results. Check your connection and try again.");
+        } else {
+          this.showError("Search isn't available right now. Please try again.");
+        }
+      });
+
+      this.renderRecents();
+    },
+
+    getRecents() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(this.RECENT_KEY) || '[]');
+        if (!Array.isArray(parsed)) return [];
+        return parsed
+          .map((item) => String(item || '').trim())
+          .filter(Boolean)
+          .slice(0, this.MAX_RECENTS);
+      } catch (e) {
+        return [];
+      }
+    },
+
+    writeRecents(items) {
+      try {
+        localStorage.setItem(this.RECENT_KEY, JSON.stringify(items.slice(0, this.MAX_RECENTS)));
+      } catch (e) {}
+    },
+
+    saveRecent(rawQuery) {
+      const query = String(rawQuery || '').trim();
+      if (!query) return;
+      const next = [query, ...this.getRecents().filter((item) => item.toLowerCase() !== query.toLowerCase())];
+      this.writeRecents(next);
+      this.renderRecents();
+    },
+
+    removeRecent(rawQuery) {
+      const query = String(rawQuery || '').trim();
+      if (!query) return;
+      this.writeRecents(this.getRecents().filter((item) => item.toLowerCase() !== query.toLowerCase()));
+      this.renderRecents();
+    },
+
+    clearRecents() {
+      try {
+        localStorage.removeItem(this.RECENT_KEY);
+      } catch (e) {}
+      this.renderRecents();
+    },
+
+    renderRecents() {
+      const group = document.querySelector('#karthikaRecentSearchesGroup');
+      const row = document.querySelector('#karthikaRecentCardsRow');
+      if (!group || !row) return;
+
+      const recents = this.getRecents();
+      row.replaceChildren();
+
+      if (!recents.length) {
+        group.hidden = true;
+        return;
+      }
+
+      recents.forEach((query) => {
+        const card = document.createElement('div');
+        card.className = 'karthika-recent-card';
+        card.dataset.query = query;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'karthika-recent-remove-btn';
+        removeBtn.setAttribute('data-query', query);
+        removeBtn.setAttribute('aria-label', `Remove ${query}`);
+        removeBtn.textContent = '×';
+
+        const searchBtn = document.createElement('button');
+        searchBtn.type = 'button';
+        searchBtn.className = 'karthika-recent-card-btn';
+        searchBtn.dataset.query = query;
+
+        const mark = document.createElement('span');
+        mark.className = 'karthika-recent-card-mark';
+        mark.setAttribute('aria-hidden', 'true');
+        mark.textContent = query.slice(0, 1).toUpperCase();
+
+        const name = document.createElement('span');
+        name.className = 'karthika-recent-card-name';
+        name.textContent = query;
+
+        searchBtn.append(mark, name);
+        card.append(removeBtn, searchBtn);
+        row.append(card);
+      });
+
+      group.hidden = false;
+    },
+
+    submitQuery(query) {
+      const input = document.querySelector('#KarthikaSearchModalInput, .karthika-search-modal-input');
+      if (!input) return;
+      input.value = query;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      this.saveRecent(query);
+      input.closest('form')?.requestSubmit();
+    },
+
+    async addRecommendedProduct(button) {
+      if (button.disabled || button.getAttribute('aria-busy') === 'true') return;
+      const variantId = button.getAttribute('data-variant-id');
+      if (!variantId || !window.Karthika?.Cart?.addNow) {
+        this.showError("We couldn't add that item. Please try again.");
+        return;
+      }
+
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.classList.remove('is-added', 'is-error');
+
+      const result = await window.Karthika.Cart.addNow(variantId, 1);
+
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+
+      if (!result?.ok) {
+        if (result?.reason === 'pending') return;
+        button.classList.add('is-error');
+        this.showError(result?.message || "We couldn't add that item. Please try again.");
+        return;
+      }
+
+      button.classList.add('is-added');
+      this.hideError();
+    },
+
+    showError(message) {
+      const errorEl = document.querySelector('#KarthikaSearchModalError');
+      if (!errorEl) return;
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    },
+
+    hideError() {
+      const errorEl = document.querySelector('#KarthikaSearchModalError');
+      if (!errorEl) return;
+      errorEl.textContent = '';
+      errorEl.hidden = true;
+    },
+
+    showPageError(message) {
+      const errorEl = document.querySelector('#KarthikaSearchPageError');
+      if (!errorEl) {
+        this.showError(message);
+        return;
+      }
+      errorEl.textContent = message;
+      errorEl.hidden = false;
     },
 
     syncEmptyState() {
@@ -576,30 +1045,103 @@
       const hasQuery = !!(input && input.value.trim().length > 0);
       modal.classList.toggle('has-query', hasQuery);
 
-      document.querySelectorAll('.karthika-nav-search-trigger').forEach((trigger) => {
-        trigger.classList.toggle('is-active', modal.classList.contains('is-open'));
+      this.syncTriggerState(modal.classList.contains('is-open'));
+    },
+
+    syncTriggerState(isOpen) {
+      document.querySelectorAll('.karthika-search-bar-trigger, .karthika-nav-search-trigger').forEach((trigger) => {
+        trigger.classList.toggle('is-open', isOpen);
+        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
       });
     },
 
-    open() {
+    getFocusable(container) {
+      return Array.from(
+        container.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.hasAttribute('hidden') && el.closest('[hidden]') == null);
+    },
+
+    setBackgroundInert(enable) {
       const modal = document.querySelector('#KarthikaSearchModal');
-      if (modal) {
-        modal.classList.add('is-open');
-        this.syncEmptyState();
-        setTimeout(() => {
-          modal.querySelector('.karthika-search-modal-input')?.focus();
-        }, 100);
+      if (!enable) {
+        this._inertTargets.forEach((el) => {
+          el.removeAttribute('inert');
+          if (el.dataset.karthikaInertAria === '1') {
+            el.removeAttribute('aria-hidden');
+            delete el.dataset.karthikaInertAria;
+          }
+        });
+        this._inertTargets = [];
+        return;
+      }
+
+      this._inertTargets = [];
+      Array.from(document.body.children).forEach((el) => {
+        if (el === modal || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
+        el.setAttribute('inert', '');
+        if (!el.hasAttribute('aria-hidden')) {
+          el.setAttribute('aria-hidden', 'true');
+          el.dataset.karthikaInertAria = '1';
+        }
+        this._inertTargets.push(el);
+      });
+    },
+
+    onDocumentKeydown(event) {
+      const modal = document.querySelector('#KarthikaSearchModal');
+      if (!modal?.classList.contains('is-open')) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        this.close();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const focusables = this.getFocusable(modal);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     },
 
-    close() {
+    open(trigger) {
+      const modal = document.querySelector('#KarthikaSearchModal');
+      if (!modal) return;
+      this._lastTrigger = trigger || document.activeElement;
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('karthika-search-open');
+      this.setBackgroundInert(true);
+      this.renderRecents();
+      this.syncEmptyState();
+      window.requestAnimationFrame(() => {
+        modal.querySelector('.karthika-search-modal-input')?.focus();
+      });
+    },
+
+    close(options = {}) {
       const modal = document.querySelector('#KarthikaSearchModal');
       if (!modal) return;
       modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('karthika-search-open');
+      this.setBackgroundInert(false);
       this.syncEmptyState();
-      document.querySelectorAll('.karthika-nav-search-trigger').forEach((trigger) => {
-        trigger.classList.remove('is-active');
-      });
+      this.hideError();
+      const trigger = this._lastTrigger;
+      this._lastTrigger = null;
+      if (options.restoreFocus !== false && trigger && typeof trigger.focus === 'function') {
+        trigger.focus();
+      }
     }
   };
 
@@ -1010,67 +1552,71 @@
      element so they can be updated in Liquid without touching JS.
      -------------------------------------------------------------------------- */
   const SearchPlaceholderRotator = {
-    _timer: null,
-    _index: 0,
-    _terms: [],
+    _states: [],
     _INTERVAL: 3500,
     _FADE: 380,
 
     init() {
-      const trigger = document.querySelector('[data-search-terms]');
-      if (!trigger) return;
-
-      const raw = trigger.getAttribute('data-search-terms') || '';
-      this._terms = raw.split('|').map(t => t.trim()).filter(Boolean);
-      if (this._terms.length < 2) return;
-
-      this._index = Math.floor(Math.random() * this._terms.length);
-      this._applyTerm(this._terms[this._index], false);
-      this._schedule();
+      this.destroy();
+      document.querySelectorAll('.karthika-search-placeholder-host[data-search-terms]').forEach((host) => {
+        this._bindHost(host);
+      });
     },
 
-    _schedule() {
-      clearTimeout(this._timer);
-      this._timer = setTimeout(() => this._rotate(), this._INTERVAL);
+    destroy() {
+      this._states.forEach((state) => clearTimeout(state.timer));
+      this._states = [];
     },
 
-    _rotate() {
+    _bindHost(host) {
+      const raw = host.getAttribute('data-search-terms') || '';
+      const terms = raw.split('|').map((t) => t.trim()).filter(Boolean);
+      if (terms.length < 2) return;
+
+      const target = host.querySelector('.karthika-search-placeholder-target');
+      if (!target) return;
+
+      const state = {
+        host,
+        target,
+        terms,
+        index: Math.floor(Math.random() * terms.length),
+        timer: null,
+      };
+
+      this._states.push(state);
+      this._applyTerm(state, state.terms[state.index], false);
+      this._schedule(state);
+    },
+
+    _schedule(state) {
+      clearTimeout(state.timer);
+      state.timer = setTimeout(() => this._rotate(state), this._INTERVAL);
+    },
+
+    _rotate(state) {
       const modal = document.querySelector('#KarthikaSearchModal');
-      const input = document.querySelector('.karthika-search-modal-input');
-      const modalOpen = modal && modal.classList.contains('is-open');
-      const hasValue = input && input.value.trim().length > 0;
-
-      if (!modalOpen && !hasValue) {
-        this._index = (this._index + 1) % this._terms.length;
-        this._applyTerm(this._terms[this._index], true);
-      }
-
-      this._schedule();
-    },
-
-    _applyTerm(term, animate) {
-      const spans = document.querySelectorAll('#KarthikaSearchPlaceholder, .karthika-search-placeholder-text');
-      const input = document.querySelector('#KarthikaSearchModalInput');
-
-      if (input) input.placeholder = term;
-
-      if (!spans.length) return;
-
-      if (!animate) {
-        spans.forEach(span => { span.textContent = term; });
+      if (modal?.classList.contains('is-open')) {
+        this._schedule(state);
         return;
       }
 
-      spans.forEach(span => {
-        span.style.transition = 'opacity ' + this._FADE + 'ms ease';
-        span.style.opacity = '0';
-      });
+      state.index = (state.index + 1) % state.terms.length;
+      this._applyTerm(state, state.terms[state.index], true);
+      this._schedule(state);
+    },
 
+    _applyTerm(state, term, animate) {
+      if (!animate) {
+        state.target.textContent = term;
+        return;
+      }
+
+      state.target.style.transition = 'opacity ' + this._FADE + 'ms ease';
+      state.target.style.opacity = '0';
       setTimeout(() => {
-        spans.forEach(span => {
-          span.textContent = term;
-          span.style.opacity = '1';
-        });
+        state.target.textContent = term;
+        state.target.style.opacity = '1';
       }, this._FADE);
     }
   };

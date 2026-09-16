@@ -39,7 +39,9 @@ class FacetFiltersForm extends HTMLElement {
       '.facets-container .loading__spinner, facet-filters-form .loading__spinner',
     );
     loadingSpinners.forEach((spinner) => spinner.classList.remove('hidden'));
-    document.getElementById('ProductGridContainer').querySelector('.collection').classList.add('loading');
+    const productGrid = document.getElementById('ProductGridContainer');
+    productGrid?.querySelector('.collection')?.classList.add('loading');
+    productGrid?.classList.add('loading');
     if (countContainer) {
       countContainer.classList.add('loading');
     }
@@ -121,6 +123,7 @@ class FacetFiltersForm extends HTMLElement {
       .catch((error) => {
         console.error(error);
         updateEvent?.reject(error);
+        document.dispatchEvent(new CustomEvent('karthika:search-request-failed', { detail: { source: 'facets' } }));
       });
   }
 
@@ -137,9 +140,13 @@ class FacetFiltersForm extends HTMLElement {
   }
 
   static renderProductGridContainer(html) {
-    document.getElementById('ProductGridContainer').innerHTML = new DOMParser()
-      .parseFromString(html, 'text/html')
-      .getElementById('ProductGridContainer').innerHTML;
+    const dest = document.getElementById('ProductGridContainer');
+    const parsed = new DOMParser().parseFromString(html, 'text/html').getElementById('ProductGridContainer');
+    if (!dest || !parsed) {
+      document.dispatchEvent(new CustomEvent('karthika:search-request-failed', { detail: { source: 'facets' } }));
+      return;
+    }
+    dest.innerHTML = parsed.innerHTML;
 
     document
       .getElementById('ProductGridContainer')
@@ -152,8 +159,12 @@ class FacetFiltersForm extends HTMLElement {
   static renderProductCount(html, updateEvent) {
     const parsedHtml = new DOMParser().parseFromString(html, 'text/html');
     const sourceCount = parsedHtml.getElementById('ProductCount');
-    const count = sourceCount.innerHTML;
     const container = document.getElementById('ProductCount');
+    if (!sourceCount || !container) {
+      document.dispatchEvent(new CustomEvent('karthika:search-request-failed', { detail: { source: 'facets' } }));
+      return;
+    }
+    const count = sourceCount.innerHTML;
     const containerDesktop = document.getElementById('ProductCountDesktop');
     container.innerHTML = count;
     container.dataset.productCount = sourceCount.dataset.productCount || '';

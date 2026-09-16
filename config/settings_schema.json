@@ -1381,6 +1381,90 @@
         "default": true,
         "label": "t:settings_schema.search_input.settings.predictive_search_show_price.label",
         "info": "t:settings_schema.search_input.settings.predictive_search_show_price.info"
+      },
+      {
+        "type": "header",
+        "content": "Search shortcuts"
+      },
+      {
+        "type": "paragraph",
+        "content": "These are merchant-configured shortcuts, not live search statistics."
+      },
+      {
+        "type": "text",
+        "id": "search_shortcut_1",
+        "label": "Shortcut 1",
+        "default": "Rice"
+      },
+      {
+        "type": "text",
+        "id": "search_shortcut_2",
+        "label": "Shortcut 2",
+        "default": "Spices"
+      },
+      {
+        "type": "text",
+        "id": "search_shortcut_3",
+        "label": "Shortcut 3",
+        "default": "Snacks"
+      },
+      {
+        "type": "text",
+        "id": "search_shortcut_4",
+        "label": "Shortcut 4",
+        "default": "Vegetables"
+      },
+      {
+        "type": "text",
+        "id": "search_shortcut_5",
+        "label": "Shortcut 5",
+        "default": "Dairy"
+      },
+      {
+        "type": "text",
+        "id": "search_shortcut_6",
+        "label": "Shortcut 6",
+        "default": "Kerala Products"
+      },
+      {
+        "type": "header",
+        "content": "Search category cards"
+      },
+      {
+        "type": "collection",
+        "id": "search_category_1",
+        "label": "Category 1"
+      },
+      {
+        "type": "collection",
+        "id": "search_category_2",
+        "label": "Category 2"
+      },
+      {
+        "type": "collection",
+        "id": "search_category_3",
+        "label": "Category 3"
+      },
+      {
+        "type": "collection",
+        "id": "search_category_4",
+        "label": "Category 4"
+      },
+      {
+        "type": "collection",
+        "id": "search_category_5",
+        "label": "Category 5"
+      },
+      {
+        "type": "collection",
+        "id": "search_category_6",
+        "label": "Category 6"
+      },
+      {
+        "type": "collection",
+        "id": "search_recommend_collection",
+        "label": "You might need collection",
+        "info": "Products shown in the search screen. Leave blank to use the catalog."
       }
     ]
   },

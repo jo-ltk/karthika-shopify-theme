@@ -185,9 +185,7 @@ class PredictiveSearch extends SearchForm {
     })
       .then((response) => {
         if (!response.ok) {
-          var error = new Error(response.status);
-          this.close();
-          throw error;
+          throw new Error(response.status);
         }
 
         return response.text();
@@ -195,24 +193,25 @@ class PredictiveSearch extends SearchForm {
       .then((text) => {
         const resultsMarkup = new DOMParser()
           .parseFromString(text, 'text/html')
-          .querySelector('#shopify-section-predictive-search').innerHTML;
+          .querySelector('#shopify-section-predictive-search');
+        if (!resultsMarkup) {
+          throw new Error('malformed-predictive-search');
+        }
         // Save bandwidth keeping the cache in all instances synced
         this.allPredictiveSearchInstances.forEach((predictiveSearchInstance) => {
-          predictiveSearchInstance.cachedResults[queryKey] = resultsMarkup;
+          predictiveSearchInstance.cachedResults[queryKey] = resultsMarkup.innerHTML;
         });
-        this.renderSearchResults(resultsMarkup);
+        this.renderSearchResults(resultsMarkup.innerHTML);
 
         searchDeferred?.resolve({ totalCount: this.getTotalResultCount() });
       })
       .catch((error) => {
-        if (error?.code === 20) {
-          // Code 20 means the call was aborted
+        if (error?.name === 'AbortError' || error?.code === 20) {
           searchDeferred?.reject(error);
           return;
         }
         searchDeferred?.reject(error);
-        this.close();
-        throw error;
+        this.showError();
       });
   }
 
@@ -265,9 +264,31 @@ class PredictiveSearch extends SearchForm {
   }
 
   getResultsMaxHeight() {
-    this.resultsMaxHeight =
-      window.innerHeight - document.querySelector('.section-header')?.getBoundingClientRect().bottom;
+    const modal = this.closest('#KarthikaSearchModal');
+    if (modal) {
+      const header = modal.querySelector('.karthika-search-modal-header');
+      const headerBottom = header ? header.getBoundingClientRect().bottom : 72;
+      this.resultsMaxHeight = Math.max(160, window.innerHeight - headerBottom - 24);
+      return this.resultsMaxHeight;
+    }
+    const headerBottom = document.querySelector('.section-header')?.getBoundingClientRect().bottom || 0;
+    this.resultsMaxHeight = window.innerHeight - headerBottom;
     return this.resultsMaxHeight;
+  }
+
+  showError() {
+    if (!this.predictiveSearchResults) return;
+    this.predictiveSearchResults.innerHTML =
+      '<div class="karthika-search-error karthika-search-error--predictive" role="alert">We couldn\'t load suggestions. Check your connection and try again.</div>';
+    this.setAttribute('results', true);
+    this.removeAttribute('loading');
+    this.open();
+    if (this.statusElement) {
+      this.setLiveRegionText("We couldn't load suggestions. Please try again.");
+    }
+    document.dispatchEvent(
+      new CustomEvent('karthika:search-request-failed', { detail: { source: 'predictive' } })
+    );
   }
 
   open() {
