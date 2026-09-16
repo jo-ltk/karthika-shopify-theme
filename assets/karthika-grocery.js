@@ -746,7 +746,7 @@
 
     init() {
       this._onDocumentKeydown = (event) => this.onDocumentKeydown(event);
-      document.addEventListener('keydown', this._onDocumentKeydown);
+      document.addEventListener('keydown', this._onDocumentKeydown, true);
       this.restore();
 
       document.addEventListener('click', (e) => {
@@ -877,7 +877,7 @@
       const modal = this.getModal();
       if (!modal || modal.hidden) return;
 
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' || event.key === 'Esc') {
         event.preventDefault();
         this.close();
         return;
@@ -906,10 +906,15 @@
       modal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('karthika-location-open');
       this.syncTriggerState(true);
+      if (this._lastTrigger && typeof this._lastTrigger.blur === 'function') {
+        this._lastTrigger.blur();
+      }
       this.setBackgroundInert(true);
       window.requestAnimationFrame(() => {
-        const selected = modal.querySelector('.karthika-location-item.is-selected') || modal.querySelector('.karthika-delivery-modal-close');
-        selected?.focus();
+        const selected =
+          modal.querySelector('.karthika-location-item.is-selected') ||
+          modal.querySelector('.karthika-delivery-modal-close:not(.karthika-delivery-modal-backdrop)');
+        if (selected && typeof selected.focus === 'function') selected.focus();
       });
     },
 
