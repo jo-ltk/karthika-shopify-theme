@@ -48,6 +48,15 @@
       "search": "Търсене",
       "reset": "Изчисти думата за търсене"
     },
+    "location": {
+      "title": "Store location",
+      "close": "Close location selector",
+      "delivering_to": "Delivering to",
+      "change_location": "Choose store location",
+      "checkout_note": "This updates the location shown in the header. Shipping options and rates are calculated at checkout.",
+      "unconfigured": "Add a store address in Theme settings → Store location & delivery.",
+      "from_store": "From {{ name }}"
+    },
     "wishlist": {
       "add": "Add {{ product }} to wishlist",
       "remove": "Remove {{ product }} from wishlist",

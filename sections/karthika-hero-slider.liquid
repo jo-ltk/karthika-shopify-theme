@@ -14,7 +14,7 @@
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
-              <span>{{ block.settings.badge_text | default: '30-Min Singapore Delivery' }}</span>
+              <span>{{ block.settings.badge_text | default: settings.delivery_area_text | default: 'Delivery across Singapore' }}</span>
             </div>
 
             <h1 class="karthika-hero-title">
@@ -72,7 +72,7 @@
           "type": "text",
           "id": "badge_text",
           "label": "Badge Text",
-          "default": "30-Min Singapore Delivery"
+          "default": "Delivery across Singapore"
         },
         {
           "type": "text",

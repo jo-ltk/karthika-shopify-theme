@@ -1469,6 +1469,162 @@
     ]
   },
   {
+    "name": "Store location & delivery",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "These fields control storefront location and delivery copy. They do not change Shopify checkout, shipping rates, or currency."
+      },
+      {
+        "type": "text",
+        "id": "store_location_name",
+        "label": "Store location name",
+        "default": "Karthika Main Store"
+      },
+      {
+        "type": "textarea",
+        "id": "store_location_address",
+        "label": "Store address",
+        "info": "Used in the header, location selector, product delivery note, and footer when the footer address is empty.",
+        "default": "34 Buffalo Road, Singapore 219796"
+      },
+      {
+        "type": "text",
+        "id": "store_location_city",
+        "label": "Store city",
+        "default": "Singapore"
+      },
+      {
+        "type": "text",
+        "id": "store_location_region",
+        "label": "Store region or neighbourhood",
+        "default": "Little India"
+      },
+      {
+        "type": "text",
+        "id": "store_location_country",
+        "label": "Store country",
+        "default": "Singapore"
+      },
+      {
+        "type": "text",
+        "id": "store_location_postal",
+        "label": "Store postal code",
+        "default": "219796"
+      },
+      {
+        "type": "textarea",
+        "id": "delivery_area_text",
+        "label": "Delivery area",
+        "info": "Marketing copy for where you deliver. Not a live delivery-zone calculation.",
+        "default": "Delivery across Singapore"
+      },
+      {
+        "type": "text",
+        "id": "delivery_promise_text",
+        "label": "Delivery promise",
+        "info": "Shown on product pages and similar surfaces. Do not claim a delivery time unless you actually offer it.",
+        "default": "Delivery from Karthika Supermarket"
+      },
+      {
+        "type": "text",
+        "id": "delivery_promo_text",
+        "label": "Header delivery promo",
+        "info": "Desktop header message. Leave blank to hide. Use the store currency; do not hardcode a different currency symbol.",
+        "default": "Free delivery on qualifying orders"
+      },
+      {
+        "type": "number",
+        "id": "free_delivery_threshold",
+        "label": "Promotional free-delivery threshold",
+        "info": "Cart drawer progress bar only. Enter the amount in the store currency's smallest unit (for SGD/USD, cents). 0 hides the bar. This is not live Shopify shipping.",
+        "default": 0
+      },
+      {
+        "type": "textarea",
+        "id": "location_selector_note",
+        "label": "Location selector note",
+        "default": "This updates the location shown in the header. Shipping options and rates are calculated at checkout."
+      },
+      {
+        "type": "header",
+        "content": "Optional delivery areas"
+      },
+      {
+        "type": "paragraph",
+        "content": "Shown in the location selector for storefront display only. Leave a row blank to hide it. These areas do not change checkout shipping."
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_1_name",
+        "label": "Area 1 name",
+        "default": "Karthika Main Store"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_1_address",
+        "label": "Area 1 address",
+        "default": "34 Buffalo Road, Singapore 219796"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_1_note",
+        "label": "Area 1 note"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_2_name",
+        "label": "Area 2 name",
+        "default": "Tampines & East Area"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_2_address",
+        "label": "Area 2 address",
+        "default": "Tampines Central, Singapore 529538"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_2_note",
+        "label": "Area 2 note"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_3_name",
+        "label": "Area 3 name",
+        "default": "Jurong & West Region"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_3_address",
+        "label": "Area 3 address",
+        "default": "Jurong East Ave 1, Singapore 609788"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_3_note",
+        "label": "Area 3 note"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_4_name",
+        "label": "Area 4 name",
+        "default": "Woodlands & North Region"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_4_address",
+        "label": "Area 4 address",
+        "default": "Woodlands Square, Singapore 737737"
+      },
+      {
+        "type": "text",
+        "id": "delivery_area_4_note",
+        "label": "Area 4 note"
+      }
+    ]
+  },
+  {
     "name": "t:settings_schema.currency_format.name",
     "settings": [
       {

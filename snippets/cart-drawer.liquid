@@ -76,9 +76,9 @@
         </button>
       </div>
 
-      {%- if cart != empty -%}
+      {%- if cart != empty and settings.free_delivery_threshold > 0 -%}
         {%- liquid
-          assign free_shipping_threshold = 5000
+          assign free_shipping_threshold = settings.free_delivery_threshold
           assign cart_total = cart.total_price
           assign amount_left = free_shipping_threshold | minus: cart_total
           assign progress_percent = cart_total | times: 100.0 | divided_by: free_shipping_threshold
@@ -89,9 +89,9 @@
         <div class="karthika-drawer-free-shipping" style="margin: 0 1.5rem 1.2rem 1.5rem;">
           <div style="display: flex; align-items: center; justify-content: space-between; font-size: 1.2rem; font-weight: 700; color: var(--karthika-text-dark);">
             {%- if amount_left > 0 -%}
-              <span>🚚 Add <strong style="color: var(--karthika-red);">{{ amount_left | money }}</strong> for FREE Delivery</span>
+              <span>Add <strong style="color: var(--karthika-red);">{{ amount_left | money }}</strong> for free delivery</span>
             {%- else -%}
-              <span style="color: #15803D;">🎉 You've unlocked FREE Singapore Delivery!</span>
+              <span style="color: #15803D;">You’ve unlocked free delivery</span>
             {%- endif -%}
           </div>
           <div class="karthika-progress-bar-bg">

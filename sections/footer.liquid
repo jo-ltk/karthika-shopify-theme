@@ -46,7 +46,7 @@
     assign helpline_phone = section.settings.helpline_phone | default: '(65) 6297 7533' | strip
     assign fax_number = section.settings.fax_number | default: '(65) 62977511' | strip
     assign contact_email = section.settings.contact_email | default: 'grocery@karthika.sg' | strip
-    assign store_address = section.settings.store_address | default: '34, Buffalo Road Singapore 219796' | strip
+    assign store_address = settings.store_location_address | default: section.settings.store_address | strip
     assign gst_number = section.settings.gst_number | default: '200311912H' | strip
     assign helpline_heading = section.settings.helpline_heading | default: 'Helpline' | strip
     assign helpline_tel = helpline_phone | replace: ' ', '' | replace: '(', '' | replace: ')', '' | replace: '-', ''
@@ -561,7 +561,8 @@
       "type": "textarea",
       "id": "store_address",
       "label": "Address",
-      "default": "34, Buffalo Road Singapore 219796"
+      "info": "Used when Theme settings → Store location address is empty.",
+      "default": "34 Buffalo Road, Singapore 219796"
     },
     {
       "type": "text",

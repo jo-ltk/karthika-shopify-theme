@@ -57,10 +57,34 @@
 
 {%- unless template.name == 'list-collections' or request.path == '/collections' -%}
 <div class="karthika-desktop-header" role="banner">
+  {%- liquid
+    assign store_location_label = settings.store_location_address | strip
+    if store_location_label == blank and settings.store_location_city != blank and settings.store_location_postal != blank
+      assign store_location_label = settings.store_location_city | append: ' ' | append: settings.store_location_postal | strip
+    elsif store_location_label == blank
+      assign store_location_label = settings.store_location_city | strip
+    endif
+    if store_location_label == blank
+      assign store_location_label = settings.store_location_name | strip
+    endif
+  -%}
   <div class="karthika-desktop-header__utility">
     <div class="karthika-desktop-header__utility-inner">
-      <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#128666;</span> Free delivery on orders above &#8377;499</span>
-      <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#9906;</span> Delivering to <strong>682024, Kochi</strong> <span aria-hidden="true">&#8964;</span></span>
+      {%- if settings.delivery_promo_text != blank -%}
+        <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#128666;</span> {{ settings.delivery_promo_text | escape }}</span>
+      {%- endif -%}
+      <button
+        type="button"
+        class="karthika-desktop-header__utility-item karthika-desktop-header__location karthika-change-location-btn"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="KarthikaDeliveryModal"
+        aria-label="{{ 'general.location.change_location' | t }}"
+      >
+        <span aria-hidden="true">&#9906;</span>
+        {{ 'general.location.delivering_to' | t }}
+        <strong class="karthika-delivery-address">{% if store_location_label != blank %}{{ store_location_label | escape }}{% else %}{{ 'general.location.unconfigured' | t }}{% endif %}</strong>
+      </button>
       <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#128241;</span> Download App</span>
       <span class="karthika-desktop-header__utility-item"><span aria-hidden="true">&#9716;</span> Track Order</span>
     </div>
@@ -164,18 +188,25 @@
     </div>
   </div>
 
-  <div class="karthika-delivery-strip karthika-change-location-btn" role="button" tabindex="0" aria-label="Change delivery location">
+  <button
+    type="button"
+    class="karthika-delivery-strip karthika-change-location-btn"
+    aria-haspopup="dialog"
+    aria-expanded="false"
+    aria-controls="KarthikaDeliveryModal"
+    aria-label="{{ 'general.location.change_location' | t }}"
+  >
     <svg class="karthika-delivery-pin" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
     </svg>
     <span class="karthika-delivery-copy">
-      <span class="karthika-delivery-label">delivering to</span>
-      <span class="karthika-delivery-address">lampines central, singapore 520123</span>
+      <span class="karthika-delivery-label">{{ 'general.location.delivering_to' | t }}</span>
+      <span class="karthika-delivery-address">{% if store_location_label != blank %}{{ store_location_label | escape }}{% else %}{{ 'general.location.unconfigured' | t }}{% endif %}</span>
     </span>
     <svg class="karthika-delivery-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
       <polyline points="6 9 12 15 18 9"></polyline>
     </svg>
-  </div>
+  </button>
 
   {%- liquid
     if template.name == 'collection' and collection.handle == 'all'

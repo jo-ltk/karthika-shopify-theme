@@ -513,7 +513,7 @@
                           endif
                         -%}
                         {%- if delivery_source != blank -%}
-                          <div class="karthika-product-delivery-note__meta">{{ 'From ' | append: delivery_source | escape }}</div>
+                          <div class="karthika-product-delivery-note__meta">{{ 'general.location.from_store' | t: name: delivery_source }}</div>
                         {%- endif -%}
                       </div>
                     </div>

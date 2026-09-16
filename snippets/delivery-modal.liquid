@@ -1,71 +1,197 @@
 {% doc %}
-  Renders the delivery location modal for selecting Singapore addresses and postal codes.
+  Informational store location selector. Updates header display only; does not change checkout shipping.
 {% enddoc %}
 
-<div id="KarthikaDeliveryModal" class="karthika-delivery-modal" role="dialog" aria-modal="true" aria-labelledby="DeliveryModalTitle">
-  <div class="karthika-delivery-modal-box">
+{%- liquid
+  assign location_address = settings.store_location_address | strip
+  assign location_city = settings.store_location_city | strip
+  assign location_postal = settings.store_location_postal | strip
+  assign location_name = settings.store_location_name | strip
+  assign default_label = location_address
+  if default_label == blank and location_city != blank and location_postal != blank
+    assign default_label = location_city | append: ' ' | append: location_postal
+  elsif default_label == blank
+    assign default_label = location_city
+  endif
+  if default_label == blank
+    assign default_label = location_name
+  endif
+-%}
+
+<div
+  id="KarthikaDeliveryModal"
+  class="karthika-delivery-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="KarthikaDeliveryModalTitle"
+  aria-describedby="KarthikaDeliveryModalDesc"
+  aria-hidden="true"
+  hidden
+  data-default-location="{{ default_label | escape }}"
+>
+  <button
+    type="button"
+    class="karthika-delivery-modal-backdrop"
+    data-karthika-location-dismiss
+    tabindex="-1"
+    aria-label="{{ 'general.location.close' | t }}"
+  ></button>
+  <div class="karthika-delivery-modal-box" role="document">
     <div class="karthika-delivery-modal-head">
-      <h3 id="DeliveryModalTitle" class="karthika-delivery-modal-title">Select Delivery Location</h3>
-      <button type="button" class="karthika-delivery-modal-close" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--karthika-text-muted);">&times;</button>
+      <h2 id="KarthikaDeliveryModalTitle" class="karthika-delivery-modal-title">
+        {{ 'general.location.title' | t }}
+      </h2>
+      <button
+        type="button"
+        class="karthika-delivery-modal-close"
+        data-karthika-location-dismiss
+        aria-label="{{ 'general.location.close' | t }}"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
     </div>
 
-    <p style="font-size: 13px; color: var(--karthika-text-muted); margin-bottom: 16px;">
-      Express 30-min Indian grocery delivery across Singapore. Select your address:
+    {%- if settings.delivery_area_text != blank -%}
+      <p id="KarthikaDeliveryModalIntro" class="karthika-delivery-modal-intro">
+        {{ settings.delivery_area_text | escape }}
+      </p>
+    {%- endif -%}
+
+    <p id="KarthikaDeliveryModalDesc" class="karthika-delivery-modal-note">
+      {%- if settings.location_selector_note != blank -%}
+        {{ settings.location_selector_note | escape }}
+      {%- else -%}
+        {{ 'general.location.checkout_note' | t }}
+      {%- endif -%}
     </p>
 
-    <div class="karthika-location-item is-selected" data-address="34 Buffalo Road, Little India (219796)">
-      <div>
-        <div style="font-weight: 700; font-size: 14px; color: var(--karthika-text-dark);">Karthika Main Store (Little India)</div>
-        <div style="font-size: 12px; color: var(--karthika-text-muted);">34 Buffalo Road, Singapore 219796</div>
-      </div>
-      <span style="font-size: 11px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 2px 8px; border-radius: 999px;">30 min</span>
-    </div>
+    <div class="karthika-location-list">
+      {%- liquid
+        assign area_1_name = settings.delivery_area_1_name | strip
+        assign area_1_address = settings.delivery_area_1_address | strip
+        assign area_1_note = settings.delivery_area_1_note | strip
+        assign area_2_name = settings.delivery_area_2_name | strip
+        assign area_2_address = settings.delivery_area_2_address | strip
+        assign area_2_note = settings.delivery_area_2_note | strip
+        assign area_3_name = settings.delivery_area_3_name | strip
+        assign area_3_address = settings.delivery_area_3_address | strip
+        assign area_3_note = settings.delivery_area_3_note | strip
+        assign area_4_name = settings.delivery_area_4_name | strip
+        assign area_4_address = settings.delivery_area_4_address | strip
+        assign area_4_note = settings.delivery_area_4_note | strip
+      -%}
 
-    <div class="karthika-location-item" data-address="Tampines Central, Singapore 529538">
-      <div>
-        <div style="font-weight: 700; font-size: 14px; color: var(--karthika-text-dark);">Tampines & East Area</div>
-        <div style="font-size: 12px; color: var(--karthika-text-muted);">Tampines Central, Singapore 529538</div>
-      </div>
-      <span style="font-size: 11px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 2px 8px; border-radius: 999px;">Express</span>
-    </div>
-
-    <div class="karthika-location-item" data-address="Jurong East Ave 1, Singapore 609788">
-      <div>
-        <div style="font-weight: 700; font-size: 14px; color: var(--karthika-text-dark);">Jurong & West Region</div>
-        <div style="font-size: 12px; color: var(--karthika-text-muted);">Jurong East Ave 1, Singapore 609788</div>
-      </div>
-      <span style="font-size: 11px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 2px 8px; border-radius: 999px;">Express</span>
-    </div>
-
-    <div class="karthika-location-item" data-address="Woodlands Square, Singapore 737737">
-      <div>
-        <div style="font-weight: 700; font-size: 14px; color: var(--karthika-text-dark);">Woodlands & North Region</div>
-        <div style="font-size: 12px; color: var(--karthika-text-muted);">Woodlands Square, Singapore 737737</div>
-      </div>
-      <span style="font-size: 11px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 2px 8px; border-radius: 999px;">Same Day</span>
-    </div>
-
-    <div style="margin-top: 16px; border-top: 1px solid var(--karthika-border); padding-top: 14px;">
-      <label style="font-size: 12px; font-weight: 700; color: var(--karthika-text-dark); display: block; margin-bottom: 6px;">
-        Or enter Singapore 6-digit postal code:
-      </label>
-      <div style="display: flex; gap: 8px;">
-        <input
-          type="text"
-          id="KarthikaPostalInput"
-          placeholder="e.g. 219796"
-          maxlength="6"
-          style="flex: 1; padding: 8px 12px; border-radius: var(--karthika-radius-md); border: 1px solid var(--karthika-border); font-size: 14px; outline: none;"
-        >
+      {%- if area_1_name != blank or area_1_address != blank -%}
+        {%- liquid
+          assign area_1_label = area_1_address
+          if area_1_label == blank
+            assign area_1_label = area_1_name
+          endif
+        -%}
         <button
           type="button"
-          id="KarthikaPostalSubmit"
-          style="background: var(--karthika-red); color: #fff; border: none; padding: 8px 16px; border-radius: var(--karthika-radius-pill); font-weight: 700; font-size: 13px; cursor: pointer;"
-          onclick="const val = document.getElementById('KarthikaPostalInput').value; if(val){ window.Karthika.Location.setLocation('Singapore ' + val); }"
+          class="karthika-location-item{% if area_1_label == default_label %} is-selected{% endif %}"
+          data-location-id="area-1"
+          data-address="{{ area_1_label | escape }}"
+          aria-pressed="{% if area_1_label == default_label %}true{% else %}false{% endif %}"
         >
-          Confirm
+          <span class="karthika-location-item__copy">
+            {%- if area_1_name != blank -%}<span class="karthika-location-item__name">{{ area_1_name | escape }}</span>{%- endif -%}
+            {%- if area_1_address != blank -%}<span class="karthika-location-item__address">{{ area_1_address | escape }}</span>{%- endif -%}
+          </span>
+          {%- if area_1_note != blank -%}<span class="karthika-location-item__note">{{ area_1_note | escape }}</span>{%- endif -%}
         </button>
-      </div>
+      {%- endif -%}
+
+      {%- if area_2_name != blank or area_2_address != blank -%}
+        {%- liquid
+          assign area_2_label = area_2_address
+          if area_2_label == blank
+            assign area_2_label = area_2_name
+          endif
+        -%}
+        <button
+          type="button"
+          class="karthika-location-item{% if area_2_label == default_label %} is-selected{% endif %}"
+          data-location-id="area-2"
+          data-address="{{ area_2_label | escape }}"
+          aria-pressed="{% if area_2_label == default_label %}true{% else %}false{% endif %}"
+        >
+          <span class="karthika-location-item__copy">
+            {%- if area_2_name != blank -%}<span class="karthika-location-item__name">{{ area_2_name | escape }}</span>{%- endif -%}
+            {%- if area_2_address != blank -%}<span class="karthika-location-item__address">{{ area_2_address | escape }}</span>{%- endif -%}
+          </span>
+          {%- if area_2_note != blank -%}<span class="karthika-location-item__note">{{ area_2_note | escape }}</span>{%- endif -%}
+        </button>
+      {%- endif -%}
+
+      {%- if area_3_name != blank or area_3_address != blank -%}
+        {%- liquid
+          assign area_3_label = area_3_address
+          if area_3_label == blank
+            assign area_3_label = area_3_name
+          endif
+        -%}
+        <button
+          type="button"
+          class="karthika-location-item{% if area_3_label == default_label %} is-selected{% endif %}"
+          data-location-id="area-3"
+          data-address="{{ area_3_label | escape }}"
+          aria-pressed="{% if area_3_label == default_label %}true{% else %}false{% endif %}"
+        >
+          <span class="karthika-location-item__copy">
+            {%- if area_3_name != blank -%}<span class="karthika-location-item__name">{{ area_3_name | escape }}</span>{%- endif -%}
+            {%- if area_3_address != blank -%}<span class="karthika-location-item__address">{{ area_3_address | escape }}</span>{%- endif -%}
+          </span>
+          {%- if area_3_note != blank -%}<span class="karthika-location-item__note">{{ area_3_note | escape }}</span>{%- endif -%}
+        </button>
+      {%- endif -%}
+
+      {%- if area_4_name != blank or area_4_address != blank -%}
+        {%- liquid
+          assign area_4_label = area_4_address
+          if area_4_label == blank
+            assign area_4_label = area_4_name
+          endif
+        -%}
+        <button
+          type="button"
+          class="karthika-location-item{% if area_4_label == default_label %} is-selected{% endif %}"
+          data-location-id="area-4"
+          data-address="{{ area_4_label | escape }}"
+          aria-pressed="{% if area_4_label == default_label %}true{% else %}false{% endif %}"
+        >
+          <span class="karthika-location-item__copy">
+            {%- if area_4_name != blank -%}<span class="karthika-location-item__name">{{ area_4_name | escape }}</span>{%- endif -%}
+            {%- if area_4_address != blank -%}<span class="karthika-location-item__address">{{ area_4_address | escape }}</span>{%- endif -%}
+          </span>
+          {%- if area_4_note != blank -%}<span class="karthika-location-item__note">{{ area_4_note | escape }}</span>{%- endif -%}
+        </button>
+      {%- endif -%}
+
+      {%- assign has_configured_areas = false -%}
+      {%- if area_1_name != blank or area_1_address != blank or area_2_name != blank or area_2_address != blank or area_3_name != blank or area_3_address != blank or area_4_name != blank or area_4_address != blank -%}
+        {%- assign has_configured_areas = true -%}
+      {%- endif -%}
+
+      {%- if has_configured_areas == false and default_label != blank -%}
+        <button
+          type="button"
+          class="karthika-location-item is-selected"
+          data-location-id="area-1"
+          data-address="{{ default_label | escape }}"
+          aria-pressed="true"
+        >
+          <span class="karthika-location-item__copy">
+            {%- if location_name != blank -%}<span class="karthika-location-item__name">{{ location_name | escape }}</span>{%- endif -%}
+            <span class="karthika-location-item__address">{{ default_label | escape }}</span>
+          </span>
+        </button>
+      {%- endif -%}
     </div>
+
+    {%- if default_label == blank and area_1_name == blank and area_2_name == blank and area_3_name == blank and area_4_name == blank and area_1_address == blank and area_2_address == blank and area_3_address == blank and area_4_address == blank -%}
+      <p class="karthika-delivery-modal-empty">{{ 'general.location.unconfigured' | t }}</p>
+    {%- endif -%}
   </div>
 </div>
