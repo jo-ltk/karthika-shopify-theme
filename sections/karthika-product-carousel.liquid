@@ -2,7 +2,15 @@
   Karthika product shelf. Products come from one merchant-selected collection.
 {%- endcomment -%}
 
+{%- comment -%}
+  UI restore: if no collection is configured in the theme editor, fall back to the
+  all-products collection so historical homepage shelves still render (matches
+  pre-93a94c5 index.json which bound shelves to "all"). No offset slicing.
+{%- endcomment -%}
 {%- assign target_collection = section.settings.collection -%}
+{%- if target_collection == blank -%}
+  {%- assign target_collection = collections.all -%}
+{%- endif -%}
 {%- assign products_to_show = section.settings.products_to_show | default: 4 -%}
 
 {%- if target_collection != blank -%}

@@ -20,24 +20,120 @@
     "quick_tabs": {
       "type": "karthika-quick-tabs",
       "blocks": {
-        "tab_1": { "type": "tab_item", "settings": { "label": "All", "icon": "🛍️", "link_all_products": true } },
-        "tab_2": { "type": "tab_item", "settings": { "label": "Rice", "icon": "🍚", "collection": "rice-grains", "collection_handle": "rice-grains" } },
-        "tab_3": { "type": "tab_item", "settings": { "label": "Spices", "icon": "🌶️", "collection": "spices-masala", "collection_handle": "spices-masala" } },
-        "tab_4": { "type": "tab_item", "settings": { "label": "Snacks", "icon": "🍪", "collection": "indian-snacks", "collection_handle": "indian-snacks" } },
-        "tab_5": { "type": "tab_item", "settings": { "label": "Beverages", "icon": "🥤", "collection": "beverages", "collection_handle": "beverages" } },
-        "tab_6": { "type": "tab_item", "settings": { "label": "Dairy", "icon": "🥛", "collection": "dairy-eggs", "collection_handle": "dairy-eggs" } }
+        "tab_1": {
+          "type": "tab_item",
+          "settings": {
+            "label": "All",
+            "icon": "\ud83d\udecd\ufe0f",
+            "link_all_products": true
+          }
+        },
+        "tab_2": {
+          "type": "tab_item",
+          "settings": {
+            "label": "Rice",
+            "icon": "\ud83c\udf5a",
+            "collection": "rice-grains",
+            "collection_handle": "rice-grains"
+          }
+        },
+        "tab_3": {
+          "type": "tab_item",
+          "settings": {
+            "label": "Spices",
+            "icon": "\ud83c\udf36\ufe0f",
+            "collection": "spices-masala",
+            "collection_handle": "spices-masala"
+          }
+        },
+        "tab_4": {
+          "type": "tab_item",
+          "settings": {
+            "label": "Snacks",
+            "icon": "\ud83c\udf6a",
+            "collection": "indian-snacks",
+            "collection_handle": "indian-snacks"
+          }
+        },
+        "tab_5": {
+          "type": "tab_item",
+          "settings": {
+            "label": "Beverages",
+            "icon": "\ud83e\udd64",
+            "collection": "beverages",
+            "collection_handle": "beverages"
+          }
+        },
+        "tab_6": {
+          "type": "tab_item",
+          "settings": {
+            "label": "Dairy",
+            "icon": "\ud83e\udd5b",
+            "collection": "dairy-eggs",
+            "collection_handle": "dairy-eggs"
+          }
+        }
       },
-      "block_order": ["tab_1", "tab_2", "tab_3", "tab_4", "tab_5", "tab_6"],
-      "settings": { "title": "Shop by category" }
+      "block_order": [
+        "tab_1",
+        "tab_2",
+        "tab_3",
+        "tab_4",
+        "tab_5",
+        "tab_6"
+      ],
+      "settings": {
+        "title": "Shop by category"
+      }
     },
     "festive_ad_banner": {
       "type": "karthika-ad-banner",
       "blocks": {
-        "banner_1": { "type": "slide", "settings": { "heading": "Freshness You Can Trust", "subheading": "Fresh Picks", "description": "Handpicked fruits & veggies for a healthier you", "badge_text": "40% OFF", "button_text": "Shop Now", "image": "", "link": "", "title": "Banner 1" } },
-        "banner_2": { "type": "slide", "settings": { "heading": "Poli Onam Sale", "subheading": "Festive Sale", "description": "Onam specials, Sadya essentials & festive picks", "badge_text": "50% OFF", "button_text": "Shop Now", "image": "", "link": "", "title": "Banner 2" } },
-        "banner_3": { "type": "slide", "settings": { "heading": "New Season Arrivals", "subheading": "Fresh Picks", "description": "Discover what's in season now", "badge_text": "NEW", "button_text": "Shop Now", "image": "", "link": "", "title": "Banner 3" } }
+        "banner_1": {
+          "type": "slide",
+          "settings": {
+            "heading": "Freshness You Can Trust",
+            "subheading": "Fresh Picks",
+            "description": "Handpicked fruits & veggies for a healthier you",
+            "badge_text": "40% OFF",
+            "button_text": "Shop Now",
+            "image": "",
+            "link": "",
+            "title": "Banner 1"
+          }
+        },
+        "banner_2": {
+          "type": "slide",
+          "settings": {
+            "heading": "Poli Onam Sale",
+            "subheading": "Festive Sale",
+            "description": "Onam specials, Sadya essentials & festive picks",
+            "badge_text": "50% OFF",
+            "button_text": "Shop Now",
+            "image": "",
+            "link": "",
+            "title": "Banner 2"
+          }
+        },
+        "banner_3": {
+          "type": "slide",
+          "settings": {
+            "heading": "New Season Arrivals",
+            "subheading": "Fresh Picks",
+            "description": "Discover what's in season now",
+            "badge_text": "NEW",
+            "button_text": "Shop Now",
+            "image": "",
+            "link": "",
+            "title": "Banner 3"
+          }
+        }
       },
-      "block_order": ["banner_1", "banner_2", "banner_3"],
+      "block_order": [
+        "banner_1",
+        "banner_2",
+        "banner_3"
+      ],
       "settings": {
         "autoplay_speed": 5
       }
@@ -45,16 +141,81 @@
     "featured_grid": {
       "type": "karthika-feature-grid",
       "blocks": {
-        "card_1": { "type": "feature_card", "settings": { "title": "Onam specials", "bg_color": "#DDF4A8", "demo_image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=300&q=80" } },
-        "card_2": { "type": "feature_card", "settings": { "title": "Sadya & payasam", "bg_color": "#FFE58A", "demo_image_url": "https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=300&q=80" } },
-        "card_3": { "type": "feature_card", "settings": { "title": "Pookkalam & celebration", "bg_color": "#FFC9B8", "demo_image_url": "https://images.unsplash.com/photo-1604423043492-95d33ba90c3d?auto=format&fit=crop&w=300&q=80" } },
-        "card_4": { "type": "feature_card", "settings": { "title": "Glam up for the festival", "bg_color": "#CFE9FF", "demo_image_url": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80" } },
-        "card_5": { "type": "feature_card", "settings": { "title": "Fresh vegetables", "bg_color": "#E7EEDA", "demo_image_url": "https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=300&q=80" } },
-        "card_6": { "type": "feature_card", "settings": { "title": "Kerala snacks", "bg_color": "#FFEDA8", "demo_image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=300&q=80" } },
-        "card_7": { "type": "feature_card", "settings": { "title": "Dairy delights", "bg_color": "#EAF4DE", "demo_image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=300&q=80" } },
-        "card_8": { "type": "feature_card", "settings": { "title": "Home essentials", "bg_color": "#FCEAEA", "demo_image_url": "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=300&q=80" } }
+        "card_1": {
+          "type": "feature_card",
+          "settings": {
+            "title": "Onam specials",
+            "bg_color": "#DDF4A8",
+            "demo_image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=300&q=80"
+          }
+        },
+        "card_2": {
+          "type": "feature_card",
+          "settings": {
+            "title": "Sadya & payasam",
+            "bg_color": "#FFE58A",
+            "demo_image_url": "https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=300&q=80"
+          }
+        },
+        "card_3": {
+          "type": "feature_card",
+          "settings": {
+            "title": "Pookkalam & celebration",
+            "bg_color": "#FFC9B8",
+            "demo_image_url": "https://images.unsplash.com/photo-1604423043492-95d33ba90c3d?auto=format&fit=crop&w=300&q=80"
+          }
+        },
+        "card_4": {
+          "type": "feature_card",
+          "settings": {
+            "title": "Glam up for the festival",
+            "bg_color": "#CFE9FF",
+            "demo_image_url": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80"
+          }
+        },
+        "card_5": {
+          "type": "feature_card",
+          "settings": {
+            "title": "Fresh vegetables",
+            "bg_color": "#E7EEDA",
+            "demo_image_url": "https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=300&q=80"
+          }
+        },
+        "card_6": {
+          "type": "feature_card",
+          "settings": {
+            "title": "Kerala snacks",
+            "bg_color": "#FFEDA8",
+            "demo_image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=300&q=80"
+          }
+        },
+        "card_7": {
+          "type": "feature_card",
+          "settings": {
+            "title": "Dairy delights",
+            "bg_color": "#EAF4DE",
+            "demo_image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=300&q=80"
+          }
+        },
+        "card_8": {
+          "type": "feature_card",
+          "settings": {
+            "title": "Home essentials",
+            "bg_color": "#FCEAEA",
+            "demo_image_url": "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=300&q=80"
+          }
+        }
       },
-      "block_order": ["card_1", "card_2", "card_3", "card_4", "card_5", "card_6", "card_7", "card_8"],
+      "block_order": [
+        "card_1",
+        "card_2",
+        "card_3",
+        "card_4",
+        "card_5",
+        "card_6",
+        "card_7",
+        "card_8"
+      ],
       "settings": {
         "title": "",
         "link_text": ""
@@ -78,7 +239,8 @@
         "subtitle": "Daily fresh savings & discounts",
         "link_text": "See all",
         "preset_type": "deals",
-        "products_to_show": 6
+        "products_to_show": 6,
+        "collection": "all"
       }
     },
     "kerala_favourites": {
@@ -88,26 +250,104 @@
         "subtitle": "Authentic flavours from home",
         "link_text": "See all",
         "preset_type": "kerala",
-        "products_to_show": 6
+        "products_to_show": 6,
+        "collection": "all"
       }
     },
     "karthika_ai": {
       "type": "karthika-ai-assistant",
       "blocks": {
-        "cat_rice": { "type": "category", "settings": { "label": "Rice & Grains", "icon": "🍚" } },
-        "cat_spices": { "type": "category", "settings": { "label": "Spices", "icon": "🌶️" } },
-        "cat_snacks": { "type": "category", "settings": { "label": "Snacks", "icon": "🍪" } },
-        "cat_veg": { "type": "category", "settings": { "label": "Vegetables", "icon": "🥬" } },
-        "cat_dairy": { "type": "category", "settings": { "label": "Dairy", "icon": "🥛" } },
-        "cat_bev": { "type": "category", "settings": { "label": "Beverages", "icon": "🥤" } },
-        "cat_home": { "type": "category", "settings": { "label": "Household", "icon": "🧹" } },
-        "need_breakfast": { "type": "intent", "settings": { "label": "Breakfast" } },
-        "need_lunch": { "type": "intent", "settings": { "label": "Lunch" } },
-        "need_dinner": { "type": "intent", "settings": { "label": "Dinner" } },
-        "need_snacks": { "type": "intent", "settings": { "label": "Snacks" } },
-        "need_kerala": { "type": "intent", "settings": { "label": "Kerala cooking" } },
-        "need_baking": { "type": "intent", "settings": { "label": "Baking" } },
-        "need_essentials": { "type": "intent", "settings": { "label": "Everyday essentials" } }
+        "cat_rice": {
+          "type": "category",
+          "settings": {
+            "label": "Rice & Grains",
+            "icon": "\ud83c\udf5a"
+          }
+        },
+        "cat_spices": {
+          "type": "category",
+          "settings": {
+            "label": "Spices",
+            "icon": "\ud83c\udf36\ufe0f"
+          }
+        },
+        "cat_snacks": {
+          "type": "category",
+          "settings": {
+            "label": "Snacks",
+            "icon": "\ud83c\udf6a"
+          }
+        },
+        "cat_veg": {
+          "type": "category",
+          "settings": {
+            "label": "Vegetables",
+            "icon": "\ud83e\udd6c"
+          }
+        },
+        "cat_dairy": {
+          "type": "category",
+          "settings": {
+            "label": "Dairy",
+            "icon": "\ud83e\udd5b"
+          }
+        },
+        "cat_bev": {
+          "type": "category",
+          "settings": {
+            "label": "Beverages",
+            "icon": "\ud83e\udd64"
+          }
+        },
+        "cat_home": {
+          "type": "category",
+          "settings": {
+            "label": "Household",
+            "icon": "\ud83e\uddf9"
+          }
+        },
+        "need_breakfast": {
+          "type": "intent",
+          "settings": {
+            "label": "Breakfast"
+          }
+        },
+        "need_lunch": {
+          "type": "intent",
+          "settings": {
+            "label": "Lunch"
+          }
+        },
+        "need_dinner": {
+          "type": "intent",
+          "settings": {
+            "label": "Dinner"
+          }
+        },
+        "need_snacks": {
+          "type": "intent",
+          "settings": {
+            "label": "Snacks"
+          }
+        },
+        "need_kerala": {
+          "type": "intent",
+          "settings": {
+            "label": "Kerala cooking"
+          }
+        },
+        "need_baking": {
+          "type": "intent",
+          "settings": {
+            "label": "Baking"
+          }
+        },
+        "need_essentials": {
+          "type": "intent",
+          "settings": {
+            "label": "Everyday essentials"
+          }
+        }
       },
       "block_order": [
         "cat_rice",
@@ -140,7 +380,8 @@
         "subtitle": "Freshly stocked groceries & specialities",
         "link_text": "See all",
         "preset_type": "new_arrivals",
-        "products_to_show": 6
+        "products_to_show": 6,
+        "collection": "all"
       }
     }
   },
