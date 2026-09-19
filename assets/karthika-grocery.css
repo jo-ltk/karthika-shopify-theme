@@ -3068,14 +3068,17 @@ textarea {
   justify-content: center;
   flex: 1;
   height: 100%;
-  color: #525252;
+  color: var(--karthika-text-muted);
   text-decoration: none;
-  font-size: 10px;
-  font-weight: 550;
-  letter-spacing: -0.01em;
-  gap: 3px;
+  font-family: var(--karthika-font-sans);
+  font-size: 11px;
+  font-weight: var(--karthika-weight-semibold);
+  letter-spacing: 0;
+  line-height: 1;
+  gap: 5px;
   position: relative;
-  border-radius: 24px;
+  border: 0;
+  border-radius: var(--karthika-radius-lg);
   padding: 4px 0;
   transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
   user-select: none;
@@ -3088,14 +3091,17 @@ textarea {
 
 .karthika-nav-item.is-active {
   color: var(--karthika-red);
-  font-weight: 700;
-  background: rgba(180, 0, 0, 0.06);
+  font-weight: var(--karthika-weight-bold);
+  background: var(--karthika-red-subtle);
 }
 
 .karthika-nav-item svg {
-  width: 21px;
-  height: 21px;
-  stroke-width: 1.9;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), stroke-width 0.2s ease;
 }
 
@@ -4222,7 +4228,10 @@ body.karthika-location-open {
   border: none;
   padding: 4px 0;
   cursor: pointer;
-  font: inherit;
+  font-family: var(--karthika-font-sans);
+  font-size: 11px;
+  font-weight: var(--karthika-weight-semibold);
+  line-height: 1;
 }
 
 .ks-search-row {
@@ -5516,12 +5525,11 @@ a.karthika-quick-tab:focus-visible {
 
 .kcb2-soldout-media {
   display: block;
-  pointer-events: none;
 }
 
 .kcb2-card.is-sold-out .karthika-compact-title {
-  cursor: default;
-  pointer-events: none;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 /* ==========================================================================
@@ -5849,6 +5857,38 @@ a.karthika-quick-tab:focus-visible {
   gap: 8px;
 }
 
+.kcl-grid--products {
+  display: flex;
+  grid-template-columns: none;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+
+.kcl-grid--products::-webkit-scrollbar {
+  display: none;
+}
+
+.kcl-tile--product {
+  flex: 0 0 auto;
+  width: 132px;
+  scroll-snap-align: start;
+}
+
+.kcl-grid--products .kcl-tile--view-all {
+  flex: 0 0 auto;
+  width: 100px;
+  scroll-snap-align: start;
+}
+
+.kcl-tile--product .karthika-compact-card {
+  height: 100%;
+}
+
 .kcl-tile {
   display: flex;
   flex-direction: column;
@@ -5908,6 +5948,10 @@ a.karthika-quick-tab:focus-visible {
   font-weight: var(--karthika-weight-bold);
   line-height: 1.2;
   text-align: center;
+}
+
+.kcl-products {
+  margin-top: 6px;
 }
 
 .kcl-empty {
@@ -7394,6 +7438,13 @@ canvas {
 .template-article #MainContent,
 .template-gift_card #MainContent {
   padding-bottom: calc(var(--karthika-bottom-nav-height) + 24px + env(safe-area-inset-bottom, 0px));
+}
+
+/* The footer always follows #MainContent and already provides clearance
+   above the fixed bottom nav, so drop the extra reserved padding here to
+   avoid a large blank gap before the footer on short pages (e.g. sold-out items). */
+.template-product #MainContent {
+  padding-bottom: 0;
 }
 
 table {

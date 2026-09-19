@@ -115,7 +115,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr);
     align-items: center;
-    gap: 34px;
+    column-gap: 0;
     margin-top: 46px;
     padding: 44px;
     border: 1px solid var(--kf-line);
@@ -176,6 +176,7 @@
 
   .kf-footer__hero-actions {
     display: flex;
+    justify-content: center;
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 28px;
@@ -308,7 +309,7 @@
   .kf-footer__visual-content {
     position: absolute;
     z-index: 3;
-    right: 20px;
+    right: 12px;
     bottom: 18px;
     left: 20px;
   }
@@ -326,7 +327,7 @@
   .kf-footer__visual-title {
     margin: 0;
     color: #fff;
-    font-size: 25px;
+    font-size: 30px;
     font-weight: 750;
     line-height: 1.05;
     letter-spacing: -.035em;
@@ -714,7 +715,7 @@
   @media screen and (max-width: 900px) {
     .kf-footer__hero {
       grid-template-columns: 1fr;
-      gap: 22px;
+      row-gap: 22px;
       margin-top: 32px;
       padding: 30px;
     }

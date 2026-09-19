@@ -363,6 +363,15 @@ a.product__text {
   margin-bottom: 1.2rem;
 }
 
+.product-form__quantity--wide .quantity {
+  width: 100%;
+  max-width: 44rem;
+}
+
+.product-form__quantity--wide .quantity__input {
+  flex-grow: 1;
+}
+
 .product-form__buttons {
   max-width: 44rem;
 }

@@ -487,18 +487,14 @@
       card.innerHTML = [
         '<div class="karthika-compact-media">',
           savePercent ? '<div class="karthika-card-badge">' + savePercent + '% OFF</div>' : '',
-          available
-            ? '<a href="' + escHtml(productUrl) + '" aria-label="' + escHtml(product.title) + '" tabindex="-1"><img src="' + escHtml(imgSrc) + '" alt="' + escHtml(product.title) + '" width="200" height="200" loading="lazy" class="karthika-compact-img" data-ph="' + escHtml(placeholderForType(product.type)) + '" onerror="this.onerror=null;this.src=this.getAttribute(\'data-ph\')||\'\'"></a>'
-            : '<span class="kcb2-soldout-media" aria-hidden="true"><img src="' + escHtml(imgSrc) + '" alt="" width="200" height="200" loading="lazy" class="karthika-compact-img" data-ph="' + escHtml(placeholderForType(product.type)) + '" onerror="this.onerror=null;this.src=this.getAttribute(\'data-ph\')||\'\'"></span>',
+          '<a href="' + escHtml(productUrl) + '" aria-label="' + escHtml(product.title) + '" tabindex="-1"' + (available ? '' : ' class="kcb2-soldout-media"') + '><img src="' + escHtml(imgSrc) + '" alt="' + escHtml(product.title) + '" width="200" height="200" loading="lazy" class="karthika-compact-img" data-ph="' + escHtml(placeholderForType(product.type)) + '" onerror="this.onerror=null;this.src=this.getAttribute(\'data-ph\')||\'\'"></a>',
         '</div>',
         '<div class="karthika-compact-info">',
           '<div class="karthika-card-meta-row">',
             '<span class="karthika-compact-pack">' + escHtml(packLabel) + '</span>',
             '<span class="karthika-stock-badge' + (available ? '' : ' karthika-stock-badge--out') + '"><span class="karthika-stock-dot"></span>' + (available ? 'In stock' : 'Sold out') + '</span>',
           '</div>',
-          available
-            ? '<a href="' + escHtml(productUrl) + '" class="karthika-compact-title" title="' + escHtml(product.title) + '">' + escHtml(product.title) + '</a>'
-            : '<span class="karthika-compact-title" title="' + escHtml(product.title) + '">' + escHtml(product.title) + '</span>',
+          '<a href="' + escHtml(productUrl) + '" class="karthika-compact-title" title="' + escHtml(product.title) + '">' + escHtml(product.title) + '</a>',
           '<div class="karthika-price-container"><div class="karthika-price-main-row">',
             '<span class="karthika-price-current">' + formatMoney(numPrice) + '</span>',
             savePercent ? '<span class="karthika-price-original">' + formatMoney(numCompare) + '</span>' : '',

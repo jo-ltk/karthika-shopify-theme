@@ -1,5 +1,180 @@
 {
   "sections": {
+    "main": {
+      "type": "karthika-categories-landing",
+      "settings": {
+        "title": "Categories"
+      },
+      "blocks": {
+        "group_fresh": {
+          "type": "group",
+          "settings": {
+            "title": "Fresh & Dairy"
+          }
+        },
+        "tile_dairy_eggs": {
+          "type": "tile",
+          "settings": {
+            "title": "Milk",
+            "browse_handle": "dairy-eggs",
+            "demo_image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_bread_buns": {
+          "type": "tile",
+          "settings": {
+            "title": "Bread and Buns",
+            "browse_handle": "bread-buns",
+            "demo_image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_paneer_tofu": {
+          "type": "tile",
+          "settings": {
+            "title": "Paneer and Tofu",
+            "browse_handle": "paneer-tofu",
+            "demo_image_url": "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_cheese": {
+          "type": "tile",
+          "settings": {
+            "title": "Cheese",
+            "browse_handle": "cheese",
+            "demo_image_url": "https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_eggs": {
+          "type": "tile",
+          "settings": {
+            "title": "Eggs",
+            "browse_handle": "eggs",
+            "demo_image_url": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_fresh_fruits": {
+          "type": "tile",
+          "settings": {
+            "title": "Fresh Fruits",
+            "browse_handle": "fresh-fruits",
+            "demo_image_url": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_vegetables": {
+          "type": "tile",
+          "settings": {
+            "title": "Vegetables",
+            "browse_handle": "vegetables",
+            "demo_image_url": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "group_grocery": {
+          "type": "group",
+          "settings": {
+            "title": "Grocery & Kitchen Essentials"
+          }
+        },
+        "tile_rice_grains": {
+          "type": "tile",
+          "settings": {
+            "title": "Rice & Grains",
+            "browse_handle": "rice-grains",
+            "demo_image_url": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_spices_masala": {
+          "type": "tile",
+          "settings": {
+            "title": "Spices & Masala",
+            "browse_handle": "spices-masala",
+            "demo_image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_dals_pulses": {
+          "type": "tile",
+          "settings": {
+            "title": "Dals & Pulses",
+            "browse_handle": "dals-pulses",
+            "demo_image_url": "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_atta_flours": {
+          "type": "tile",
+          "settings": {
+            "title": "Atta & Flours",
+            "browse_handle": "atta-flours",
+            "demo_image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_household": {
+          "type": "tile",
+          "settings": {
+            "title": "Household",
+            "browse_handle": "household",
+            "demo_image_url": "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "group_snacks": {
+          "type": "group",
+          "settings": {
+            "title": "Snacks & Drinks"
+          }
+        },
+        "tile_indian_snacks": {
+          "type": "tile",
+          "settings": {
+            "title": "Indian Snacks",
+            "browse_handle": "indian-snacks",
+            "demo_image_url": "https://images.unsplash.com/photo-1621447504864-d8686e12698c?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_frozen_foods": {
+          "type": "tile",
+          "settings": {
+            "title": "Frozen Foods",
+            "browse_handle": "frozen-foods",
+            "demo_image_url": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_beverages": {
+          "type": "tile",
+          "settings": {
+            "title": "Beverages",
+            "browse_handle": "beverages",
+            "demo_image_url": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=280&auto=format&fit=crop&q=80"
+          }
+        },
+        "tile_top_deals": {
+          "type": "tile",
+          "settings": {
+            "title": "Top Deals",
+            "browse_handle": "top-deals",
+            "demo_image_url": "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=280&auto=format&fit=crop&q=80"
+          }
+        }
+      },
+      "block_order": [
+        "group_fresh",
+        "tile_dairy_eggs",
+        "tile_bread_buns",
+        "tile_paneer_tofu",
+        "tile_cheese",
+        "tile_eggs",
+        "tile_fresh_fruits",
+        "tile_vegetables",
+        "group_grocery",
+        "tile_rice_grains",
+        "tile_spices_masala",
+        "tile_dals_pulses",
+        "tile_atta_flours",
+        "tile_household",
+        "group_snacks",
+        "tile_indian_snacks",
+        "tile_frozen_foods",
+        "tile_beverages",
+        "tile_top_deals"
+      ]
+    },
     "main-collection-banner": {
       "type": "main-collection-banner",
       "settings": {
@@ -30,6 +205,7 @@
     }
   },
   "order": [
+    "main",
     "main-collection-banner",
     "main-product-grid"
   ]

@@ -1,0 +1,31 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "c1f64eca28538eb3d6dc14ec4f75db17"
+application_url = "https://karthika-app.onrender.com"
+embedded = true
+name = "Karthika AI Assistant"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "customer_read_customers,customer_read_orders,read_products"
+optional_scopes = [ ]
+use_legacy_install_flow = false
+
+[auth]
+redirect_urls = [ "https://karthika-app.onrender.com/auth/callback" ]
+
+[webhooks]
+api_version = "2026-07"
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/app/scopes_update"
+  topics = [ "app/scopes_update" ]
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/app/uninstalled"
+  topics = [ "app/uninstalled" ]
+
+[app_proxy]
+url = "https://karthika-app.onrender.com/apps/karthika"
+subpath = "karthika"
+prefix = "apps"

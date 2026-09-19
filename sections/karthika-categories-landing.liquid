@@ -256,6 +256,8 @@
 
         assign group_view_url = browse_url
 
+        assign kcl_product_offset = 0
+
       -%}
 
       {%- for block in section.blocks -%}
@@ -354,7 +356,7 @@
 
               </div>
 
-              <div class="kcl-grid">
+              <div class="kcl-grid kcl-grid--products">
 
           {%- when 'tile' -%}
 
@@ -364,191 +366,27 @@
 
                 assign group_tile_index = group_tile_index | plus: 1
 
-                assign tile_title = block.settings.title
+                assign tile_product = blank
 
-                assign tile_handle = block.settings.browse_handle
+                for p in collections.all.products limit: 1 offset: kcl_product_offset
 
-                assign tile_image = block.settings.image
+                  assign tile_product = p
 
-                assign tile_demo_url = block.settings.demo_image_url
+                endfor
 
-                assign tile_collection = block.settings.collection
-
-                if tile_collection == blank and tile_handle != blank
-
-                  assign tile_collection = collections[tile_handle]
-
-                endif
-
-                assign tile_link = blank
-
-                if tile_collection != blank and tile_collection.url != blank
-
-                  assign tile_link = tile_collection.url
-
-                  if tile_title == blank
-
-                    assign tile_title = tile_collection.title
-
-                  endif
-
-                endif
-
-                if tile_image == blank and tile_collection != blank and tile_collection.featured_image
-
-                  assign tile_image = tile_collection.featured_image
-
-                endif
-
-                unless tile_link != blank
-
-                  unless request.design_mode
-
-                    continue
-
-                  endunless
-
-                  assign tile_link = '#'
-
-                endunless
-
-
-
-                case tile_handle
-
-                  when 'dairy-eggs'
-
-                    assign tile_bg = '#E3F2FD'
-
-                  when 'bread-buns'
-
-                    assign tile_bg = '#FBF0E6'
-
-                  when 'paneer-tofu'
-
-                    assign tile_bg = '#F0F0F0'
-
-                  when 'cheese'
-
-                    assign tile_bg = '#FFF8E1'
-
-                  when 'eggs'
-
-                    assign tile_bg = '#FCE8EC'
-
-                  when 'fresh-fruits'
-
-                    assign tile_bg = '#E8F5E9'
-
-                  when 'vegetables'
-
-                    assign tile_bg = '#EAF6EA'
-
-                  when 'rice-grains'
-
-                    assign tile_bg = '#FCE4EC'
-
-                  when 'spices-masala'
-
-                    assign tile_bg = '#FFF3E0'
-
-                  when 'dals-pulses'
-
-                    assign tile_bg = '#FFFDE7'
-
-                  when 'atta-flours'
-
-                    assign tile_bg = '#FBF0E6'
-
-                  when 'household'
-
-                    assign tile_bg = '#E3F2FD'
-
-                  when 'indian-snacks'
-
-                    assign tile_bg = '#FFF9C4'
-
-                  when 'frozen-foods'
-
-                    assign tile_bg = '#E8EAF6'
-
-                  when 'beverages'
-
-                    assign tile_bg = '#E1F5FE'
-
-                  when 'top-deals'
-
-                    assign tile_bg = '#FFF3E0'
-
-                  else
-
-                    assign pastel_cycle = 'E3F2FD,FBF0E6,F0F0F0,FFF8E1,FCE8EC,E8F5E9' | split: ','
-
-                    assign pastel_idx = group_tile_index | minus: 1 | modulo: pastel_cycle.size
-
-                    assign tile_bg = '#' | append: pastel_cycle[pastel_idx]
-
-                endcase
+                assign kcl_product_offset = kcl_product_offset | plus: 1
 
               -%}
 
-              <a
+              {%- if tile_product != blank -%}
 
-                href="{{ tile_link }}"
+                <div class="kcl-tile kcl-tile--product">
 
-                class="kcl-tile"
-
-                style="--kcl-tile-bg: {{ tile_bg }}"
-
-                {{ block.shopify_attributes }}
-
-              >
-
-                <div class="kcl-tile__card">
-
-                  {%- if tile_image != blank -%}
-
-                    <img
-
-                      src="{{ tile_image | image_url: width: 240 }}"
-
-                      alt="{{ tile_title | escape }}"
-
-                      class="kcl-tile__img"
-
-                      width="120"
-
-                      height="120"
-
-                      loading="lazy"
-
-                    >
-
-                  {%- elsif request.design_mode and tile_demo_url != blank -%}
-
-                    <img
-
-                      src="{{ tile_demo_url }}"
-
-                      alt="{{ tile_title | escape }}"
-
-                      class="kcl-tile__img"
-
-                      width="120"
-
-                      height="120"
-
-                      loading="lazy"
-
-                    >
-
-                  {%- endif -%}
+                  {% render 'karthika-card-product', card_product: tile_product %}
 
                 </div>
 
-                <span class="kcl-tile__name">{{ tile_title }}</span>
-
-              </a>
+              {%- endif -%}
 
               {%- if show_tile_view_all and group_tile_index == group_tile_count -%}
 
@@ -591,6 +429,28 @@
     {%- endif -%}
 
   </div>
+
+  {%- if collection and collection.products.size > 0 -%}
+    <section class="kcl-group kcl-products" aria-label="All products">
+      <div class="kcl-group__head">
+        <h2 class="kcl-group__title">All products</h2>
+      </div>
+
+      {%- paginate collection.products by 20 -%}
+        <ul class="ks-product-grid" role="list">
+          {%- for product in collection.products -%}
+            <li class="grid__item">
+              {% render 'karthika-card-product', card_product: product %}
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- if paginate.pages > 1 -%}
+          {% render 'pagination', paginate: paginate, anchor: '' %}
+        {%- endif -%}
+      {%- endpaginate -%}
+    </section>
+  {%- endif -%}
 
 </section>
 
