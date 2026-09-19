@@ -369,7 +369,7 @@
         "heading": "What are you shopping for?",
         "subheading": "Choose a category, a meal, or a recipe. Products come from this store.",
         "products_to_show": 8,
-        "enable_ai_mode": false,
+        "enable_ai_mode": true,
         "ai_endpoint": "/apps/karthika/recommend"
       }
     },
