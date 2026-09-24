@@ -1872,6 +1872,11 @@
     _pageRoot: null,
     _pageLoaded: false,
     _pageLoading: false,
+    _modalRoot: null,
+    _modalLoaded: false,
+    _modalLoading: false,
+    _inertTargets: [],
+    _lastTrigger: null,
 
     shopRoot() {
       const root = window.Shopify?.routes?.root || window.routes?.root || '/';
@@ -1937,6 +1942,7 @@
       this.syncButtons();
       this.syncCounts();
       this.syncPageAfterChange();
+      this.syncModalAfterChange();
     },
 
     contains(handle) {
@@ -2009,6 +2015,11 @@
           el.hidden = this.count() === 0;
         }
       });
+      document.querySelectorAll('[data-wishlist-trigger]').forEach((trigger) => {
+        const itemLabel = this.count() === 1 ? 'item' : 'items';
+        const wishlistLabel = trigger.getAttribute('data-wishlist-label') || 'Wishlist';
+        trigger.setAttribute('aria-label', `${wishlistLabel} (${count} ${itemLabel})`);
+      });
     },
 
     queueSync() {
@@ -2023,6 +2034,27 @@
       document.addEventListener(
         'click',
         (event) => {
+          const trigger = event.target.closest('[data-wishlist-trigger]');
+          if (trigger) {
+            event.preventDefault();
+            this.open(trigger);
+            return;
+          }
+
+          const checkout = event.target.closest('[data-wishlist-checkout]');
+          if (checkout) {
+            event.preventDefault();
+            this.checkoutFromWishlist(checkout);
+            return;
+          }
+
+          const dismiss = event.target.closest('[data-karthika-wishlist-dismiss]');
+          if (dismiss) {
+            event.preventDefault();
+            this.close();
+            return;
+          }
+
           const button = event.target.closest('.karthika-wishlist-btn');
           if (!button) return;
           event.preventDefault();
@@ -2033,6 +2065,8 @@
         },
         true
       );
+
+      document.addEventListener('keydown', (event) => this.onDocumentKeydown(event));
 
       window.addEventListener('storage', (event) => {
         if (event.key !== this.STORAGE_KEY) return;
@@ -2047,6 +2081,10 @@
         if (this._pageRoot) {
           this._pageLoaded = false;
           this.loadPage();
+        }
+        if (this._modalRoot) {
+          this._modalLoaded = false;
+          this.loadModal();
         }
       });
 
@@ -2066,16 +2104,16 @@
       }
     },
 
-    cardUrl(handle) {
-      const view = this._pageRoot?.getAttribute('data-card-view') || 'wishlist-card';
+    cardUrl(handle, root = this._pageRoot) {
+      const view = root?.getAttribute('data-card-view') || 'wishlist-card';
       return `${this.shopRoot()}products/${encodeURIComponent(handle)}?view=${encodeURIComponent(view)}`;
     },
 
-    async fetchCard(handle) {
+    async fetchCard(handle, root = this._pageRoot) {
       const safe = this.sanitizeHandle(handle);
       if (!safe) return { handle: '', card: null, missing: true };
       try {
-        const response = await fetch(this.cardUrl(safe), {
+        const response = await fetch(this.cardUrl(safe, root), {
           credentials: 'same-origin',
           headers: { Accept: 'text/html' },
         });
@@ -2179,6 +2217,325 @@
       this._pageLoading = false;
     },
 
+    getModal() {
+      return this._modalRoot;
+    },
+
+    getFocusable(container) {
+      return Array.from(
+        container.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.hasAttribute('hidden') && el.closest('[hidden]') == null);
+    },
+
+    setModalBackgroundInert(enable) {
+      const modal = this.getModal();
+      if (!enable) {
+        this._inertTargets.forEach((el) => {
+          el.removeAttribute('inert');
+          if (el.dataset.karthikaWishlistInertAria === '1') {
+            el.removeAttribute('aria-hidden');
+            delete el.dataset.karthikaWishlistInertAria;
+          }
+        });
+        this._inertTargets = [];
+        return;
+      }
+
+      this._inertTargets = [];
+      Array.from(document.body.children).forEach((el) => {
+        if (el === modal || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
+        el.setAttribute('inert', '');
+        if (!el.hasAttribute('aria-hidden')) {
+          el.setAttribute('aria-hidden', 'true');
+          el.dataset.karthikaWishlistInertAria = '1';
+        }
+        this._inertTargets.push(el);
+      });
+    },
+
+    syncTriggerState(isOpen) {
+      document.querySelectorAll('[data-wishlist-trigger]').forEach((trigger) => {
+        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    },
+
+    onDocumentKeydown(event) {
+      const modal = this.getModal();
+      if (!modal || !modal.classList.contains('is-open')) return;
+
+      if (event.key === 'Escape' || event.key === 'Esc') {
+        event.preventDefault();
+        this.close();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const focusables = this.getFocusable(modal);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    },
+
+    open(trigger) {
+      const modal = this.getModal();
+      if (!modal) return;
+      if (window.Karthika?.Search?.close) {
+        window.Karthika.Search.close({ restoreFocus: false });
+      }
+      if (window.Karthika?.Location?.close) {
+        window.Karthika.Location.close({ restoreFocus: false });
+      }
+
+      this._lastTrigger = trigger || document.activeElement;
+      modal.hidden = false;
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('karthika-wishlist-open');
+      this.syncTriggerState(true);
+      this.setModalBackgroundInert(true);
+      if (!this._modalLoaded) this.loadModal();
+
+      window.requestAnimationFrame(() => {
+        modal.querySelector('.karthika-wishlist-modal-close')?.focus();
+      });
+    },
+
+    close(options = {}) {
+      const modal = this.getModal();
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.hidden = true;
+      document.body.classList.remove('karthika-wishlist-open');
+      this.syncTriggerState(false);
+      this.setModalBackgroundInert(false);
+      const trigger = this._lastTrigger;
+      this._lastTrigger = null;
+      if (options.restoreFocus !== false && trigger && typeof trigger.focus === 'function') {
+        trigger.focus();
+      }
+    },
+
+    getAvailableModalVariants() {
+      if (!this._modalRoot) return [];
+      const grid = this._modalRoot.querySelector('[data-wishlist-grid]');
+      if (!grid) return [];
+      const seen = new Set();
+      return Array.from(grid.querySelectorAll('.karthika-compact-card[data-variant-id]'))
+        .filter((card) => card.querySelector('.karthika-stepper[data-product-available="true"]'))
+        .map((card) => Number(card.getAttribute('data-variant-id')))
+        .filter((variantId) => {
+          if (!variantId || seen.has(variantId)) return false;
+          seen.add(variantId);
+          return true;
+        });
+    },
+
+    syncModalActions() {
+      if (!this._modalRoot) return;
+      const actions = this._modalRoot.querySelector('[data-wishlist-actions]');
+      const button = this._modalRoot.querySelector('[data-wishlist-checkout]');
+      const note = this._modalRoot.querySelector('[data-wishlist-checkout-note]');
+      if (!actions || !button || !note) return;
+
+      const grid = this._modalRoot.querySelector('[data-wishlist-grid]');
+      const savedCount = grid ? grid.querySelectorAll('.karthika-compact-card[data-product-handle]').length : 0;
+      const available = this.getAvailableModalVariants();
+      actions.hidden = savedCount === 0;
+      button.disabled = available.length === 0;
+      button.classList.remove('is-busy');
+
+      if (!savedCount) {
+        note.hidden = true;
+        note.textContent = '';
+      } else if (!available.length) {
+        note.hidden = false;
+        note.textContent = button.getAttribute('data-unavailable-message') || '';
+      } else if (available.length < savedCount) {
+        note.hidden = false;
+        note.textContent = button.getAttribute('data-partial-message') || '';
+      } else {
+        note.hidden = true;
+        note.textContent = '';
+      }
+    },
+
+    async checkoutFromWishlist(button) {
+      if (!button || button.disabled || button.classList.contains('is-busy')) return;
+      const variants = this.getAvailableModalVariants();
+      if (!variants.length) {
+        this.syncModalActions();
+        return;
+      }
+
+      const cart = window.Karthika?.Cart;
+      const checkout = window.Karthika?.Checkout;
+      if (!cart?.addMany || !checkout?.begin || !checkout?.validateCart || !checkout?.submitForm) {
+        cart?.showCartError?.('Checkout is not ready. Please try again.');
+        return;
+      }
+
+      button.classList.add('is-busy');
+      button.disabled = true;
+      const label = button.querySelector('[data-wishlist-checkout-label]');
+      const idleLabel = label?.textContent || 'Proceed to checkout';
+      if (label) label.textContent = 'Adding wishlist items…';
+
+      try {
+        const result = await cart.addMany(variants.map((id) => ({ id, quantity: 1 })));
+        if (!result.added) {
+          cart.showCartError('No available wishlist items could be added.');
+          return;
+        }
+        if (!checkout.begin(button)) return;
+        await checkout.validateCart();
+        let form = document.getElementById('CartDrawer-Form') || document.getElementById('cart');
+        if (!form) {
+          form = document.createElement('form');
+          form.method = 'post';
+          form.action = window.routes?.cart_url || '/cart';
+          form.id = 'KarthikaWishlistCheckoutForm';
+          document.body.appendChild(form);
+        }
+        if (!form.querySelector('input[name="checkout"]')) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'checkout';
+          input.value = '';
+          form.appendChild(input);
+        }
+        button.setAttribute('form', form.id);
+        checkout.submitForm(button);
+      } catch (error) {
+        checkout.fail?.(error?.message || 'Checkout could not start.');
+      } finally {
+        button.classList.remove('is-busy');
+        button.disabled = false;
+        if (label) label.textContent = idleLabel;
+        this.syncModalActions();
+      }
+    },
+
+    setModalMode(mode) {
+      if (!this._modalRoot) return;
+      const loading = this._modalRoot.querySelector('[data-wishlist-loading]');
+      const empty = this._modalRoot.querySelector('[data-wishlist-empty]');
+      const grid = this._modalRoot.querySelector('[data-wishlist-grid]');
+      if (loading) loading.hidden = mode !== 'loading';
+      if (empty) empty.hidden = mode !== 'empty';
+      if (grid) grid.hidden = mode !== 'grid';
+      const actions = this._modalRoot.querySelector('[data-wishlist-actions]');
+      if (actions) {
+        actions.hidden = mode !== 'grid';
+        if (mode === 'grid') this.syncModalActions();
+      }
+    },
+
+    async loadModal() {
+      if (!this._modalRoot || this._modalLoading) return;
+      this._modalLoading = true;
+      const grid = this._modalRoot.querySelector('[data-wishlist-grid]');
+      const status = this._modalRoot.querySelector('[data-wishlist-status]');
+      if (!grid) {
+        this._modalLoading = false;
+        return;
+      }
+
+      const handles = this.items.slice();
+      if (!handles.length) {
+        grid.replaceChildren();
+        this.setModalMode('empty');
+        this.syncModalActions();
+        this._modalLoaded = true;
+        this._modalLoading = false;
+        return;
+      }
+
+      this.setModalMode('loading');
+      const results = await Promise.all(handles.map((handle) => this.fetchCard(handle, this._modalRoot)));
+      const keptHandles = [];
+      const cards = [];
+      let removedMissing = false;
+      let hadError = false;
+
+      results.forEach((result, index) => {
+        const handle = handles[index];
+        if (result?.card) {
+          keptHandles.push(handle);
+          cards.push(result.card);
+        } else if (result?.missing) {
+          removedMissing = true;
+        } else {
+          hadError = true;
+          keptHandles.push(handle);
+        }
+      });
+
+      if (removedMissing) {
+        this.items = keptHandles;
+        this.persist();
+        this.syncButtons();
+        this.syncCounts();
+      }
+
+      if (status) {
+        status.hidden = !(removedMissing || (hadError && !cards.length));
+        status.textContent = removedMissing
+          ? status.getAttribute('data-unavailable-message') || ''
+          : hadError && !cards.length
+            ? status.getAttribute('data-load-error-message') || ''
+            : '';
+      }
+
+      grid.replaceChildren();
+      cards.forEach((card) => grid.appendChild(card));
+      this.syncButtons(grid);
+      if (window.Karthika?.Cart?.syncAllSteppers) {
+        window.Karthika.Cart.syncAllSteppers();
+      }
+      this.setModalMode(cards.length ? 'grid' : 'empty');
+      this.syncModalActions();
+      this._modalLoaded = true;
+      this._modalLoading = false;
+    },
+
+    syncModalAfterChange() {
+      if (!this._modalRoot || !this._modalLoaded || this._modalLoading) return;
+      const grid = this._modalRoot.querySelector('[data-wishlist-grid]');
+      if (!grid) return;
+
+      grid.querySelectorAll('.karthika-compact-card').forEach((card) => {
+        const handle = this.sanitizeHandle(card.getAttribute('data-product-handle'));
+        if (!this.contains(handle)) card.remove();
+      });
+
+      if (!this.items.length) {
+        this.setModalMode('empty');
+        this.syncModalActions();
+        return;
+      }
+
+      const rendered = new Set();
+      grid.querySelectorAll('.karthika-compact-card').forEach((card) => {
+        const handle = this.sanitizeHandle(card.getAttribute('data-product-handle'));
+        if (handle) rendered.add(handle);
+      });
+      if (this.items.some((handle) => !rendered.has(handle))) {
+        this.loadModal();
+        return;
+      }
+      this.setModalMode('grid');
+    },
+
     syncPageAfterChange() {
       if (!this._pageRoot || !this._pageLoaded || this._pageLoading) return;
       const grid = this._pageRoot.querySelector('[data-wishlist-grid]');
@@ -2215,6 +2572,7 @@
       this.syncButtons();
       this.syncCounts();
       this._pageRoot = document.querySelector('[data-karthika-wishlist-page]');
+      this._modalRoot = document.querySelector('[data-karthika-wishlist-modal]');
       if (this._pageRoot) {
         this.loadPage();
       }

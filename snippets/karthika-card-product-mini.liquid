@@ -1,10 +1,13 @@
 {%- if card_product and card_product != empty -%}
-  <a href="{{ card_product.url }}" class="karthika-popular-mini-card" aria-label="View {{ card_product.title | escape }}">
-    <span class="karthika-popular-mini-media">
-      {%- if card_product.featured_media -%}
-        <img src="{{ card_product.featured_media | image_url: width: 220 }}" alt="{{ card_product.title | escape }}" loading="lazy" width="220" height="220">
-      {%- endif -%}
-    </span>
-    <span class="karthika-popular-mini-title">{{ card_product.title | escape }}</span>
-  </a>
+  <div class="karthika-popular-mini-card">
+    <a href="{{ card_product.url }}" class="karthika-popular-mini-link" aria-label="View {{ card_product.title | escape }}">
+      <span class="karthika-popular-mini-media">
+        {%- if card_product.featured_media -%}
+          <img src="{{ card_product.featured_media | image_url: width: 220 }}" alt="{{ card_product.title | escape }}" loading="lazy" width="220" height="220">
+        {%- endif -%}
+      </span>
+      <span class="karthika-popular-mini-title">{{ card_product.title | escape }}</span>
+    </a>
+    {% render 'karthika-wishlist-button', product: card_product, button_class: 'karthika-wishlist-btn--mini' %}
+  </div>
 {%- endif -%}

@@ -633,32 +633,72 @@ textarea {
   height: 24px;
 }
 
-/* --- Bell Notification Icon --- */
-.karthika-header-notification {
+/* --- Wishlist Icon --- */
+.karthika-header-wishlist,
+.karthika-desktop-header__wishlist {
   display: grid;
   place-items: center;
+  position: relative;
   width: 44px;
   height: 44px;
+  padding: 0;
+  border: 0;
   background: transparent;
   color: #222222;
-  border: none;
   cursor: pointer;
-  position: relative;
-  padding: 0;
+  text-decoration: none;
   transition: opacity 0.2s ease;
 }
 
-.karthika-header-notification:hover {
+.karthika-header-wishlist:hover,
+.karthika-desktop-header__wishlist:hover {
   opacity: 0.7;
 }
 
-.karthika-header-notification:active {
+.karthika-header-wishlist:active,
+.karthika-desktop-header__wishlist:active {
   opacity: 0.5;
 }
 
-.karthika-header-notification svg {
+.karthika-header-wishlist:focus-visible,
+.karthika-desktop-header__wishlist:focus-visible {
+  outline: 2px solid #2775D9;
+  outline-offset: 2px;
+}
+
+.karthika-header-wishlist svg,
+.karthika-desktop-header__wishlist svg {
   width: 24px;
   height: 24px;
+}
+
+.karthika-desktop-header__wishlist {
+  width: 32px;
+  height: 40px;
+  color: #111111;
+}
+
+.karthika-desktop-header__wishlist-badge {
+  position: absolute;
+  top: 2px;
+  right: -3px;
+  display: grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: var(--karthika-gold);
+  color: #111111;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.karthika-wishlist-badge[hidden],
+.karthika-desktop-header__wishlist-badge[hidden] {
+  display: none !important;
 }
 
 /* --- Cart Icon --- */
@@ -1329,6 +1369,30 @@ textarea {
   color: var(--karthika-text-dark);
   text-decoration: none;
   scroll-snap-align: start;
+}
+
+.karthika-wishlist-btn--mini {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.karthika-popular-mini-card {
+  position: relative;
+}
+
+.karthika-popular-mini-link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
 }
 
 .karthika-popular-mini-media {
@@ -3139,7 +3203,8 @@ textarea {
 /* ==========================================================================
    10. MODALS (Location Selector & Search Overlay)
    ========================================================================== */
-body.karthika-location-open {
+body.karthika-location-open,
+body.karthika-wishlist-open {
   overflow: hidden;
 }
 
@@ -6155,6 +6220,17 @@ a.karthika-quick-tab:focus-visible {
   flex-shrink: 0;
 }
 
+.karthika-popular-mini-card .karthika-wishlist-btn--mini {
+  width: 34px;
+  height: 34px;
+}
+
+.karthika-pdp-title-row h1,
+.karthika-pdp-title-row h2 {
+  flex: 1;
+  min-width: 0;
+}
+
 .karthika-pdp-title-row {
   display: flex;
   align-items: flex-start;
@@ -7228,6 +7304,237 @@ cart-drawer.drawer {
 }
 
 /* ==========================================================================
+   Wishlist panel
+   ========================================================================== */
+
+.karthika-wishlist-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+.karthika-wishlist-modal.is-open {
+  display: flex;
+}
+
+.karthika-wishlist-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.karthika-wishlist-modal-box {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 760px;
+  max-height: min(88vh, 100dvh);
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-radius: 28px 28px 0 0;
+  background: #ffffff;
+}
+
+.karthika-wishlist-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.karthika-wishlist-modal-title {
+  margin: 0;
+  color: var(--karthika-text-dark, #171717);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.karthika-wishlist-modal-description {
+  margin: 5px 0 0;
+  color: var(--karthika-text-muted, #6b6b6b);
+  font-size: 0.85rem;
+}
+
+.karthika-wishlist-modal-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f5f5f2;
+  color: var(--karthika-text-muted, #6b6b6b);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.karthika-wishlist-modal-close:hover {
+  background: #ecece8;
+  color: var(--karthika-text-dark, #171717);
+}
+
+.karthika-wishlist-modal-status,
+.karthika-wishlist-modal-loading {
+  margin: 0 0 16px;
+  color: var(--karthika-text-muted, #6b6b6b);
+  font-size: 0.9rem;
+}
+
+.karthika-wishlist-modal-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.karthika-wishlist-modal-empty {
+  padding: 28px 20px;
+}
+
+.karthika-wishlist-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: #fff5f4;
+  color: #e5534b;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.karthika-wishlist-modal-empty h3 {
+  margin: 0 0 8px;
+  color: var(--karthika-text-dark, #171717);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.karthika-wishlist-modal-empty p {
+  margin-bottom: 20px;
+}
+
+.karthika-wishlist-modal-actions {
+  position: sticky;
+  bottom: -20px;
+  z-index: 4;
+  margin: 16px -16px -20px;
+  padding: 14px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--karthika-border, #ecece8);
+  background: rgba(255, 255, 255, 0.97);
+}
+
+.karthika-wishlist-modal-actions__note {
+  margin: 0 0 10px;
+  color: var(--karthika-text-muted, #6b6b6b);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.karthika-wishlist-checkout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--karthika-red, #3F7D2E);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 800;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.karthika-wishlist-checkout-button:hover:not(:disabled) {
+  background: var(--karthika-red-hover, #336524);
+}
+
+.karthika-wishlist-checkout-button:focus-visible {
+  outline: 2px solid #2775D9;
+  outline-offset: 2px;
+}
+
+.karthika-wishlist-checkout-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.karthika-wishlist-checkout-button.is-busy {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.karthika-wishlist-checkout-spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: karthika-wishlist-spin 0.7s linear infinite;
+}
+
+.karthika-wishlist-checkout-button.is-busy .karthika-wishlist-checkout-spinner {
+  display: inline-block;
+}
+
+@keyframes karthika-wishlist-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media screen and (min-width: 750px) {
+  .karthika-wishlist-modal {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .karthika-wishlist-modal-box {
+    max-width: 760px;
+    padding: 24px;
+    border-radius: 28px;
+  }
+
+  .karthika-wishlist-modal-actions {
+    bottom: -24px;
+    margin-right: -24px;
+    margin-left: -24px;
+    padding: 14px 24px 24px;
+  }
+
+  .karthika-wishlist-modal-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media screen and (min-width: 1100px) {
+  .karthika-wishlist-modal-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+
+/* ==========================================================================
    Wishlist page
    ========================================================================== */
 
@@ -7368,20 +7675,6 @@ canvas {
   opacity: 0.78;
   cursor: default;
   pointer-events: none;
-}
-
-.karthika-header-notification[disabled],
-.karthika-header-notification[aria-disabled="true"] {
-  cursor: default;
-  opacity: 0.42;
-  pointer-events: none;
-}
-
-.karthika-header-notification[disabled]:hover,
-.karthika-header-notification[aria-disabled="true"]:hover,
-.karthika-header-notification[disabled]:active,
-.karthika-header-notification[aria-disabled="true"]:active {
-  opacity: 0.42;
 }
 
 .karthika-nav-item:focus-visible,

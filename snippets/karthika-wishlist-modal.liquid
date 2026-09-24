@@ -1,0 +1,93 @@
+{% doc %}
+  Karthika responsive wishlist panel. Product data is loaded by WishlistManager
+  from Shopify's product.wishlist-card view.
+{% enddoc %}
+
+<div
+  id="KarthikaWishlistModal"
+  class="karthika-wishlist-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="KarthikaWishlistModalTitle"
+  aria-describedby="KarthikaWishlistModalDescription"
+  aria-hidden="true"
+  hidden
+  data-karthika-wishlist-modal
+  data-card-view="wishlist-card"
+>
+  <button
+    type="button"
+    class="karthika-wishlist-modal-backdrop"
+    data-karthika-wishlist-dismiss
+    tabindex="-1"
+    aria-label="{{ 'accessibility.close' | t }}"
+  ></button>
+
+  <div class="karthika-wishlist-modal-box" role="document">
+    <div class="karthika-wishlist-modal-head">
+      <div>
+        <h2 id="KarthikaWishlistModalTitle" class="karthika-wishlist-modal-title">
+          {{ 'general.wishlist.title' | t }}
+        </h2>
+        <p id="KarthikaWishlistModalDescription" class="karthika-wishlist-modal-description">
+          {{ 'general.wishlist.empty_text' | t }}
+        </p>
+      </div>
+      <button
+        type="button"
+        class="karthika-wishlist-modal-close"
+        data-karthika-wishlist-dismiss
+        aria-label="{{ 'accessibility.close' | t }}"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+
+    <p
+      class="karthika-wishlist-modal-status"
+      data-wishlist-status
+      data-unavailable-message="{{ 'general.wishlist.unavailable' | t | escape }}"
+      data-load-error-message="{{ 'general.wishlist.load_error' | t | escape }}"
+      hidden
+    ></p>
+
+    <div class="karthika-wishlist-modal-loading" data-wishlist-loading hidden>
+      <p>{{ 'general.wishlist.loading' | t }}</p>
+    </div>
+
+    <div class="karthika-wishlist-empty karthika-wishlist-modal-empty" data-wishlist-empty hidden>
+      <div class="karthika-wishlist-empty-icon" aria-hidden="true">♡</div>
+      <h3>{{ 'general.wishlist.empty_heading' | t }}</h3>
+      <p>{{ 'general.wishlist.empty_text' | t }}</p>
+      <div class="karthika-wishlist-empty__actions">
+        <a class="karthika-wishlist-empty__btn" href="{{ routes.all_products_collection_url }}">
+          {{ 'general.wishlist.shop_products' | t }}
+        </a>
+        <a class="karthika-wishlist-empty__btn karthika-wishlist-empty__btn--secondary" href="{{ routes.collections_url }}">
+          {{ 'general.wishlist.shop_categories' | t }}
+        </a>
+      </div>
+    </div>
+
+    <noscript>
+      <p>{{ 'general.wishlist.js_required' | t }}</p>
+    </noscript>
+
+    <div class="karthika-wishlist-grid karthika-wishlist-modal-grid" data-wishlist-grid hidden></div>
+
+    <div class="karthika-wishlist-modal-actions" data-wishlist-actions hidden>
+      <p class="karthika-wishlist-modal-actions__note" data-wishlist-checkout-note hidden></p>
+      <button
+        type="button"
+        class="karthika-wishlist-checkout-button"
+        data-wishlist-checkout
+        data-unavailable-message="{{ 'general.wishlist.checkout_unavailable' | t | escape }}"
+        data-partial-message="{{ 'general.wishlist.checkout_partial' | t | escape }}"
+        disabled
+      >
+        <span data-wishlist-checkout-label>{{ 'general.wishlist.proceed_to_checkout' | t }}</span>
+        <span class="karthika-wishlist-checkout-spinner" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</div>

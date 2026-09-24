@@ -109,13 +109,18 @@
                     {{- block.settings.text -}}
                   </p>
                 {%- when 'title' -%}
-                  <h2 class="product__title {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                  <div class="karthika-pdp-title-row" {{ block.shopify_attributes }}>
                     {%- unless placeholder -%}
-                      {{ product.title | escape }}
-                    {%- else -%}
-                      {{ 'onboarding.product_title' | t }}
+                      {% render 'karthika-wishlist-button', product: product, button_class: 'karthika-wishlist-btn--pdp' %}
                     {%- endunless -%}
-                  </h2>
+                    <h2 class="product__title {{ block.settings.heading_size }}">
+                      {%- unless placeholder -%}
+                        {{ product.title | escape }}
+                      {%- else -%}
+                        {{ 'onboarding.product_title' | t }}
+                      {%- endunless -%}
+                    </h2>
+                  </div>
                 {%- when 'price' -%}
                   <div id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
                     {%- render 'price',

@@ -69,8 +69,10 @@
       "loading": "Loading your wishlist",
       "js_required": "Turn on JavaScript to view your saved products.",
       "unavailable": "This product is no longer available and was removed from your wishlist.",
-      "load_error": "We couldn't load your saved products. Check your connection and try again."
-    },
+      "load_error": "We couldn't load your saved products. Check your connection and try again.",
+      "proceed_to_checkout": "Proceed to checkout",
+      "checkout_unavailable": "Sold-out items cannot be added. Choose available items to continue.",
+      "checkout_partial": "Sold-out items will be skipped."    },
     "cart": {
       "view": "Visualizza carrello ({{ count }})",
       "item_added": "Articolo aggiunto al carrello",
