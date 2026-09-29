@@ -3220,10 +3220,17 @@ body.karthika-wishlist-open {
   display: none;
   position: fixed;
   inset: 0;
+  /* Use dvh so the overlay fits within the visible viewport on iOS Safari */
+  height: 100dvh;
+  height: 100vh; /* fallback for older browsers */
+  height: 100dvh;
   z-index: 2100;
   align-items: flex-end;       /* bottom sheet on mobile */
   justify-content: center;
   padding: 0;
+  /* Push content above Safari's bottom toolbar */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
 }
 
 .karthika-delivery-modal.is-open {
@@ -3256,11 +3263,13 @@ body.karthika-wishlist-open {
   background: #ffffff;
   width: 100%;
   max-width: 480px;
-  max-height: min(94vh, 100dvh);
+  /* Use dvh so it never overflows Safari's visible area; fall back to 90vh */
+  max-height: 90vh;
+  max-height: 90dvh;
   overflow-x: hidden;
   overflow-y: auto;
   box-sizing: border-box;
-  padding: 0 0 env(safe-area-inset-bottom, 0px);
+  /* No extra bottom padding here — the parent container handles safe-area */
   border-radius: 24px 24px 0 0;
   box-shadow: 0 -4px 32px rgba(24, 55, 25, 0.14);
 }
@@ -3281,6 +3290,7 @@ body.karthika-wishlist-open {
     border-radius: 20px;
     max-width: 520px;
     max-height: min(88vh, 740px);
+    max-height: min(88dvh, 740px);
     box-shadow: 0 8px 48px rgba(24, 55, 25, 0.18);
   }
   .karthika-delivery-modal-box::before { display: none; }
