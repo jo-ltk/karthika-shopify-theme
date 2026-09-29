@@ -12,7 +12,7 @@
     "mcp:shopify": "npx @shopify/dev-mcp"
   },
   "dependencies": {
-    "express": "4.21.2"
+    "express": "^4.21.2"
   },
   "devDependencies": {
     "@shopify/cli": "^4.7.0",
