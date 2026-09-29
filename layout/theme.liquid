@@ -305,13 +305,17 @@
     {% endstyle %}
 
     {{ 'base.css' | asset_url | stylesheet_tag }}
+
+    {{- /* Leaflet CSS must load before our stylesheet so its map widget rules are available */ -}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
     {{ 'karthika-grocery.css' | asset_url | stylesheet_tag }}
+
+    {{- /* Leaflet JS — defer keeps parsing non-blocking; correct SRI hash ensures the script is not silently dropped */ -}}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+
     <script src="{{ 'karthika-grocery.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'karthika-checkout.js' | asset_url }}" defer="defer"></script>
-
-    {{- /* Leaflet CSS — free interactive map, no API key required */ -}}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLs=" crossorigin="" defer></script>
     <link rel="stylesheet" href="{{ 'component-cart-items.css' | asset_url }}" media="print" onload="this.media='all'">
 
     {%- if settings.cart_type == 'drawer' -%}

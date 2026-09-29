@@ -891,9 +891,15 @@
         });
       }
 
-      // When switching to map, invalidate size so Leaflet tiles fill correctly
+      // When switching to map, invalidate Leaflet's size so tiles fill the
+      // container correctly. The panel just became visible, so we need both a
+      // rAF (for the first paint) and a short setTimeout (for slow paint cycles
+      // or CSS transitions that finish after the first frame).
       if (name === 'map' && this._map) {
-        window.requestAnimationFrame(() => this._map.invalidateSize());
+        window.requestAnimationFrame(() => {
+          this._map.invalidateSize();
+          setTimeout(() => this._map && this._map.invalidateSize(), 50);
+        });
       }
     },
 
@@ -990,6 +996,8 @@
       this._pendingCoords  = { lat, lng };
       this._pendingAddress = address || '';
 
+      // Show the panel first so the container has layout dimensions,
+      // then init/update Leaflet in the next animation frame.
       this._showPanel('map');
 
       window.requestAnimationFrame(() => {
@@ -1003,7 +1011,8 @@
       const mapEl = this._mapEl();
       if (!mapEl) return;
 
-      // Wait for Leaflet to be available (loaded async via CDN)
+      // Leaflet is loaded synchronously (no defer) so L is always defined here.
+      // Guard defensively for edge cases (e.g. script blocked by browser).
       if (typeof L === 'undefined') {
         setTimeout(() => this._initOrUpdateMap(lat, lng), 150);
         return;
@@ -1017,7 +1026,9 @@
           attributionControl: true,
         });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // Use the direct tile URL (no {s} subdomain variable) to avoid any
+        // CORS / SRI mismatch that can silently blank the map.
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
           maxZoom: 19,
         }).addTo(this._map);
@@ -1053,6 +1064,12 @@
           this._mapMarker.setLatLng(ev.latlng);
           this._pendingCoords = { lat: ev.latlng.lat, lng: ev.latlng.lng };
           this._reverseGeocode(ev.latlng.lat, ev.latlng.lng);
+        });
+
+        // After first-time creation the container may still be mid-layout,
+        // so force a size recalculation to make tiles paint immediately.
+        window.requestAnimationFrame(() => {
+          this._map && this._map.invalidateSize();
         });
 
       } else {

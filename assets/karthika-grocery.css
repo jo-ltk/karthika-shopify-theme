@@ -3665,20 +3665,30 @@ body.karthika-wishlist-open {
   font-weight: 500;
 }
 
-/* Leaflet map container */
+/* Leaflet map container — explicit pixel height is required for Leaflet to
+   measure the container correctly. min-height acts as a safety net in case a
+   parent with height:auto tries to collapse the wrapper. display:block on
+   .kdm-map stops any inherited display value from confusing Leaflet. */
 .kdm-map-wrap {
   position: relative;
   width: 100%;
   height: 240px;
+  min-height: 240px;
   background: #EAF3DC;
+  overflow: hidden; /* clip Leaflet's absolutely-positioned tiles */
 }
 @media screen and (min-width: 750px) {
-  .kdm-map-wrap { height: 280px; }
+  .kdm-map-wrap {
+    height: 280px;
+    min-height: 280px;
+  }
 }
 
 .kdm-map {
+  display: block;
   width: 100%;
   height: 100%;
+  min-height: inherit; /* inherits 240 / 280 from wrapper */
 }
 
 /* Leaflet overrides — keep inside our colour scheme */
