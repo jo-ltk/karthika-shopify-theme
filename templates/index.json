@@ -229,6 +229,7 @@
         "collection": "all",
         "preset_type": "popular",
         "products_to_show": 6,
+        "products_offset": 0,
         "carousel": false
       }
     },
@@ -240,6 +241,7 @@
         "link_text": "See all",
         "preset_type": "deals",
         "products_to_show": 6,
+        "products_offset": 6,
         "collection": "all"
       }
     },
@@ -251,6 +253,7 @@
         "link_text": "See all",
         "preset_type": "kerala",
         "products_to_show": 6,
+        "products_offset": 12,
         "collection": "all"
       }
     },
@@ -381,6 +384,7 @@
         "link_text": "See all",
         "preset_type": "new_arrivals",
         "products_to_show": 6,
+        "products_offset": 18,
         "collection": "all"
       }
     }

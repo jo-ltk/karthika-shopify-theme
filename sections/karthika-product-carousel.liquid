@@ -12,6 +12,7 @@
   {%- assign target_collection = collections.all -%}
 {%- endif -%}
 {%- assign products_to_show = section.settings.products_to_show | default: 4 -%}
+{%- assign products_offset = section.settings.products_offset | default: 0 -%}
 
 {%- if target_collection != blank -%}
   <div class="karthika-grid-section{% if section.settings.carousel %} karthika-product-section--carousel{% endif %}">
@@ -32,7 +33,7 @@
 
     <div class="{% if section.settings.preset_type == 'popular' %}karthika-popular-mini-grid{% elsif section.settings.preset_type == 'deals' or section.settings.preset_type == 'kerala' or section.settings.preset_type == 'new_arrivals' %}karthika-deals-three-grid{% else %}karthika-two-col-grid{% endif %}">
       {%- if target_collection.products_count > 0 -%}
-        {%- for product in target_collection.products limit: products_to_show -%}
+        {%- for product in target_collection.products limit: products_to_show offset: products_offset -%}
           {%- if section.settings.preset_type == 'popular' -%}
             {% render 'karthika-card-product-mini', card_product: product %}
           {%- else -%}
@@ -103,6 +104,13 @@
       "step": 2,
       "default": 4,
       "label": "Products to Show"
+    },
+    {
+      "type": "number",
+      "id": "products_offset",
+      "label": "Products Offset",
+      "default": 0,
+      "info": "Skip this many products from the start of the collection. Use different values across sections to avoid showing the same products."
     },
     {
       "type": "checkbox",
