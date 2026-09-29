@@ -1,193 +1,105 @@
 {%- comment -%}
-  Karthika Quick Tabs — horizontal collection shortcuts under homepage search.
-  Each tab shows only an icon and a category name, and links to /collections/...
+  Karthika Category Carousel — single horizontal scrollable row below the search bar.
+  All 16 categories in ONE ROW. Users swipe left/right to browse.
+  Images served from Shopify Admin → Content → Files via the file_url filter.
+  No CDN URLs hardcoded. Do NOT move these images into the theme assets folder.
 {%- endcomment -%}
 
-{%- assign shown_handles = '|' -%}
-{%- assign tab_count = 0 -%}
+{%- comment -%}
+  Static 16-entry category data.
+  Format: title||webp_filename||collection_handle
+{%- endcomment -%}
+{%- assign _cats_raw = "Home||karthika-cat-home.webp||all,Baby & Child||karthika-cat-baby-child.webp||baby-child,Baking||karthika-cat-baking.webp||baking,Beverages||karthika-cat-beverages.webp||beverages,Personal Care||karthika-cat-personal-care.webp||personal-care,Confectioneries||karthika-cat-confectioneries.webp||confectioneries,Dairy||karthika-cat-dairy.webp||dairy-eggs,Frozen||karthika-cat-frozen.webp||frozen-foods,Fruit & Veg||karthika-cat-fruit-vegetables.webp||fresh-fruits,Rice||karthika-cat-rice.webp||rice-grains,Groceries||karthika-cat-groceries.webp||groceries,Household||karthika-cat-household.webp||household,Kitchen||karthika-cat-kitchen.webp||kitchen,Pharmacy||karthika-cat-pharmacy.webp||pharmacy,Pooja Items||karthika-cat-pooja-items.webp||pooja-items,Manufacturer||karthika-cat-manufacturer.webp||manufacturer" | split: "," -%}
 
-<nav
-  class="karthika-quick-tabs"
-  id="KarthikaQuickTabs-{{ section.id }}"
-  aria-label="{{ section.settings.title | default: 'Shop by category' | escape }}"
+<section
+  class="kcg-section"
+  id="KCG-{{ section.id }}"
+  aria-labelledby="kcg-title-{{ section.id }}"
 >
-  {%- for block in section.blocks -%}
-    {%- liquid
-      assign tab_url = blank
-      assign tab_collection = block.settings.collection
-      assign tab_label = block.settings.label | strip
-      assign tab_image = block.settings.image
-      assign tab_handle = block.settings.collection_handle | strip | handleize
-      assign label_handle = tab_label | handleize
-
-      if tab_handle == blank
-        if label_handle == 'rice' or label_handle == 'rice-and-grains'
-          assign tab_handle = 'rice-grains'
-        elsif label_handle == 'spices' or label_handle == 'spices-and-masala'
-          assign tab_handle = 'spices-masala'
-        elsif label_handle == 'snacks'
-          assign tab_handle = 'indian-snacks'
-        elsif label_handle == 'dairy' or label_handle == 'dairy-and-eggs'
-          assign tab_handle = 'dairy-eggs'
-        elsif label_handle != blank and label_handle != 'all'
-          assign tab_handle = label_handle
-        endif
-      endif
-
-      if tab_collection == blank and tab_handle != blank
-        assign tab_collection = collections[tab_handle]
-      endif
-
-      if tab_collection != blank and tab_collection.url != blank
-        assign tab_url = tab_collection.url
-        assign tab_handle = tab_collection.handle
-        if tab_label == blank
-          assign tab_label = tab_collection.title
-        endif
-        if tab_image == blank and tab_collection.image
-          assign tab_image = tab_collection.image
-        endif
-      elsif block.settings.link_all_products
-        assign tab_url = routes.all_products_collection_url
-        assign tab_handle = 'all'
-        if tab_label == blank
-          assign tab_label = 'All'
-        endif
-      elsif tab_handle != blank
-        assign tab_url = routes.collections_url | append: '/' | append: tab_handle
-      endif
-
-      assign tab_active = false
-      if template.name == 'collection' and collection
-        if tab_handle != blank and collection.handle == tab_handle
-          assign tab_active = true
-        elsif block.settings.link_all_products and collection.handle == 'all'
-          assign tab_active = true
-        endif
-      endif
-    -%}
-    {%- if tab_url != blank and tab_label != blank -%}
-      {%- assign shown_handles = shown_handles | append: tab_handle | append: '|' -%}
-      {%- assign tab_count = tab_count | plus: 1 -%}
-      <a
-        href="{{ tab_url }}"
-        class="karthika-quick-tab{% if tab_active %} is-active{% endif %}"
-        aria-label="{{ tab_label | escape }}"
-        {% if tab_active %}aria-current="page"{% endif %}
-        {{ block.shopify_attributes }}
-      >
-        <span class="karthika-quick-tab-icon" aria-hidden="true">
-          {%- if tab_image != blank -%}
-            <img
-              src="{{ tab_image | image_url: width: 96 }}"
-              alt=""
-              width="28"
-              height="28"
-              loading="lazy"
-            >
-          {%- else -%}
-            {{ block.settings.icon | default: '🛒' }}
-          {%- endif -%}
-        </span>
-        <span class="karthika-quick-tab-label">{{ tab_label | escape }}</span>
-      </a>
+  <div class="kcg-header">
+    <h2 class="kcg-title" id="kcg-title-{{ section.id }}">
+      {{- section.settings.title | default: 'Shop by Category' -}}
+    </h2>
+    {%- if section.settings.subtitle != blank or section.settings.subtitle == blank -%}
+      <p class="kcg-subtitle">
+        {{- section.settings.subtitle | default: 'Everything you need, all in one place' -}}
+      </p>
     {%- endif -%}
-  {%- endfor -%}
+  </div>
 
-  {%- for store_collection in collections -%}
-    {%- liquid
-      if tab_count >= 12
-        break
-      endif
-      if store_collection.handle == 'all' or store_collection.handle == 'frontpage'
-        continue
-      endif
-      if store_collection.url == blank
-        continue
-      endif
-      assign handle_token = '|' | append: store_collection.handle | append: '|'
-      if shown_handles contains handle_token
-        continue
-      endif
-      assign tab_count = tab_count | plus: 1
-    -%}
-    <a
-      href="{{ store_collection.url }}"
-      class="karthika-quick-tab"
-      aria-label="{{ store_collection.title | escape }}"
-    >
-      <span class="karthika-quick-tab-icon" aria-hidden="true">
-        {%- if store_collection.image -%}
-          <img
-            src="{{ store_collection.image | image_url: width: 96 }}"
-            alt=""
-            width="28"
-            height="28"
-            loading="lazy"
-          >
-        {%- else -%}
-          🛒
+  <div class="kcg-scroll" role="list" aria-label="{{ section.settings.title | default: 'Shop by Category' | escape }}">
+    {%- for _cat_entry in _cats_raw -%}
+      {%- assign _parts  = _cat_entry | split: "||" -%}
+      {%- assign _title  = _parts[0] -%}
+      {%- assign _file   = _parts[1] -%}
+      {%- assign _handle = _parts[2] -%}
+
+      {%- comment -%} Resolve URL from live collection object, with /collections/<handle> fallback {%- endcomment -%}
+      {%- assign _col = collections[_handle] -%}
+      {%- if _col != blank and _col.url != blank -%}
+        {%- assign _url = _col.url -%}
+      {%- elsif _handle == 'all' -%}
+        {%- assign _url = routes.all_products_collection_url -%}
+      {%- else -%}
+        {%- assign _url = routes.collections_url | append: '/' | append: _handle -%}
+      {%- endif -%}
+
+      {%- comment -%} Active state when browsing a matching collection {%- endcomment -%}
+      {%- assign _active = false -%}
+      {%- if template.name == 'collection' and collection -%}
+        {%- if collection.handle == _handle -%}
+          {%- assign _active = true -%}
+        {%- elsif _handle == 'all' and collection.handle == 'all' -%}
+          {%- assign _active = true -%}
         {%- endif -%}
-      </span>
-      <span class="karthika-quick-tab-label">{{ store_collection.title | escape }}</span>
-    </a>
-  {%- endfor -%}
-</nav>
+      {%- endif -%}
+
+      <a
+        href="{{ _url }}"
+        class="kcg-item{% if _active %} kcg-item--active{% endif %}"
+        aria-label="{{ _title | escape }}"
+        {% if _active %}aria-current="page"{% endif %}
+        role="listitem"
+      >
+        <span class="kcg-icon">
+          <img
+            src="{{ _file | file_url }}"
+            alt=""
+            width="72"
+            height="72"
+            loading="lazy"
+            draggable="false"
+          >
+        </span>
+        <span class="kcg-label">{{ _title }}</span>
+      </a>
+    {%- endfor -%}
+  </div>
+</section>
 
 {% schema %}
 {
-  "name": "Karthika Quick Tabs",
+  "name": "Karthika Category Carousel",
   "tag": "section",
   "class": "section karthika-quick-tabs-section",
-  "max_blocks": 12,
   "settings": [
     {
       "type": "text",
       "id": "title",
-      "label": "Accessible title",
-      "default": "Shop by category"
-    }
-  ],
-  "blocks": [
+      "label": "Section title",
+      "default": "Shop by Category"
+    },
     {
-      "type": "tab_item",
-      "name": "Category",
-      "settings": [
-        { "type": "text", "id": "label", "label": "Label", "info": "Optional. Defaults to the collection title." },
-        { "type": "text", "id": "icon", "label": "Icon (emoji)", "default": "🛒", "info": "Used when no image or collection image is available." },
-        { "type": "image_picker", "id": "image", "label": "Icon image (optional, overrides collection image)" },
-        {
-          "type": "checkbox",
-          "id": "link_all_products",
-          "label": "Link to all products",
-          "default": false,
-          "info": "All tab. Links to /collections/all."
-        },
-        {
-          "type": "collection",
-          "id": "collection",
-          "label": "Collection"
-        },
-        {
-          "type": "text",
-          "id": "collection_handle",
-          "label": "Collection handle",
-          "info": "Used for /collections/<handle> when the collection picker is empty. Example: rice-grains"
-        }
-      ]
+      "type": "text",
+      "id": "subtitle",
+      "label": "Section subtitle",
+      "default": "Everything you need, all in one place"
     }
   ],
+  "blocks": [],
   "presets": [
     {
-      "name": "Karthika Quick Tabs",
-      "blocks": [
-        { "type": "tab_item", "settings": { "label": "All", "icon": "🛍️", "link_all_products": true } },
-        { "type": "tab_item", "settings": { "label": "Rice", "icon": "🍚", "collection": "rice-grains", "collection_handle": "rice-grains" } },
-        { "type": "tab_item", "settings": { "label": "Spices", "icon": "🌶️", "collection": "spices-masala", "collection_handle": "spices-masala" } },
-        { "type": "tab_item", "settings": { "label": "Snacks", "icon": "🍪", "collection": "indian-snacks", "collection_handle": "indian-snacks" } },
-        { "type": "tab_item", "settings": { "label": "Beverages", "icon": "🥤", "collection": "beverages", "collection_handle": "beverages" } },
-        { "type": "tab_item", "settings": { "label": "Dairy", "icon": "🥛", "collection": "dairy-eggs", "collection_handle": "dairy-eggs" } }
-      ]
+      "name": "Karthika Category Carousel"
     }
   ]
 }
