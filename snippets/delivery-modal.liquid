@@ -1,23 +1,25 @@
 {% doc %}
-  Informational store location selector. Updates header display only; does not change checkout shipping.
-{% enddoc %}
+  Delivery location modal — Leaflet + OpenStreetMap, zero Google dependency.
 
-{%- liquid
-  assign location_address = settings.store_location_address | strip
-  assign location_city = settings.store_location_city | strip
-  assign location_region = settings.store_location_region | strip
-  assign location_name = settings.store_location_name | strip
-  assign default_label = ''
-  if location_region != blank and location_city != blank
-    assign default_label = location_region | append: ', ' | append: location_city
-  elsif location_city != blank
-    assign default_label = location_city
-  elsif location_name != blank
-    assign default_label = location_name
-  elsif location_address != blank
-    assign default_label = location_address
-  endif
--%}
+  Panel 1 (.kdm-panel--search):
+    - "Select your location" heading
+    - Address search input (Nominatim geocoder on submit)
+    - Search results list (selectable)
+    - "Use current location" button (browser geolocation → Nominatim reverse-geocode)
+    - Recent addresses (localStorage, max 5, hidden until populated)
+
+  Panel 2 (.kdm-panel--map):
+    - Leaflet interactive map (OpenStreetMap tiles, OSM attribution)
+    - Draggable pin marker
+    - "Add delivery address" CTA to proceed to form
+
+  Panel 3 (.kdm-panel--form):
+    - Address detail fields (house/flat, street, area/building, postal, label)
+    - "Use this address" CTA
+
+  The JavaScript in LocationManager drives all interactivity.
+  The modal is rendered globally by layout/theme.liquid on every page.
+{% enddoc %}
 
 <div
   id="KarthikaDeliveryModal"
@@ -25,12 +27,13 @@
   role="dialog"
   aria-modal="true"
   aria-labelledby="KarthikaDeliveryModalTitle"
-  aria-describedby="KarthikaDeliveryModalDesc"
   aria-hidden="true"
   hidden
-  data-default-location="{{ default_label | escape }}"
-  data-default-location-id="area-1"
+  data-default-location="{{ settings.store_location_region | default: settings.store_location_city | default: settings.store_location_name | escape }}"
+  data-default-location-id="kdm-default"
 >
+
+  {{- /* ── Backdrop ──────────────────────────────────────────── */ -}}
   <button
     type="button"
     class="karthika-delivery-modal-backdrop"
@@ -38,171 +41,320 @@
     tabindex="-1"
     aria-label="{{ 'general.location.close' | t }}"
   ></button>
+
+  {{- /* ── Modal box ───────────────────────────────────────────── */ -}}
   <div class="karthika-delivery-modal-box" role="document">
-    <div class="karthika-delivery-modal-head">
-      <h2 id="KarthikaDeliveryModalTitle" class="karthika-delivery-modal-title">
-        {{ 'general.location.title' | t }}
+
+    {{- /* ── Shared header row ─────────────────────────────────── */ -}}
+    <div class="kdm-header">
+      <button
+        type="button"
+        class="kdm-back-btn"
+        data-kdm-back
+        aria-label="Back to search"
+        hidden
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <h2 id="KarthikaDeliveryModalTitle" class="kdm-title" data-kdm-title>
+        Select your location
       </h2>
       <button
         type="button"
-        class="karthika-delivery-modal-close"
+        class="kdm-close-btn"
         data-karthika-location-dismiss
         aria-label="{{ 'general.location.close' | t }}"
       >
-        <span aria-hidden="true">&times;</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" width="20" height="20">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
       </button>
     </div>
 
-    {%- if settings.delivery_area_text != blank -%}
-      <p id="KarthikaDeliveryModalIntro" class="karthika-delivery-modal-intro">
-        {{ settings.delivery_area_text | escape }}
-      </p>
-    {%- endif -%}
+    {{- /* ═══════════════════════════════════════════════════════
+          PANEL 1 — SEARCH
+         ═══════════════════════════════════════════════════════ */ -}}
+    <div class="kdm-panel kdm-panel--search" data-kdm-panel="search">
 
-    <p id="KarthikaDeliveryModalDesc" class="karthika-delivery-modal-note">
-      {%- if settings.location_selector_note != blank -%}
-        {{ settings.location_selector_note | escape }}
-      {%- else -%}
-        {{ 'general.location.checkout_note' | t }}
-      {%- endif -%}
-    </p>
-
-    <div class="karthika-location-list">
-      {%- liquid
-        assign area_1_name = settings.delivery_area_1_name | strip
-        assign area_1_address = settings.delivery_area_1_address | strip
-        assign area_1_note = settings.delivery_area_1_note | strip
-        assign area_2_name = settings.delivery_area_2_name | strip
-        assign area_2_address = settings.delivery_area_2_address | strip
-        assign area_2_note = settings.delivery_area_2_note | strip
-        assign area_3_name = settings.delivery_area_3_name | strip
-        assign area_3_address = settings.delivery_area_3_address | strip
-        assign area_3_note = settings.delivery_area_3_note | strip
-        assign area_4_name = settings.delivery_area_4_name | strip
-        assign area_4_address = settings.delivery_area_4_address | strip
-        assign area_4_note = settings.delivery_area_4_note | strip
-      -%}
-
-      {%- if area_1_name != blank or area_1_address != blank -%}
-        {%- liquid
-          assign area_1_label = area_1_name
-          if area_1_label == blank
-            assign area_1_label = area_1_address
-          endif
-        -%}
+      {{- /* Search input */ -}}
+      <form
+        class="kdm-search-shell"
+        role="search"
+        aria-label="Search for your delivery location"
+        data-kdm-search-form
+        autocomplete="off"
+      >
+        <svg class="kdm-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          id="KdmSearchInput"
+          type="search"
+          class="kdm-search-input"
+          placeholder="Search address…"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-label="Search for your area, street or building"
+          aria-autocomplete="list"
+          aria-controls="KdmSearchResults"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+        >
         <button
           type="button"
-          class="karthika-location-item is-selected"
-          data-location-id="area-1"
-          data-label="{{ area_1_label | escape }}"
-          data-address="{{ area_1_label | escape }}"
-          aria-pressed="true"
-        >
-          <span class="karthika-location-item__copy">
-            {%- if area_1_name != blank -%}<span class="karthika-location-item__name">{{ area_1_name | escape }}</span>{%- endif -%}
-            {%- if area_1_address != blank -%}<span class="karthika-location-item__address">{{ area_1_address | escape }}</span>{%- endif -%}
-          </span>
-          {%- if area_1_note != blank -%}<span class="karthika-location-item__note">{{ area_1_note | escape }}</span>{%- endif -%}
-        </button>
-      {%- endif -%}
-
-      {%- if area_2_name != blank or area_2_address != blank -%}
-        {%- liquid
-          assign area_2_label = area_2_name
-          if area_2_label == blank
-            assign area_2_label = area_2_address
-          endif
-        -%}
+          class="kdm-search-clear"
+          data-kdm-search-clear
+          aria-label="Clear search"
+          hidden
+        >&times;</button>
         <button
-          type="button"
-          class="karthika-location-item"
-          data-location-id="area-2"
-          data-label="{{ area_2_label | escape }}"
-          data-address="{{ area_2_label | escape }}"
-          aria-pressed="false"
+          type="submit"
+          class="kdm-search-submit"
+          aria-label="Search"
         >
-          <span class="karthika-location-item__copy">
-            {%- if area_2_name != blank -%}<span class="karthika-location-item__name">{{ area_2_name | escape }}</span>{%- endif -%}
-            {%- if area_2_address != blank -%}<span class="karthika-location-item__address">{{ area_2_address | escape }}</span>{%- endif -%}
-          </span>
-          {%- if area_2_note != blank -%}<span class="karthika-location-item__note">{{ area_2_note | escape }}</span>{%- endif -%}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" width="16" height="16">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
         </button>
-      {%- endif -%}
+      </form>
 
-      {%- if area_3_name != blank or area_3_address != blank -%}
-        {%- liquid
-          assign area_3_label = area_3_name
-          if area_3_label == blank
-            assign area_3_label = area_3_address
-          endif
-        -%}
-        <button
-          type="button"
-          class="karthika-location-item"
-          data-location-id="area-3"
-          data-label="{{ area_3_label | escape }}"
-          data-address="{{ area_3_label | escape }}"
-          aria-pressed="false"
-        >
-          <span class="karthika-location-item__copy">
-            {%- if area_3_name != blank -%}<span class="karthika-location-item__name">{{ area_3_name | escape }}</span>{%- endif -%}
-            {%- if area_3_address != blank -%}<span class="karthika-location-item__address">{{ area_3_address | escape }}</span>{%- endif -%}
-          </span>
-          {%- if area_3_note != blank -%}<span class="karthika-location-item__note">{{ area_3_note | escape }}</span>{%- endif -%}
-        </button>
-      {%- endif -%}
+      {{- /* Search result list (populated by JS after Nominatim call) */ -}}
+      <ul
+        id="KdmSearchResults"
+        class="kdm-search-results"
+        role="listbox"
+        aria-label="Address search results"
+        hidden
+      ></ul>
 
-      {%- if area_4_name != blank or area_4_address != blank -%}
-        {%- liquid
-          assign area_4_label = area_4_name
-          if area_4_label == blank
-            assign area_4_label = area_4_address
-          endif
-        -%}
-        <button
-          type="button"
-          class="karthika-location-item"
-          data-location-id="area-4"
-          data-label="{{ area_4_label | escape }}"
-          data-address="{{ area_4_label | escape }}"
-          aria-pressed="false"
-        >
-          <span class="karthika-location-item__copy">
-            {%- if area_4_name != blank -%}<span class="karthika-location-item__name">{{ area_4_name | escape }}</span>{%- endif -%}
-            {%- if area_4_address != blank -%}<span class="karthika-location-item__address">{{ area_4_address | escape }}</span>{%- endif -%}
-          </span>
-          {%- if area_4_note != blank -%}<span class="karthika-location-item__note">{{ area_4_note | escape }}</span>{%- endif -%}
-        </button>
-      {%- endif -%}
+      {{- /* Search status / spinner */ -}}
+      <p class="kdm-search-status" id="KdmSearchStatus" role="status" aria-live="polite" hidden></p>
 
-      {%- assign has_configured_areas = false -%}
-      {%- if area_1_name != blank or area_1_address != blank or area_2_name != blank or area_2_address != blank or area_3_name != blank or area_3_address != blank or area_4_name != blank or area_4_address != blank -%}
-        {%- assign has_configured_areas = true -%}
-      {%- endif -%}
-
-      {%- if has_configured_areas == false and default_label != blank -%}
-        <button
-          type="button"
-          class="karthika-location-item is-selected"
-          data-location-id="area-1"
-          data-label="{{ default_label | escape }}"
-          data-address="{{ default_label | escape }}"
-          aria-pressed="true"
-        >
-          <span class="karthika-location-item__copy">
-            {%- if location_name != blank -%}<span class="karthika-location-item__name">{{ location_name | escape }}</span>{%- endif -%}
-            <span class="karthika-location-item__address">{{ default_label | escape }}</span>
-          </span>
-        </button>
-      {%- endif -%}
-    </div>
-
-    {%- if default_label == blank and area_1_name == blank and area_2_name == blank and area_3_name == blank and area_4_name == blank and area_1_address == blank and area_2_address == blank and area_3_address == blank and area_4_address == blank -%}
-      <p class="karthika-delivery-modal-empty">{{ 'general.location.unconfigured' | t }}</p>
-    {%- elsif default_label != blank -%}
-      <button type="button" class="karthika-location-reset" data-karthika-location-reset>
-        {{ 'general.location.reset' | t }}
+      {{- /* Use current location row */ -}}
+      <button
+        type="button"
+        class="kdm-current-location-btn"
+        data-kdm-use-current
+        aria-live="polite"
+      >
+        <span class="kdm-current-location-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+        </span>
+        <span class="kdm-current-location-copy">
+          <span class="kdm-current-location-label">Use current location</span>
+          <span class="kdm-current-location-sub">Use your device GPS</span>
+        </span>
       </button>
-    {%- endif -%}
-  </div>
-</div>
+
+      {{- /* Recent addresses — hidden until populated by JS */ -}}
+      <div class="kdm-recents" id="KdmRecents" hidden>
+        <div class="kdm-recents-header">
+          <span class="kdm-recents-title">Recent addresses</span>
+          <button type="button" class="kdm-recents-clear" data-kdm-clear-recents aria-label="Clear recent addresses">Clear</button>
+        </div>
+        <ul class="kdm-recents-list" id="KdmRecentsList" role="list"></ul>
+      </div>
+
+    </div>{{- /* /panel--search */ -}}
+
+    {{- /* ═══════════════════════════════════════════════════════
+          PANEL 2 — MAP (Leaflet)
+         ═══════════════════════════════════════════════════════ */ -}}
+    <div class="kdm-panel kdm-panel--map" data-kdm-panel="map" hidden>
+
+      <p class="kdm-map-hint">Move the pin to your exact delivery spot</p>
+
+      <div class="kdm-map-wrap" id="KdmMapWrap">
+        {{- /* Leaflet renders inside this div */ -}}
+        <div id="KdmMap" class="kdm-map" aria-label="Interactive delivery location map" role="application"></div>
+      </div>
+
+      <div class="kdm-map-address-bar" id="KdmMapAddressBar" aria-live="polite">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true" class="kdm-map-address-pin">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+        <span id="KdmMapAddressText" class="kdm-map-address-text">Locating…</span>
+      </div>
+
+      <button
+        type="button"
+        class="kdm-map-proceed-btn"
+        id="KdmMapProceedBtn"
+        data-kdm-map-proceed
+      >
+        Add delivery address
+      </button>
+
+    </div>{{- /* /panel--map */ -}}
+
+    {{- /* ═══════════════════════════════════════════════════════
+          PANEL 3 — ADDRESS FORM
+         ═══════════════════════════════════════════════════════ */ -}}
+    <div class="kdm-panel kdm-panel--form" data-kdm-panel="form" hidden>
+
+      {{- /* Resolved address pill */ -}}
+      <div class="kdm-form-address-pill" id="KdmFormAddressPill" aria-live="polite" hidden>
+        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true" class="kdm-form-address-pill__icon">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+        <p class="kdm-form-address-line" id="KdmFormAddressLine"></p>
+      </div>
+
+      <form class="kdm-address-form" data-kdm-address-form novalidate>
+
+        {{- /* Two-column row: House/Unit + Postal */ -}}
+        <div class="kdm-field-row">
+          <div class="kdm-field">
+            <label class="kdm-label" for="KdmFieldUnit">
+              House / Flat / Unit
+            </label>
+            <div class="kdm-input-wrap">
+              <svg class="kdm-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+                <path d="M9 21V12h6v9"/>
+              </svg>
+              <input
+                id="KdmFieldUnit"
+                name="unit"
+                type="text"
+                class="kdm-input"
+                placeholder="Flat / Unit no."
+                autocomplete="address-line2"
+              >
+            </div>
+          </div>
+
+          <div class="kdm-field">
+            <label class="kdm-label" for="KdmFieldPostal">Postal code</label>
+            <div class="kdm-input-wrap">
+              <svg class="kdm-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M2 9h20"/>
+                <path d="M7 15h.01M12 15h.01M17 15h.01"/>
+              </svg>
+              <input
+                id="KdmFieldPostal"
+                name="postal"
+                type="text"
+                inputmode="numeric"
+                class="kdm-input"
+                placeholder="PIN code"
+                autocomplete="postal-code"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="kdm-field">
+          <label class="kdm-label" for="KdmFieldStreet">
+            Street address
+            <span class="kdm-required" aria-hidden="true">*</span>
+          </label>
+          <div class="kdm-input-wrap">
+            <svg class="kdm-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M4 20h16M4 14h16M4 8h16"/>
+            </svg>
+            <input
+              id="KdmFieldStreet"
+              name="street"
+              type="text"
+              class="kdm-input"
+              placeholder="Street / Road name"
+              autocomplete="address-line1"
+              required
+              aria-required="true"
+            >
+          </div>
+        </div>
+
+        <div class="kdm-field">
+          <label class="kdm-label" for="KdmFieldArea">Area / Building</label>
+          <div class="kdm-input-wrap">
+            <svg class="kdm-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="2" y="7" width="10" height="17" rx="1"/>
+              <path d="M12 14h10M12 7l5-5 5 5M17 2v19"/>
+            </svg>
+            <input
+              id="KdmFieldArea"
+              name="area"
+              type="text"
+              class="kdm-input"
+              placeholder="Colony / Landmark"
+              autocomplete="off"
+            >
+          </div>
+        </div>
+
+        {{- /* Address label chips */ -}}
+        <div class="kdm-field kdm-field--label-chips">
+          <span class="kdm-label" id="KdmLabelGroupLabel">Save as</span>
+          <div class="kdm-label-group" role="group" aria-labelledby="KdmLabelGroupLabel">
+
+            <label class="kdm-label-chip">
+              <input type="radio" name="address_label" value="Home" class="kdm-label-radio" checked>
+              <span class="kdm-label-chip__inner">
+                <span class="kdm-label-chip__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+                    <path d="M9 21V12h6v9"/>
+                  </svg>
+                </span>
+                Home
+              </span>
+            </label>
+
+            <label class="kdm-label-chip">
+              <input type="radio" name="address_label" value="Work" class="kdm-label-radio">
+              <span class="kdm-label-chip__inner">
+                <span class="kdm-label-chip__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                    <line x1="12" y1="12" x2="12" y2="16"/>
+                    <line x1="10" y1="14" x2="14" y2="14"/>
+                  </svg>
+                </span>
+                Work
+              </span>
+            </label>
+
+            <label class="kdm-label-chip">
+              <input type="radio" name="address_label" value="Other" class="kdm-label-radio">
+              <span class="kdm-label-chip__inner">
+                <span class="kdm-label-chip__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                </span>
+                Other
+              </span>
+            </label>
+
+          </div>
+        </div>
+
+        <p class="kdm-form-error" id="KdmFormError" role="alert" hidden></p>
+
+        <button type="submit" class="kdm-confirm-btn" id="KdmConfirmBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Use this address
+        </button>
+
+      </form>
+
+    </div>{{- /* /panel--form */ -}}
+
+  </div>{{- /* /.karthika-delivery-modal-box */ -}}
+</div>{{- /* /#KarthikaDeliveryModal */ -}}

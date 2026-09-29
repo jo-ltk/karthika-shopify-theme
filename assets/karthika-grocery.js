@@ -754,60 +754,573 @@
 
   /* --------------------------------------------------------------------------
      2. Location Selector Modal
+     — Leaflet + OpenStreetMap. Zero Google dependency.
+       Nominatim address search, browser geolocation, Leaflet interactive map,
+       address detail form, recent addresses (localStorage).
      -------------------------------------------------------------------------- */
   const LocationManager = {
-    STORAGE_KEY: 'karthika_delivery_location',
-    _lastTrigger: null,
-    _inertTargets: [],
-    _onDocumentKeydown: null,
+    // ── Storage keys ────────────────────────────────────────────────────────
+    STORAGE_KEY:         'karthika_delivery_location',
+    RECENTS_KEY:         'karthika_recent_locations',
+    MAX_RECENTS:         5,
 
+    // ── Internal state ───────────────────────────────────────────────────────
+    _lastTrigger:        null,
+    _inertTargets:       [],
+    _onDocumentKeydown:  null,
+    _map:                null,   // Leaflet map instance
+    _mapMarker:          null,   // Leaflet draggable marker
+    _pendingCoords:      null,   // { lat, lng } picked on map, waiting for form
+    _pendingAddress:     null,   // reverse-geocoded address string for the map panel
+    _activePanel:        'search',
+    _searchAbort:        null,   // AbortController for in-flight Nominatim request
+
+    // ── Initialise ──────────────────────────────────────────────────────────
     init() {
-      this._onDocumentKeydown = (event) => this.onDocumentKeydown(event);
+      this._onDocumentKeydown = (e) => this._handleKeydown(e);
       document.addEventListener('keydown', this._onDocumentKeydown, true);
-      this.restore();
 
+      // Restore previously confirmed location into header strip
+      this._restoreHeader();
+
+      // ── Delegated click handler ──────────────────────────────────────────
       document.addEventListener('click', (e) => {
-        const trigger = e.target.closest('.karthika-change-location-btn');
-        if (trigger) {
-          e.preventDefault();
-          this.open(trigger);
+        // Open modal
+        const openTrigger = e.target.closest('.karthika-change-location-btn');
+        if (openTrigger) { e.preventDefault(); this.open(openTrigger); return; }
+
+        // Dismiss (backdrop or close button)
+        if (e.target.closest('[data-karthika-location-dismiss]')) { this.close(); return; }
+
+        // Back button
+        if (e.target.closest('[data-kdm-back]')) {
+          if (this._activePanel === 'form') this._showPanel('map');
+          else this._showPanel('search');
           return;
         }
 
-        const dismiss = e.target.closest('[data-karthika-location-dismiss]');
-        if (dismiss) {
-          this.close();
-          return;
-        }
+        // "Add delivery address" — proceed from map to form
+        if (e.target.closest('[data-kdm-map-proceed]')) { this._showFormPanel(); return; }
 
-        const reset = e.target.closest('[data-karthika-location-reset]');
-        if (reset) {
-          e.preventDefault();
-          this.resetToDefault();
-          return;
-        }
+        // Use current location
+        if (e.target.closest('[data-kdm-use-current]')) { this._useCurrentLocation(); return; }
 
-        const locationOption = e.target.closest('.karthika-location-item');
-        if (locationOption && locationOption.closest('#KarthikaDeliveryModal')) {
-          const id = locationOption.dataset.locationId;
-          const label = (locationOption.dataset.label || locationOption.dataset.address || '').trim();
-          if (label) this.setLocation({ id, label });
-        }
+        // Clear search input
+        if (e.target.closest('[data-kdm-search-clear]')) { this._clearSearch(); return; }
+
+        // Clear recent addresses
+        if (e.target.closest('[data-kdm-clear-recents]')) { this._clearRecents(); return; }
+
+        // Click a recent address row
+        const recentItem = e.target.closest('[data-kdm-recent-item]');
+        if (recentItem) { this._selectRecentItem(recentItem); return; }
+
+        // Click a Nominatim search result
+        const searchResult = e.target.closest('[data-kdm-result]');
+        if (searchResult) { this._selectSearchResult(searchResult); return; }
+      });
+
+      // ── Search form submit (Nominatim explicit search) ───────────────────
+      document.addEventListener('submit', (e) => {
+        const form = e.target.closest('[data-kdm-search-form]');
+        if (!form) return;
+        e.preventDefault();
+        const input = this._searchInput();
+        const q = input ? input.value.trim() : '';
+        if (q) this._nominatimSearch(q);
+      });
+
+      // Show/hide clear button on search input
+      document.addEventListener('input', (e) => {
+        const input = e.target.closest('#KdmSearchInput');
+        if (!input) return;
+        const clearBtn = document.querySelector('[data-kdm-search-clear]');
+        if (clearBtn) clearBtn.hidden = input.value.trim() === '';
+      });
+
+      // Address form submit
+      document.addEventListener('submit', (e) => {
+        const form = e.target.closest('[data-kdm-address-form]');
+        if (!form) return;
+        e.preventDefault();
+        this._submitAddressForm(form);
       });
     },
 
-    getModal() {
-      return document.querySelector('#KarthikaDeliveryModal');
-    },
+    // ── DOM helpers ──────────────────────────────────────────────────────────
+    getModal()         { return document.getElementById('KarthikaDeliveryModal'); },
+    _searchInput()     { return document.getElementById('KdmSearchInput'); },
+    _searchResults()   { return document.getElementById('KdmSearchResults'); },
+    _searchStatus()    { return document.getElementById('KdmSearchStatus'); },
+    _recentsWrap()     { return document.getElementById('KdmRecents'); },
+    _recentsList()     { return document.getElementById('KdmRecentsList'); },
+    _mapWrap()         { return document.getElementById('KdmMapWrap'); },
+    _mapEl()           { return document.getElementById('KdmMap'); },
+    _mapAddressText()  { return document.getElementById('KdmMapAddressText'); },
+    _formAddressLine() { return document.getElementById('KdmFormAddressLine'); },
+    _formError()       { return document.getElementById('KdmFormError'); },
+    _backBtn()         { return document.querySelector('[data-kdm-back]'); },
+    _titleEl()         { return document.querySelector('[data-kdm-title]'); },
+    _currentBtn()      { return document.querySelector('[data-kdm-use-current]'); },
 
     isSearchOpen() {
-      return !!document.querySelector('#KarthikaSearchModal')?.classList.contains('is-open');
+      return !!document.getElementById('KarthikaSearchModal')?.classList.contains('is-open');
     },
 
-    clearStoredLocation() {
+    // ── Panel switching ──────────────────────────────────────────────────────
+    _showPanel(name) {
+      const modal = this.getModal();
+      if (!modal) return;
+      this._activePanel = name;
+
+      modal.querySelectorAll('[data-kdm-panel]').forEach((panel) => {
+        panel.hidden = panel.dataset.kdmPanel !== name;
+      });
+
+      const backBtn  = this._backBtn();
+      const titleEl  = this._titleEl();
+
+      const titles = { search: 'Select your location', map: 'Confirm location', form: 'Add delivery address' };
+      if (titleEl) titleEl.textContent = titles[name] || 'Select your location';
+      if (backBtn) backBtn.hidden = (name === 'search');
+
+      if (name === 'search') {
+        window.requestAnimationFrame(() => {
+          const input = this._searchInput();
+          if (input) input.focus();
+        });
+      }
+
+      // When switching to map, invalidate size so Leaflet tiles fill correctly
+      if (name === 'map' && this._map) {
+        window.requestAnimationFrame(() => this._map.invalidateSize());
+      }
+    },
+
+    // ── Nominatim address search ─────────────────────────────────────────────
+    _nominatimSearch(query) {
+      const resultsEl = this._searchResults();
+      const statusEl  = this._searchStatus();
+
+      // Cancel any previous request
+      if (this._searchAbort) { this._searchAbort.abort(); }
+      this._searchAbort = new AbortController();
+
+      if (statusEl) { statusEl.textContent = 'Searching…'; statusEl.hidden = false; }
+      if (resultsEl) resultsEl.hidden = true;
+
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`;
+
+      fetch(url, {
+        signal: this._searchAbort.signal,
+        headers: { 'Accept-Language': 'en' },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          this._searchAbort = null;
+          if (statusEl) statusEl.hidden = true;
+          if (!data || !data.length) {
+            if (statusEl) { statusEl.textContent = 'No addresses found. Try a different search.'; statusEl.hidden = false; }
+            if (resultsEl) resultsEl.hidden = true;
+            return;
+          }
+          this._renderSearchResults(data);
+        })
+        .catch((err) => {
+          if (err.name === 'AbortError') return;
+          this._searchAbort = null;
+          if (statusEl) { statusEl.textContent = 'Search failed. Please check your connection and try again.'; statusEl.hidden = false; }
+        });
+    },
+
+    _renderSearchResults(items) {
+      const resultsEl = this._searchResults();
+      if (!resultsEl) return;
+
+      resultsEl.innerHTML = items.map((item, i) => {
+        const name    = item.display_name || '';
+        const parts   = name.split(',');
+        const primary = parts.slice(0, 2).join(',').trim();
+        const secondary = parts.slice(2).join(',').trim();
+        return `
+          <li class="kdm-result-item" role="option">
+            <button
+              type="button"
+              class="kdm-result-btn"
+              data-kdm-result
+              data-result-index="${i}"
+              data-lat="${item.lat}"
+              data-lng="${item.lon}"
+              data-display="${this._esc(name)}"
+              aria-label="${this._esc(name)}"
+            >
+              <span class="kdm-result-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              </span>
+              <span class="kdm-result-copy">
+                <span class="kdm-result-primary">${this._esc(primary)}</span>
+                ${secondary ? `<span class="kdm-result-secondary">${this._esc(secondary)}</span>` : ''}
+              </span>
+            </button>
+          </li>`;
+      }).join('');
+
+      resultsEl.hidden = false;
+      const input = this._searchInput();
+      if (input) input.setAttribute('aria-expanded', 'true');
+    },
+
+    _selectSearchResult(el) {
+      const lat     = parseFloat(el.dataset.lat);
+      const lng     = parseFloat(el.dataset.lng);
+      const address = el.dataset.display || '';
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      // Hide results
+      const resultsEl = this._searchResults();
+      if (resultsEl) resultsEl.hidden = true;
+      const input = this._searchInput();
+      if (input) input.setAttribute('aria-expanded', 'false');
+
+      this._showMapPanel(lat, lng, address);
+    },
+
+    // ── Map panel ────────────────────────────────────────────────────────────
+    _showMapPanel(lat, lng, address) {
+      this._pendingCoords  = { lat, lng };
+      this._pendingAddress = address || '';
+
+      this._showPanel('map');
+
+      window.requestAnimationFrame(() => {
+        this._initOrUpdateMap(lat, lng);
+        const addrEl = this._mapAddressText();
+        if (addrEl) addrEl.textContent = address || 'Move the pin to adjust';
+      });
+    },
+
+    _initOrUpdateMap(lat, lng) {
+      const mapEl = this._mapEl();
+      if (!mapEl) return;
+
+      // Wait for Leaflet to be available (loaded async via CDN)
+      if (typeof L === 'undefined') {
+        setTimeout(() => this._initOrUpdateMap(lat, lng), 150);
+        return;
+      }
+
+      if (!this._map) {
+        this._map = L.map(mapEl, {
+          center: [lat, lng],
+          zoom: 16,
+          zoomControl: true,
+          attributionControl: true,
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+          maxZoom: 19,
+        }).addTo(this._map);
+
+        // Custom pin icon using Karthika brand colour
+        const pinIcon = L.divIcon({
+          className: 'kdm-leaflet-pin',
+          html: `<svg viewBox="0 0 24 24" fill="#183719" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
+                   <filter id="kdm-shadow" x="-50%" y="-50%" width="200%" height="200%">
+                     <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.35)"/>
+                   </filter>
+                   <path filter="url(#kdm-shadow)" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                   <circle cx="12" cy="9" r="2.5" fill="#EAF3DC"/>
+                 </svg>`,
+          iconSize:   [36, 36],
+          iconAnchor: [18, 36],
+        });
+
+        this._mapMarker = L.marker([lat, lng], {
+          icon:      pinIcon,
+          draggable: true,
+        }).addTo(this._map);
+
+        // When user drags the pin, reverse-geocode the new position
+        this._mapMarker.on('dragend', () => {
+          const pos = this._mapMarker.getLatLng();
+          this._pendingCoords = { lat: pos.lat, lng: pos.lng };
+          this._reverseGeocode(pos.lat, pos.lng);
+        });
+
+        // Tapping the map also moves the pin
+        this._map.on('click', (ev) => {
+          this._mapMarker.setLatLng(ev.latlng);
+          this._pendingCoords = { lat: ev.latlng.lat, lng: ev.latlng.lng };
+          this._reverseGeocode(ev.latlng.lat, ev.latlng.lng);
+        });
+
+      } else {
+        this._map.setView([lat, lng], 16);
+        this._mapMarker.setLatLng([lat, lng]);
+        this._map.invalidateSize();
+      }
+    },
+
+    // ── Nominatim reverse-geocode (for drag / geolocation) ──────────────────
+    _reverseGeocode(lat, lng) {
+      const addrEl = this._mapAddressText();
+      if (addrEl) addrEl.textContent = 'Locating…';
+
+      const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
+      fetch(url, { headers: { 'Accept-Language': 'en' } })
+        .then((r) => r.json())
+        .then((data) => {
+          const address = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          this._pendingAddress = address;
+          if (addrEl) addrEl.textContent = address;
+        })
+        .catch(() => {
+          const fallback = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          this._pendingAddress = fallback;
+          if (addrEl) addrEl.textContent = fallback;
+        });
+    },
+
+    // ── Address form panel ───────────────────────────────────────────────────
+    _showFormPanel() {
+      const addrLineEl = this._formAddressLine();
+      if (addrLineEl) addrLineEl.textContent = this._pendingAddress || '';
+
+      // Pre-fill street field from detected address
+      const streetInput = document.getElementById('KdmFieldStreet');
+      if (streetInput && !streetInput.value.trim()) {
+        // Try to use the first meaningful parts of the detected address
+        const parts = (this._pendingAddress || '').split(',');
+        streetInput.value = parts.slice(0, 2).join(',').trim();
+      }
+
+      // Pre-fill postal code if detectable
+      const postalInput = document.getElementById('KdmFieldPostal');
+      if (postalInput && !postalInput.value.trim()) {
+        const postalMatch = (this._pendingAddress || '').match(/\b\d{5,6}\b/);
+        if (postalMatch) postalInput.value = postalMatch[0];
+      }
+
+      this._showPanel('form');
+      window.requestAnimationFrame(() => {
+        const unitInput = document.getElementById('KdmFieldUnit');
+        if (unitInput) unitInput.focus();
+      });
+    },
+
+    _submitAddressForm(form) {
+      const errorEl = this._formError();
+
+      const unit    = (form.elements['unit']?.value    || '').trim();
+      const street  = (form.elements['street']?.value  || '').trim();
+      const area    = (form.elements['area']?.value    || '').trim();
+      const postal  = (form.elements['postal']?.value  || '').trim();
+      const labelVal = form.querySelector('input[name="address_label"]:checked')?.value || 'Other';
+
+      if (!street) {
+        if (errorEl) { errorEl.textContent = 'Please enter a street address.'; errorEl.hidden = false; }
+        document.getElementById('KdmFieldStreet')?.focus();
+        return;
+      }
+      if (errorEl) errorEl.hidden = true;
+
+      // Build the display label and full address string
+      const lineParts = [unit, street, area, postal ? 'Singapore ' + postal : ''].filter(Boolean);
+      const fullAddress = lineParts.join(', ');
+      const labelEmoji  = { Home: '🏠', Work: '💼', Other: '📍' }[labelVal] || '📍';
+      const displayLabel = `${labelEmoji} ${labelVal} — ${fullAddress}`;
+
+      const location = {
+        id:       'custom-' + Date.now(),
+        label:    displayLabel,
+        address:  fullAddress,
+        name:     labelVal,
+        unit,
+        street,
+        area,
+        postal,
+        lat:      this._pendingCoords?.lat  || null,
+        lng:      this._pendingCoords?.lng  || null,
+        placeId:  '',
+      };
+
+      this._saveRecent(location);
+      this.applyLocation(location, { persist: true, close: true });
+
+      // Reset form for next use
+      form.reset();
+    },
+
+    // ── Use current location ─────────────────────────────────────────────────
+    _useCurrentLocation() {
+      if (!navigator.geolocation) {
+        alert('Your browser does not support location access.');
+        return;
+      }
+
+      const btn   = this._currentBtn();
+      const label = btn ? btn.querySelector('.kdm-current-location-label') : null;
+
+      if (label) label.textContent = 'Locating…';
+      if (btn)   btn.disabled = true;
+
+      const reset = () => {
+        if (label) label.textContent = 'Use current location';
+        if (btn)   btn.disabled = false;
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          reset();
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          // Show map centred on the device location; reverse-geocode the pin
+          this._showMapPanel(lat, lng, 'Detecting address…');
+          this._reverseGeocode(lat, lng);
+        },
+        (err) => {
+          reset();
+          let msg = 'Could not get your location.';
+          if (err.code === err.PERMISSION_DENIED)
+            msg = 'Location access was denied. Please allow it in your browser settings.';
+          alert(msg);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    },
+
+    // ── Recent addresses ─────────────────────────────────────────────────────
+    _loadRecents() {
       try {
-        localStorage.removeItem(this.STORAGE_KEY);
-      } catch (e) {}
+        const raw = localStorage.getItem(this.RECENTS_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) { return []; }
+    },
+
+    _saveRecent(location) {
+      // De-duplicate by label
+      const recents = this._loadRecents().filter(r => r.label !== location.label);
+      recents.unshift(location);
+      const trimmed = recents.slice(0, this.MAX_RECENTS);
+      try { localStorage.setItem(this.RECENTS_KEY, JSON.stringify(trimmed)); } catch (e) {}
+    },
+
+    _clearRecents() {
+      try { localStorage.removeItem(this.RECENTS_KEY); } catch (e) {}
+      this._renderRecents();
+    },
+
+    _renderRecents() {
+      const recents = this._loadRecents();
+      const wrap    = this._recentsWrap();
+      const list    = this._recentsList();
+      if (!wrap || !list) return;
+
+      if (!recents.length) { wrap.hidden = true; return; }
+
+      wrap.hidden    = false;
+      list.innerHTML = recents.map((r, i) => {
+        const iconMap   = { Home: '🏠', Work: '💼', Other: '📍' };
+        const emoji     = iconMap[r.name] || '📍';
+        const headline  = r.name && r.name !== r.address ? r.name : '';
+        const addrLine  = r.address || r.label || '';
+
+        return `
+          <li class="kdm-recent-item">
+            <button
+              type="button"
+              class="kdm-recent-btn"
+              data-kdm-recent-item
+              data-recent-index="${i}"
+              aria-label="Select ${this._esc(r.label || r.address)}"
+            >
+              <span class="kdm-recent-emoji" aria-hidden="true">${emoji}</span>
+              <span class="kdm-recent-copy">
+                ${headline ? `<span class="kdm-recent-name">${this._esc(headline)}</span>` : ''}
+                <span class="kdm-recent-addr">${this._esc(addrLine)}</span>
+              </span>
+            </button>
+          </li>`;
+      }).join('');
+    },
+
+    _selectRecentItem(el) {
+      const idx     = parseInt(el.dataset.recentIndex, 10);
+      const recents = this._loadRecents();
+      const r       = recents[idx];
+      if (!r) return;
+      // Apply immediately — no need to go back through the map
+      this.applyLocation(r, { persist: true, close: true });
+    },
+
+    // ── Search input helpers ─────────────────────────────────────────────────
+    _clearSearch() {
+      const input    = this._searchInput();
+      const clearBtn = document.querySelector('[data-kdm-search-clear]');
+      const results  = this._searchResults();
+      const status   = this._searchStatus();
+      if (input)    { input.value = ''; input.focus(); input.setAttribute('aria-expanded', 'false'); }
+      if (clearBtn)  clearBtn.hidden = true;
+      if (results)   results.hidden  = true;
+      if (status)    status.hidden   = true;
+    },
+
+    // ── Escape HTML for innerHTML ────────────────────────────────────────────
+    _esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    },
+
+    // ── Persist / apply ──────────────────────────────────────────────────────
+    applyLocation(location, options = {}) {
+      const label = String(location?.label || '').trim();
+      if (!label) return;
+
+      // Update every delivery-address strip on the page
+      document.querySelectorAll('.karthika-delivery-address').forEach((el) => {
+        el.textContent = label;
+      });
+
+      if (options.persist) {
+        try {
+          localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
+            id:      String(location.id      || ''),
+            label,
+            address: String(location.address || label),
+            name:    String(location.name    || ''),
+            lat:     location.lat  || null,
+            lng:     location.lng  || null,
+            placeId: '',
+          }));
+        } catch (e) {}
+      }
+
+      if (options.close) this.close();
+    },
+
+    _restoreHeader() {
+      const modal = this.getModal();
+      if (!modal) return;
+
+      let stored = null;
+      try { stored = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || 'null'); } catch (e) {}
+
+      const label = stored?.label?.trim() || '';
+      if (label) {
+        document.querySelectorAll('.karthika-delivery-address').forEach(el => { el.textContent = label; });
+        return;
+      }
+
+      // Fall back to the theme-setting default embedded in the modal's data attribute
+      const fallbackLabel = (modal.getAttribute('data-default-location') || '').trim();
+      if (fallbackLabel) {
+        document.querySelectorAll('.karthika-delivery-address').forEach(el => { el.textContent = fallbackLabel; });
+      }
     },
 
     defaultLocation() {
@@ -815,86 +1328,48 @@
       if (!modal) return null;
       const label = (modal.getAttribute('data-default-location') || '').trim();
       if (!label) return null;
-      return {
-        id: (modal.getAttribute('data-default-location-id') || '').trim(),
-        label,
-      };
+      return { id: (modal.getAttribute('data-default-location-id') || '').trim(), label };
     },
 
-    restore() {
-      const modal = this.getModal();
-      if (!modal) return;
-      let stored = null;
-      try {
-        stored = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || 'null');
-      } catch (e) {
-        stored = null;
-      }
-      const validObject = stored && typeof stored === 'object' && !Array.isArray(stored);
-      const id = validObject && typeof stored.id === 'string' && /^area-\d+$/.test(stored.id) ? stored.id : '';
-      const match = id ? modal.querySelector(`.karthika-location-item[data-location-id="${id}"]`) : null;
-      const matchLabel = match ? (match.dataset.label || match.dataset.address || '').trim() : '';
-      if (matchLabel) {
-        this.applyLocation({ id, label: matchLabel }, { persist: false, close: false });
-        return;
-      }
-      if (localStorage.getItem(this.STORAGE_KEY)) this.clearStoredLocation();
-      const fallback = this.defaultLocation();
-      if (fallback) this.applyLocation(fallback, { persist: false, close: false });
-    },
-
-    resetToDefault() {
-      this.clearStoredLocation();
-      const fallback = this.defaultLocation();
-      if (fallback) this.applyLocation(fallback, { persist: false, close: true });
-      else this.close();
-    },
-
-    setLocation(location) {
-      this.applyLocation(location, { persist: true, close: true });
-    },
-
-    applyLocation(location, options = {}) {
-      const label = String(location?.label || '').trim();
-      if (!label) return;
-
-      document.querySelectorAll('.karthika-delivery-address').forEach((el) => {
-        el.textContent = label;
-      });
-
-      document.querySelectorAll('#KarthikaDeliveryModal .karthika-location-item').forEach((item) => {
-        const selected = item.dataset.locationId === location.id || item.dataset.label === label || item.dataset.address === label;
-        item.classList.toggle('is-selected', selected);
-        item.setAttribute('aria-pressed', selected ? 'true' : 'false');
-      });
-
-      if (options.persist) {
-        try {
-          localStorage.setItem(
-            this.STORAGE_KEY,
-            JSON.stringify({
-              id: String(location.id || ''),
-              label,
-            })
-          );
-        } catch (e) {}
-      }
-
-      if (options.close) this.close();
-    },
-
-    syncTriggerState(isOpen) {
-      document.querySelectorAll('.karthika-change-location-btn').forEach((trigger) => {
-        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      });
-    },
-
+    // ── Focus trap & keyboard ────────────────────────────────────────────────
     getFocusable(container) {
       return Array.from(
         container.querySelectorAll(
-          'a[href], button:not([disabled]):not(.karthika-delivery-modal-backdrop), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          'a[href], button:not([disabled]):not(.karthika-delivery-modal-backdrop), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
         )
       ).filter((el) => !el.hasAttribute('hidden') && el.closest('[hidden]') == null);
+    },
+
+    _handleKeydown(event) {
+      if (this.isSearchOpen()) return;
+      const modal = this.getModal();
+      if (!modal || modal.hidden) return;
+
+      if (event.key === 'Escape' || event.key === 'Esc') {
+        event.preventDefault();
+        if (this._activePanel === 'form') this._showPanel('map');
+        else if (this._activePanel === 'map') this._showPanel('search');
+        else this.close();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const focusables = this.getFocusable(modal);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last  = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    },
+
+    // ── Inert background ────────────────────────────────────────────────────
+    syncTriggerState(isOpen) {
+      document.querySelectorAll('.karthika-change-location-btn').forEach((t) => {
+        t.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
     },
 
     setBackgroundInert(enable) {
@@ -910,7 +1385,6 @@
         this._inertTargets = [];
         return;
       }
-
       this._inertTargets = [];
       Array.from(document.body.children).forEach((el) => {
         if (el === modal || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
@@ -923,49 +1397,27 @@
       });
     },
 
-    onDocumentKeydown(event) {
-      if (this.isSearchOpen()) return;
-      const modal = this.getModal();
-      if (!modal || modal.hidden) return;
-
-      if (event.key === 'Escape' || event.key === 'Esc') {
-        event.preventDefault();
-        this.close();
-        return;
-      }
-
-      if (event.key !== 'Tab') return;
-      const focusables = this.getFocusable(modal);
-      if (!focusables.length) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    },
-
+    // ── Open / close ──────────────────────────────────────────────────────────
     open(trigger) {
       const modal = this.getModal();
       if (!modal || this.isSearchOpen()) return;
+
       this._lastTrigger = trigger || document.activeElement;
       modal.hidden = false;
       modal.classList.add('is-open');
       modal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('karthika-location-open');
       this.syncTriggerState(true);
-      if (this._lastTrigger && typeof this._lastTrigger.blur === 'function') {
-        this._lastTrigger.blur();
-      }
+      if (this._lastTrigger?.blur) this._lastTrigger.blur();
       this.setBackgroundInert(true);
+
+      // Always open on the search panel
+      this._showPanel('search');
+      this._renderRecents();
+
       window.requestAnimationFrame(() => {
-        const selected =
-          modal.querySelector('.karthika-location-item.is-selected') ||
-          modal.querySelector('.karthika-delivery-modal-close:not(.karthika-delivery-modal-backdrop)');
-        if (selected && typeof selected.focus === 'function') selected.focus();
+        const input = this._searchInput();
+        if (input) input.focus();
       });
     },
 
@@ -978,12 +1430,13 @@
       document.body.classList.remove('karthika-location-open');
       this.syncTriggerState(false);
       this.setBackgroundInert(false);
+      this._pendingCoords  = null;
+      this._pendingAddress = null;
+      this._activePanel    = 'search';
       const restore = this._lastTrigger;
       this._lastTrigger = null;
-      if (options.restoreFocus !== false && restore && typeof restore.focus === 'function') {
-        restore.focus();
-      }
-    }
+      if (options.restoreFocus !== false && restore?.focus) restore.focus();
+    },
   };
 
   /* --------------------------------------------------------------------------

@@ -308,6 +308,10 @@
     {{ 'karthika-grocery.css' | asset_url | stylesheet_tag }}
     <script src="{{ 'karthika-grocery.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'karthika-checkout.js' | asset_url }}" defer="defer"></script>
+
+    {{- /* Leaflet CSS — free interactive map, no API key required */ -}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLs=" crossorigin="" defer></script>
     <link rel="stylesheet" href="{{ 'component-cart-items.css' | asset_url }}" media="print" onload="this.media='all'">
 
     {%- if settings.cart_type == 'drawer' -%}
