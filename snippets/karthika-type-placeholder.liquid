@@ -1,24 +1,249 @@
 {%- comment -%}
-  Temporary food placeholder by product type.
-  Easy to remove later: delete this snippet (and stop calling it).
-  Uses Lorem Flickr grocery/food images with a deterministic lock from the
-  real Shopify type — no local assets, no hardcoded category→image map.
-  Accepts: product_type (string)
-  Outputs: image URL (no wrapping quotes)
+  Karthika category icon placeholder — inline SVG, no external requests.
+  Every known product type maps to a meaningful small icon path.
+  Unknown types fall back to a generic grocery-basket icon.
+
+  Accepts : product_type (string)
+  Outputs : a data: URI safe for <img src="...">
+
+  Palette  : pale mint #EEF7E8 bg, sage ring #C8E6B8, dark green #2D6A1F icon
+             (matches Karthika brand; slightly warmer tones for food variety)
 {%- endcomment -%}
+
 {%- liquid
-  assign type_key = product_type | default: '' | strip | downcase
-  if type_key == blank
-    assign type_key = 'product'
-  endif
-
-  assign type_handle = type_key | handleize
-  if type_handle == blank
-    assign type_handle = 'product'
-  endif
-
-  assign lock = type_handle.size | times: 97
-  assign lock = lock | plus: type_key.size | times: 13
-  assign lock = lock | modulo: 9000 | plus: 100
+  assign _t = product_type | default: '' | strip | upcase
 -%}
-https://loremflickr.com/600/600/grocery,food,vegetables,fruits/all?lock={{ lock }}
+
+{%- comment -%}
+  Each icon is a compact SVG path drawn on a 80×80 canvas.
+  We encode it as a partial URL-encoded fragment then compose the full URI at the end.
+  All paths use stroke-based icons (stroke-width ~3, linecap round, linejoin round)
+  on a pale mint background circle, matching the Karthika sidebar aesthetic.
+
+  BG circle colour: #EEF7E8 (pale mint)
+  Icon stroke colour: #2D6A1F (dark Karthika green)
+  Stroke-width: 3
+{%- endcomment -%}
+
+{%- comment -%} Map type → icon path fragment {%- endcomment -%}
+{%- if _t == 'ACCESSORIES' or _t == 'CLEANING ACCESSORIES' -%}
+  {%- comment -%} Shopping bag {%- endcomment -%}
+  {%- assign _icon = 'M28 34h24l-3 18H31zm0 0c0-6.6 5.4-12 12-12s12 5.4 12 12' -%}
+{%- elsif _t == 'ADA & VERMICELLI' or _t == 'NOODLES' or _t == 'PASTA' -%}
+  {%- comment -%} Wavy noodle lines {%- endcomment -%}
+  {%- assign _icon = 'M22 32c4-4 8 4 12 0s8-4 12 0 M22 40c4-4 8 4 12 0s8-4 12 0 M22 48c4-4 8 4 12 0s8-4 12 0' -%}
+{%- elsif _t == 'AGAR-AGAR/JELLY' or _t == 'CUSTARD' -%}
+  {%- comment -%} Jelly/pudding cup {%- endcomment -%}
+  {%- assign _icon = 'M30 50h20l2-14H28zm10-14v-8m-6 4a6 4 0 1 0 12 0' -%}
+{%- elsif _t == 'AGARBATHI' or _t == 'INCENSE STICKS' -%}
+  {%- comment -%} Incense stick with smoke curl {%- endcomment -%}
+  {%- assign _icon = 'M40 55V30m0 0l-6-6 M34 26c0-3 4-3 4-6s4-3 4-6 M40 30c3-4 6-2 5-7' -%}
+{%- elsif _t == 'AIR FRESHNER' -%}
+  {%- comment -%} Spray bottle {%- endcomment -%}
+  {%- assign _icon = 'M36 55V36h10v19zm0-19v-5h7l3-5h-8v-3h-8v8h-3l1 5zm14-10l4-4m-2 6l4-2' -%}
+{%- elsif _t == 'ALUMINIUM FOIL/TRAY' -%}
+  {%- comment -%} Rectangular tray {%- endcomment -%}
+  {%- assign _icon = 'M20 44h40v6a3 3 0 0 1-3 3H23a3 3 0 0 1-3-3zm4-10h32l4 10H20z' -%}
+{%- elsif _t == 'APPALAM & VADAGAM' -%}
+  {%- comment -%} Round cracker/papad {%- endcomment -%}
+  {%- assign _icon = 'M40 22a18 18 0 1 1 0 36 18 18 0 0 1 0-36zm0 6a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-8 4l16 16m-16 0l16-16' -%}
+{%- elsif _t == 'ASAFOETIDA' or _t == 'SPICES & POWDERS' or _t == 'MASALA POWDERS' or _t == 'SEASONINGS' -%}
+  {%- comment -%} Spice jar {%- endcomment -%}
+  {%- assign _icon = 'M32 55V34h16v21zm0-21v-5h16v5zm5-5v-5h6v5zm-2-5a4 4 0 0 1 4-4 4 4 0 0 1 4 4' -%}
+{%- elsif _t == 'AYURVEDA MEDICINE' or _t == 'COUGH SYRUP' or _t == 'PAIN BALMS/OILS' or _t == 'PLASTER' or _t == 'FIRST-AID' or _t == 'TABLETS' or _t == 'LOZENGES' -%}
+  {%- comment -%} Medicine bottle / cross {%- endcomment -%}
+  {%- assign _icon = 'M35 55V30h10v25zm-2-25v-5h14v5zM36 40h8m-4-4v8' -%}
+{%- elsif _t == 'BABY CARE' or _t == 'BABY OIL' -%}
+  {%- comment -%} Baby bottle {%- endcomment -%}
+  {%- assign _icon = 'M38 24v-5h4v5a10 10 0 0 1 8 9.6V50a5 5 0 0 1-5 5H35a5 5 0 0 1-5-5V33.6A10 10 0 0 1 38 24z' -%}
+{%- elsif _t == 'BABY FOOD' or _t == 'BABY FORMULA' -%}
+  {%- comment -%} Baby food bowl with spoon {%- endcomment -%}
+  {%- assign _icon = 'M27 44a13 13 0 0 1 26 0H27zm5 0v5h16v-5m10-12l-6 10m-10-18v6m-4-4l3 5' -%}
+{%- elsif _t == 'BANANA' -%}
+  {%- comment -%} Banana curve {%- endcomment -%}
+  {%- assign _icon = 'M30 52c-4-10 0-26 14-30 M44 22c6 2 10 8 8 18s-10 14-18 12' -%}
+{%- elsif _t == 'BASMATI' or _t == 'MATTA' or _t == 'PONNI' or _t == 'SONA MASURI' or _t == 'JEERAKASALA' or _t == 'SUREKA' or _t == 'BROWN/RED' or _t == 'RAW' -%}
+  {%- comment -%} Rice bowl {%- endcomment -%}
+  {%- assign _icon = 'M26 44h28a14 14 0 0 1-28 0zm0 0a14 10 0 0 1 28 0m-14-6v-10m-5 3l5-3 5 3' -%}
+{%- elsif _t == 'BEER' or _t == 'LIQUOR' -%}
+  {%- comment -%} Bottle {%- endcomment -%}
+  {%- assign _icon = 'M36 55V38l-4-8v-8h12v8l-4 8v17zm-4-22h12' -%}
+{%- elsif _t == 'BI-CARBONATE SODA' or _t == 'BAKING POWDER' -%}
+  {%- comment -%} Packet / sachet {%- endcomment -%}
+  {%- assign _icon = 'M28 28h24v28H28zm4 6h16m-16 6h10m-10 6h14' -%}
+{%- elsif _t == 'BLENDER' or _t == 'MIXER/GRINDER' -%}
+  {%- comment -%} Blender jar {%- endcomment -%}
+  {%- assign _icon = 'M32 55h16l4-26H28zm4-26v-5h8v5zM36 40l8-6m-8 0l8 6' -%}
+{%- elsif _t == 'BODYCARE' or _t == 'COSMETICS' or _t == 'FACIAL CARE' or _t == 'DEODORANTS' or _t == 'ROSE WATER' -%}
+  {%- comment -%} Lotion pump bottle {%- endcomment -%}
+  {%- assign _icon = 'M35 55V36h10v19zm0-19v-6h6v-4l5-3v4h-5v3zm-3-6h16' -%}
+{%- elsif _t == 'BRASS' or _t == 'COPPER' or _t == 'GLASS' -%}
+  {%- comment -%} Trophy/vessel shape {%- endcomment -%}
+  {%- assign _icon = 'M33 55h14m-7 0V46m-10-24h20l-3 14a7 7 0 0 1-14 0zm-2 0h-3m25 0h3' -%}
+{%- elsif _t == 'BREAD' or _t == 'PRATA/CHAPPATI' or _t == 'DOSA MIX' or _t == 'IDLY' -%}
+  {%- comment -%} Bread/flatbread {%- endcomment -%}
+  {%- assign _icon = 'M24 44a16 12 0 0 1 32 0H24zm0 0h32v5a3 3 0 0 1-3 3H27a3 3 0 0 1-3-3z' -%}
+{%- elsif _t == 'BUTTER' or _t == 'MARGARINE' -%}
+  {%- comment -%} Butter block {%- endcomment -%}
+  {%- assign _icon = 'M24 38h32v14H24zm0 0l6-8h26l-6 8m-20-8v8m8-8v8m8-8v8' -%}
+{%- elsif _t == 'CAKES' -%}
+  {%- comment -%} Cake slice {%- endcomment -%}
+  {%- assign _icon = 'M24 52h32v-4H24zm8-4V38l-8 10zm16-10l-8 10V38zm-16-3a8 8 0 0 1 16 0zm8-3v-5m-4 2l4-2 4 2' -%}
+{%- elsif _t == 'CAMPHOR' or _t == 'LAMPS/VILAKU' -%}
+  {%- comment -%} Oil lamp / diya {%- endcomment -%}
+  {%- assign _icon = 'M40 46a8 4 0 1 0 0-8 8 4 0 0 0 0 8zm0-4v-10m-3-6c0-2 3-4 3-6s3-4 3-6' -%}
+{%- elsif _t == 'CANNED FOODS' or _t == 'READY TO EAT' -%}
+  {%- comment -%} Can {%- endcomment -%}
+  {%- assign _icon = 'M28 34h24v18H28zm0 0a12 4 0 1 0 24 0 12 4 0 1 0-24 0zm0 18a12 4 0 1 0 24 0' -%}
+{%- elsif _t == 'CASSEROLE' or _t == 'COOKER' or _t == 'TAWA/KADAI/PAN' or _t == 'UTENSILS' -%}
+  {%- comment -%} Cooking pot with lid {%- endcomment -%}
+  {%- assign _icon = 'M26 44h28v8a3 3 0 0 1-3 3H29a3 3 0 0 1-3-3zm-4 0h4m28 0h4m-18-8v8m-8 0v-8m16 0v8m-8-12a12 6 0 0 1 12 6H26a12 6 0 0 1 12-6z' -%}
+{%- elsif _t == 'CEREALS & OATS' or _t == 'HEALTH MIX' or _t == 'MALT, MILO POWDERS' -%}
+  {%- comment -%} Bowl with grains {%- endcomment -%}
+  {%- assign _icon = 'M26 46h28a14 14 0 0 1-28 0zm14-14v-6m-5 4l5-4 5 4m-5-10v-3' -%}
+{%- elsif _t == 'CHARCOAL' or _t == 'LIGHTERS/CANDLES' or _t == 'SPARKLERS/PARTY' -%}
+  {%- comment -%} Candle/flame {%- endcomment -%}
+  {%- assign _icon = 'M40 52V36m0 0a6 6 0 0 1 0-12c0 6-6 8-4 12m0 0a6 6 0 0 1-4-6c4 0 4 6 4 6zm-8 16h16' -%}
+{%- elsif _t == 'CHEESE' or _t == 'PANEER' -%}
+  {%- comment -%} Cheese wedge {%- endcomment -%}
+  {%- assign _icon = 'M22 52l18-26 18 26zm6 0h24m-18-10a2 2 0 1 0 4 0 2 2 0 0 0-4 0m6 6a2 2 0 1 0 4 0 2 2 0 0 0-4 0' -%}
+{%- elsif _t == 'CHOCOLATES & SWEETS' or _t == 'SWEETMEATS' or _t == 'COOKIES & BISCUITS' or _t == 'JAMS & SPREADS' -%}
+  {%- comment -%} Sweet/candy {%- endcomment -%}
+  {%- assign _icon = 'M30 40a10 10 0 1 0 20 0 10 10 0 0 0-20 0zm10-10v-6m0 26v-6m-8-14l-4-4m24 24l-4-4m0-20l4-4m-24 24l4-4' -%}
+{%- elsif _t == 'CIGARETTES' -%}
+  {%- comment -%} No-smoke crossed-out circle (tasteful) {%- endcomment -%}
+  {%- assign _icon = 'M40 22a18 18 0 1 1 0 36 18 18 0 0 1 0-36zm-9 27l18-18m-6 2h8v4h-8z' -%}
+{%- elsif _t == 'CLEANERS' or _t == 'DISHWASHING' or _t == 'DETERGENTS' or _t == 'SOAPS' -%}
+  {%- comment -%} Cleaning bottle with bubbles {%- endcomment -%}
+  {%- assign _icon = 'M35 55V36h10v19zm0-19v-6h6v-4l4-3v3h-4v4h-6zm-4-6h18m14-8a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-6-4a3 3 0 1 1-6 0 3 3 0 0 1 6 0' -%}
+{%- elsif _t == 'COCONUT' or _t == 'GRATED COCONUT' or _t == 'COCONUT MILK/POWDER' -%}
+  {%- comment -%} Coconut half {%- endcomment -%}
+  {%- assign _icon = 'M26 44a14 10 0 0 1 28 0H26zm14-10V24m0 0c-4-4-10-2-10 4 M40 24c4-4 10-2 10 4' -%}
+{%- elsif _t == 'COFFEE' or _t == 'TEA' -%}
+  {%- comment -%} Tea/coffee cup with steam {%- endcomment -%}
+  {%- assign _icon = 'M28 44h24v5a3 3 0 0 1-3 3H31a3 3 0 0 1-3-3zm0 6h4a4 4 0 0 0 4-4m-8-2V34h16v10zm-2-6h20m-10-8v-4m-4 2c0-3 4-3 4-6s4-3 4-6' -%}
+{%- elsif _t == 'COOKING OIL' or _t == 'GHEE' or _t == 'VINEGAR' -%}
+  {%- comment -%} Oil/ghee bottle {%- endcomment -%}
+  {%- assign _icon = 'M35 55V34h10v21zm0-21V26l-5-2v-2h14v2l-5 2v8zm-3-23h16' -%}
+{%- elsif _t == 'CORDIAL & SYRUP' or _t == 'DRINK MIX' or _t == 'FRUIT DRINK /JUICE' or _t == 'HERBALJUIC' -%}
+  {%- comment -%} Juice glass with straw {%- endcomment -%}
+  {%- assign _icon = 'M30 55h20l3-24H27zm10-24V20m0 0l-5-5m5 5l5-5m-8 10a3 3 0 0 1 6 0' -%}
+{%- elsif _t == 'COTTON WICKS' -%}
+  {%- comment -%} Coil of thread/wick {%- endcomment -%}
+  {%- assign _icon = 'M40 40a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-6a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0 6v10m-6 0h12' -%}
+{%- elsif _t == 'DEF' or _t == 'MISC' or _t == 'MISCELLANEOUS' or _t == 'POWDERS' or _t == 'FRESH' or _t == 'Items' -%}
+  {%- comment -%} Generic grocery basket {%- endcomment -%}
+  {%- assign _icon = 'M22 36h36l-4 18H26zm9-10l-5 10m16-10l5 10m-13 0v12m6-12v12m-3-22v-6' -%}
+{%- elsif _t == 'DENTAL' or _t == 'TOOTHPASTE' or _t == 'TOOTHBRUSH' -%}
+  {%- comment -%} Toothbrush {%- endcomment -%}
+  {%- assign _icon = 'M28 52l24-24m0 0a4 4 0 0 1 0 6l-24 24a4 4 0 0 1-6-6zm0 0l4 2m-4 4l4-4 4 4' -%}
+{%- elsif _t == 'DRY FRUITS & NUTS' or _t == 'HONEY' -%}
+  {%- comment -%} Jar of nuts/honey {%- endcomment -%}
+  {%- assign _icon = 'M30 55V36h20v19zm0-19v-5h20v5zm5-5v-4h10v4zm-3-7a8 3 0 1 0 16 0' -%}
+{%- elsif _t == 'EGGS' -%}
+  {%- comment -%} Egg {%- endcomment -%}
+  {%- assign _icon = 'M40 22c-8 0-14 8-14 18a14 14 0 0 0 28 0c0-10-6-18-14-18zm0 12a3 3 0 1 0 0 6 3 3 0 0 0 0-6' -%}
+{%- elsif _t == 'ELECTRICALS' or _t == 'HARDWARE' or _t == 'LOCKS' -%}
+  {%- comment -%} Plug/electrical socket {%- endcomment -%}
+  {%- assign _icon = 'M34 24v10m12-10v10m-16 0h20a4 4 0 0 1 4 4v4a12 12 0 0 1-24 0v-4a4 4 0 0 1 4-4zm4 18v6m8-6v6m-6-2h4' -%}
+{%- elsif _t == 'ESSENCE/COLOURINGS' -%}
+  {%- comment -%} Dropper bottle {%- endcomment -%}
+  {%- assign _icon = 'M36 55V36h8v19zm-2-19v-6h12v6zm3-6v-5h6v5zm3-5v-4l5-2v4zm-8-2l-6-6 4-4 6 6' -%}
+{%- elsif _t == 'FACIAL CARE' -%}
+  {%- comment -%} Face cream tube {%- endcomment -%}
+  {%- assign _icon = 'M32 55V36h16v19zm0-19v-6h16v6zm5-6v-5h6v5zM38 44h4m-2-4v8' -%}
+{%- elsif _t == 'FLOUR' or _t == 'ATTA & FLOURS' -%}
+  {%- comment -%} Flour bag {%- endcomment -%}
+  {%- assign _icon = 'M30 55V30l10-8 10 8v25zm0-25h20m-10-8v-4m-6 10a6 5 0 0 1 12 0' -%}
+{%- elsif _t == 'FRUIT/NUT SNACKS' or _t == 'SNACKS' -%}
+  {%- comment -%} Snack bag {%- endcomment -%}
+  {%- assign _icon = 'M28 30l4-6h16l4 6v22a3 3 0 0 1-3 3H31a3 3 0 0 1-3-3zm0 0h24m-12 4v16m-5-10a5 5 0 0 0 10 0' -%}
+{%- elsif _t == 'GHEE' -%}
+  {%- comment -%} Already covered above, but keep separate short-circuit {%- endcomment -%}
+  {%- assign _icon = 'M35 55V34h10v21zm0-21V26l-5-2v-2h14v2l-5 2v8zm-3-23h16' -%}
+{%- elsif _t == 'GRAINS/PULSES' -%}
+  {%- comment -%} Lentil/dal bowl {%- endcomment -%}
+  {%- assign _icon = 'M26 46h28a14 14 0 0 1-28 0zm5-6a3 3 0 1 0 6 0 3 3 0 0 0-6 0m8-2a3 3 0 1 0 6 0 3 3 0 0 0-6 0m6 4a3 3 0 1 0 6 0 3 3 0 0 0-6 0' -%}
+{%- elsif _t == 'HAIRCARE' -%}
+  {%- comment -%} Comb {%- endcomment -%}
+  {%- assign _icon = 'M24 38h32v8H24zm4-8v8m4-8v8m4-8v8m4-8v8m4-8v8m4-8v8' -%}
+{%- elsif _t == 'HERBS' or _t == 'SAFFRON' or _t == 'TAMARIND' -%}
+  {%- comment -%} Leaf/herb {%- endcomment -%}
+  {%- assign _icon = 'M40 52V32m0-10c-12 4-12 20 0 20 M40 22c12 4 12 20 0 20m-6-8a12 8 0 0 0 12 0' -%}
+{%- elsif _t == 'ICE CREAM' -%}
+  {%- comment -%} Ice cream cone {%- endcomment -%}
+  {%- assign _icon = 'M33 40l7 14 7-14zm7-18a9 9 0 0 1 9 9H31a9 9 0 0 1 9-9zm-9 9h18' -%}
+{%- elsif _t == 'INSTANT MIX' or _t == 'DOSA MIX' -%}
+  {%- comment -%} Packet mix box {%- endcomment -%}
+  {%- assign _icon = 'M26 28h28v28H26zm5 6h18m-18 6h14m-14 6h18m-9-14v14' -%}
+{%- elsif _t == 'KETTLE/FLASK' -%}
+  {%- comment -%} Kettle {%- endcomment -%}
+  {%- assign _icon = 'M34 55V32h12v23zm2-23v-7h8v7zm-6-7h20m-10 0v-3m-8 12h-4a4 4 0 0 1 0-8h4' -%}
+{%- elsif _t == 'KUM KUM/TURMERIC' or _t == 'PRAYER OIL' or _t == 'SAMBRANI' or _t == 'COTTON WICKS' -%}
+  {%- comment -%} Diya/prayer lamp {%- endcomment -%}
+  {%- assign _icon = 'M28 50h24m-12-6a8 4 0 1 0 0-8 8 4 0 0 0 0 8zm0-8V30m-3-6c0-2 3-4 3-6s3-4 3-6' -%}
+{%- elsif _t == 'LAMPS/VILAKU' -%}
+  {%- comment -%} Vilaku lamp {%- endcomment -%}
+  {%- assign _icon = 'M30 52h20m-10-6a6 3 0 1 0 0-6 6 3 0 0 0 0 6zm0-6V30m4-6l-4 4-4-4m4 4v-6' -%}
+{%- elsif _t == 'MAGAZINE/NEWSPAPER' or _t == 'STATIONERY' or _t == 'PLAYING CARDS' -%}
+  {%- comment -%} Book/paper {%- endcomment -%}
+  {%- assign _icon = 'M24 26h24a3 3 0 0 1 3 3v22a3 3 0 0 1-3 3H24a3 3 0 0 1-3-3V29a3 3 0 0 1 3-3zm6 8h12m-12 6h16m-16 6h10m-7-20v28' -%}
+{%- elsif _t == 'MILK POWDER' or _t == 'UHT MILK' -%}
+  {%- comment -%} Milk carton {%- endcomment -%}
+  {%- assign _icon = 'M32 55V30h16v25zm0-25v-6l-4-2h-2l8-3 8 3h-2l-4 2zm-4-8h24m-12-3v3' -%}
+{%- elsif _t == 'MOCK MEATS' -%}
+  {%- comment -%} Leaf (plant-based) {%- endcomment -%}
+  {%- assign _icon = 'M40 54V34m0-12c-14 4-14 26 0 26 M40 22c14 4 14 26 0 26' -%}
+{%- elsif _t == 'PAIN BALMS/OILS' -%}
+  {%- comment -%} Already above for medicine, separate path variant {%- endcomment -%}
+  {%- assign _icon = 'M38 24v-4h4v4a10 10 0 0 1 8 9.6V50a5 5 0 0 1-5 5H35a5 5 0 0 1-5-5V33.6A10 10 0 0 1 38 24zm-2 16h8' -%}
+{%- elsif _t == 'PEST CONTROL' -%}
+  {%- comment -%} Bug/spray {%- endcomment -%}
+  {%- assign _icon = 'M40 44a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm-6-6l-8 8m20-20l-6 6m6 6l8 8m-20-20l6 6m-2-8h-8m24 0h-8m-8 16h-8m24 0h-8' -%}
+{%- elsif _t == 'PICKLES & PASTE' -%}
+  {%- comment -%} Pickle jar {%- endcomment -%}
+  {%- assign _icon = 'M30 55V36h20v19zm0-19v-6h20v6zm4-6v-5h12v5zm-2-5a8 3 0 0 1 16 0m-12 16a4 4 0 0 0 8 0' -%}
+{%- elsif _t == 'PLASTICWARE' or _t == 'STORAGE BAG' or _t == 'CASSEROLE' -%}
+  {%- comment -%} Container with lid {%- endcomment -%}
+  {%- assign _icon = 'M26 42h28v12H26zm2-6h24l-2 6H28zm12-10c0 4-6 6-6 10m12-10c0 4-6 6-6 10' -%}
+{%- elsif _t == 'POHA/PORI/PUFFED' -%}
+  {%- comment -%} Bowl of puffed rice {%- endcomment -%}
+  {%- assign _icon = 'M26 46h28a14 14 0 0 1-28 0zm6-6a2 2 0 1 0 4 0 2 2 0 0 0-4 0m6-2a2 2 0 1 0 4 0 2 2 0 0 0-4 0m6 2a2 2 0 1 0 4 0 2 2 0 0 0-4 0m-10-6a2 2 0 1 0 4 0 2 2 0 0 0-4 0m6 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0' -%}
+{%- elsif _t == 'POTATO' -%}
+  {%- comment -%} Potato shape {%- endcomment -%}
+  {%- assign _icon = 'M40 30c-10 0-16 6-16 12s6 12 16 12 16-6 16-12-6-12-16-12zm-6 8a2 2 0 1 0 4 0 2 2 0 0 0-4 0m8 4a2 2 0 1 0 4 0 2 2 0 0 0-4 0' -%}
+{%- elsif _t == 'SALT' -%}
+  {%- comment -%} Salt shaker {%- endcomment -%}
+  {%- assign _icon = 'M37 55V34h6v21zm-3-21v-8a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v8zm2-8v-6m2 2a1 1 0 1 0 2 0 1 1 0 0 0-2 0m-4 4a1 1 0 1 0 2 0 1 1 0 0 0-2 0m4 0a1 1 0 1 0 2 0 1 1 0 0 0-2 0' -%}
+{%- elsif _t == 'SAUCES' -%}
+  {%- comment -%} Sauce bottle squeeze {%- endcomment -%}
+  {%- assign _icon = 'M34 55V34h12v21zm0-21v-6a4 4 0 0 1 4-4h0a4 4 0 0 1 4 4v6zm3-10v-5h6v5zm4-5l4-4m-8 0l-4-4' -%}
+{%- elsif _t == 'SOFT DRINKS' or _t == 'BEER' -%}
+  {%- comment -%} Canned drink {%- endcomment -%}
+  {%- assign _icon = 'M32 55V30h16v25zm0-25a8 3 0 1 1 16 0zm0 25a8 3 0 1 0 16 0m8-12h-8m-8 0h-8' -%}
+{%- elsif _t == 'TISSUE/NAPKINS' -%}
+  {%- comment -%} Tissue box {%- endcomment -%}
+  {%- assign _icon = 'M24 36h32v18H24zm10-8a6 8 0 0 1 12 0v8H34zm6 0v-6m-6 14c4-4 12-4 12 0' -%}
+{%- elsif _t == 'TOILETRIES' or _t == 'SHAVING' -%}
+  {%- comment -%} Toiletry tube {%- endcomment -%}
+  {%- assign _icon = 'M34 55V34h12v21zm0-21v-6h12v6zm4-6v-6h4v6zm-2-10l2-4 2 4m-8 20h12' -%}
+{%- elsif _t == 'TOOVAKAL' -%}
+  {%- comment -%} Lentil/dal bag {%- endcomment -%}
+  {%- assign _icon = 'M30 28h20l4 27H26zm0 0l-4-6h28l-4 6m8 10H18m6 8h32' -%}
+{%- elsif _t == 'TOPPING' -%}
+  {%- comment -%} Sauce/topping bottle {%- endcomment -%}
+  {%- assign _icon = 'M36 55V34h8v21zm-2-21v-6h12v6zm3-6v-5h6v5zm3-5v-4l4-2v3h-4zm-6-2l-4-4 4-4' -%}
+{%- elsif _t == 'UMBERELLA/RAINCOAT' -%}
+  {%- comment -%} Umbrella {%- endcomment -%}
+  {%- assign _icon = 'M40 28v26m0 0a4 4 0 0 1-8 0m-12-22a20 20 0 0 1 40 0H28a12 12 0 0 0-12-4 12 12 0 0 0-8 4H8' -%}
+{%- elsif _t == 'YEAST' -%}
+  {%- comment -%} Small packet/sachet {%- endcomment -%}
+  {%- assign _icon = 'M28 30h24v24H28zm4 4h16m-16 6h12m-12 6h16m-8-12v12' -%}
+{%- elsif _t == 'YOGHURT' -%}
+  {%- comment -%} Yoghurt cup {%- endcomment -%}
+  {%- assign _icon = 'M30 36h20l-2 18H32zm0 0v-6h20v6zm4-6v-4h12v4m-12 12a6 4 0 0 0 12 0' -%}
+{%- else -%}
+  {%- comment -%} Generic grocery basket fallback {%- endcomment -%}
+  {%- assign _icon = 'M22 36h36l-4 18H26zm9-10l-5 10m16-10l5 10m-13 0v12m6-12v12m-3-22v-6' -%}
+{%- endif -%}
+data:image/svg+xml,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='36' fill='%23EEF7E8'/%3E%3Ccircle cx='40' cy='40' r='28' fill='%23D8EDCA' opacity='.5'/%3E%3Cpath d='{{ _icon }}' fill='none' stroke='%232D6A1F' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E
