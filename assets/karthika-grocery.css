@@ -3207,6 +3207,10 @@ textarea {
 body.karthika-location-open,
 body.karthika-wishlist-open {
   overflow: hidden;
+  /* iOS Safari scroll lock — JS sets --scroll-y before adding this class */
+  position: fixed;
+  width: 100%;
+  top: calc(var(--scroll-y, 0) * -1px);
 }
 
 /* ── Delivery location modal — Leaflet + OpenStreetMap, zero Google ───────── */
@@ -3220,17 +3224,10 @@ body.karthika-wishlist-open {
   display: none;
   position: fixed;
   inset: 0;
-  /* Use dvh so the overlay fits within the visible viewport on iOS Safari */
-  height: 100dvh;
-  height: 100vh; /* fallback for older browsers */
-  height: 100dvh;
   z-index: 2100;
   align-items: flex-end;       /* bottom sheet on mobile */
   justify-content: center;
   padding: 0;
-  /* Push content above Safari's bottom toolbar */
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-sizing: border-box;
 }
 
 .karthika-delivery-modal.is-open {
@@ -3269,7 +3266,7 @@ body.karthika-wishlist-open {
   overflow-x: hidden;
   overflow-y: auto;
   box-sizing: border-box;
-  /* No extra bottom padding here — the parent container handles safe-area */
+  padding: 0 0 env(safe-area-inset-bottom, 0px);
   border-radius: 24px 24px 0 0;
   box-shadow: 0 -4px 32px rgba(24, 55, 25, 0.14);
 }

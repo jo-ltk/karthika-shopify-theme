@@ -1406,7 +1406,13 @@
       modal.hidden = false;
       modal.classList.add('is-open');
       modal.setAttribute('aria-hidden', 'false');
+
+      // iOS Safari scroll lock: save scroll position, then fix the body
+      const scrollY = window.scrollY;
+      document.documentElement.style.setProperty('--scroll-y', scrollY);
+      document.body.dataset.scrollY = scrollY;
       document.body.classList.add('karthika-location-open');
+
       this.syncTriggerState(true);
       if (this._lastTrigger?.blur) this._lastTrigger.blur();
       this.setBackgroundInert(true);
@@ -1427,7 +1433,13 @@
       modal.classList.remove('is-open');
       modal.setAttribute('aria-hidden', 'true');
       modal.hidden = true;
+
+      // iOS Safari scroll lock: restore scroll position
+      const savedScrollY = parseInt(document.body.dataset.scrollY || '0', 10);
       document.body.classList.remove('karthika-location-open');
+      delete document.body.dataset.scrollY;
+      window.scrollTo(0, savedScrollY);
+
       this.syncTriggerState(false);
       this.setBackgroundInert(false);
       this._pendingCoords  = null;
