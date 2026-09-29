@@ -385,6 +385,9 @@
       {%- endif -%}
     {%- endfor -%}
   </section>
+  {%- if enable_ai -%}
+    <script src="{{ 'karthika-local-assistant.js' | asset_url }}" defer></script>
+  {%- endif -%}
 {%- endif -%}
 
 {% schema %}
@@ -421,16 +424,16 @@
     {
       "type": "checkbox",
       "id": "enable_ai_mode",
-      "label": "Enable AI requests",
-      "default": false,
-      "info": "Off by default. When on, the customer can submit a question to the App Proxy. Manual shopping still works if AI fails. The homepage never calls AI until the customer submits."
+      "label": "Enable Smart Search",
+      "default": true,
+      "info": "On by default. Lets customers type a dish or ingredient (e.g. 'fish curry') and see matching real products from this store. Uses local rule-based matching — no external AI API required."
     },
     {
       "type": "text",
       "id": "ai_endpoint",
-      "label": "AI App Proxy path",
+      "label": "AI App Proxy path (legacy)",
       "default": "/apps/karthika/recommend",
-      "info": "Used only when AI mode is enabled. Do not put API keys here."
+      "info": "Legacy field. The local assistant no longer calls this endpoint. Safe to ignore."
     }
   ],
   "blocks": [
