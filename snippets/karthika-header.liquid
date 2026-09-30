@@ -111,6 +111,10 @@
     <a href="{{ home_url }}" class="karthika-desktop-header__brand" aria-label="{{ shop.name }}">
       {% render 'karthika-logo', class: 'karthika-logo--nav-desktop', loading: 'eager' %}
     </a>
+    <div class="karthika-desktop-header__brand-tagline" aria-hidden="true">
+      <span class="karthika-desktop-header__tagline-badge">🚀 Express Delivery</span>
+      <span class="karthika-desktop-header__tagline-text">Fresh groceries at your door in <strong>30 mins</strong></span>
+    </div>
     <nav class="karthika-desktop-header__nav" aria-label="Main navigation">
       <a href="{{ home_url }}"{% if is_home %} class="is-active" aria-current="page"{% endif %}>Home</a>
       <a href="{{ categories_url }}"{% if is_categories %} class="is-active" aria-current="page"{% endif %}>Categories</a>

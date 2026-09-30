@@ -293,7 +293,7 @@ textarea {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
-    max-width: 180px;
+    max-width: 260px;
     color: var(--karthika-maroon);
     font-size: 24px;
     font-weight: 800;
@@ -306,13 +306,51 @@ textarea {
   .karthika-logo--nav-desktop {
     display: block;
     width: auto;
-    max-width: 168px;
-    height: 56px;
+    max-width: 240px;
+    height: 72px;
     object-fit: contain;
   }
 
   .karthika-desktop-header__brand span {
     color: var(--karthika-gold);
+  }
+
+  /* --- Brand tagline / promo pill next to logo --- */
+  .karthika-desktop-header__brand-tagline {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding-left: 18px;
+    border-left: 2px solid var(--karthika-border);
+    margin-left: 4px;
+  }
+
+  .karthika-desktop-header__tagline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: var(--karthika-radius-pill);
+    background: var(--karthika-yellow-light);
+    color: #7a5200;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    width: fit-content;
+  }
+
+  .karthika-desktop-header__tagline-text {
+    color: var(--karthika-text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .karthika-desktop-header__tagline-text strong {
+    color: var(--karthika-red);
+    font-weight: 700;
   }
 
   .karthika-desktop-header__nav {
@@ -523,8 +561,8 @@ textarea {
 .karthika-logo--nav-mobile {
   display: block;
   width: auto;
-  height: 36px;
-  max-width: 98px;
+  height: 48px;
+  max-width: 130px;
   object-fit: contain;
 }
 
@@ -6760,8 +6798,8 @@ a.kcg-item:focus-visible .kcg-icon {
   top: 4px;
   right: 4px;
   z-index: 3;
-  width: 44px;
-  height: 44px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.92);
   border: none;
@@ -6787,8 +6825,8 @@ a.kcg-item:focus-visible .kcg-icon {
 }
 
 .karthika-wishlist-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   color: #6b6b6b;
   transition: color 0.18s, fill 0.18s;
   pointer-events: none;
@@ -6811,8 +6849,8 @@ a.kcg-item:focus-visible .kcg-icon {
 }
 
 .karthika-popular-mini-card .karthika-wishlist-btn--mini {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
 }
 
 .karthika-pdp-title-row h1,
@@ -7015,15 +7053,15 @@ a.kcg-item:focus-visible .kcg-icon {
 }
 
 .ks-product-grid .karthika-wishlist-btn {
-  width: 44px;
-  height: 44px;
+  width: 26px;
+  height: 26px;
   top: 4px;
   right: 4px;
 }
 
 .ks-product-grid .karthika-wishlist-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
 }
 
 /* ==========================================================================
@@ -8391,6 +8429,11 @@ table {
   .karthika-desktop-header__order {
     min-width: 0;
     padding: 0 16px;
+  }
+
+  /* Hide tagline on smaller desktops to avoid crowding */
+  .karthika-desktop-header__brand-tagline {
+    display: none;
   }
 }
 

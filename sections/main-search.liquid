@@ -3,11 +3,6 @@
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
 {{ 'component-search.css' | asset_url | stylesheet_tag }}
 
-{%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
-  {{ 'component-facets.css' | asset_url | stylesheet_tag }}
-  <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
-
 {% if section.settings.image_shape == 'blob' %}
   {{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
 {%- endif -%}
@@ -57,47 +52,35 @@
     font-weight: var(--karthika-weight-semibold, 600);
   }
 
-  /* --- Search input row (pill style) --- */
+  /* --- Search input row --- */
   .ks-search-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
+    padding: 10px 16px 12px;
   }
 
   .ks-search-pill {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 0;
     background: #fff;
     border: 1.5px solid var(--karthika-border, #E1E8D3);
-    border-radius: var(--karthika-radius-pill, 9999px);
-    padding: 0 6px 0 14px;
-    overflow: visible;
-    box-shadow: var(--karthika-shadow-subtle);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    border-radius: 9999px;
+    padding: 0 5px 0 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: border-color 0.15s ease;
   }
-
-  .ks-search-pill input[type="search"]:focus,
-  .ks-search-pill input[type="text"]:focus,
-  .ks-search-pill input[type="search"]:focus-visible,
-  .ks-search-pill input[type="text"]:focus-visible {
-    outline: none;
-    box-shadow: none;
-  }
-
-  .ks-search-pill:has(input:focus-visible) {
+  .ks-search-pill:focus-within {
     border-color: var(--karthika-red, #3F7D2E);
-    box-shadow: 0 0 0 3px rgba(63, 125, 46, 0.18);
   }
 
-  .ks-search-pill-label {
-    font-size: 11px;
-    color: var(--karthika-text-muted);
-    padding-right: 4px;
-    white-space: nowrap;
+  .ks-search-pill-icon {
+    width: 16px;
+    height: 16px;
     flex-shrink: 0;
+    color: #9DB492;
+    margin-right: 8px;
   }
 
   .ks-search-pill input[type="search"],
@@ -106,37 +89,28 @@
     border: none;
     outline: none;
     background: transparent;
-    font: var(--karthika-weight-medium, 500) 14px/1.4 var(--karthika-font-sans);
+    font-size: 14px;
+    font-weight: 500;
     color: var(--karthika-text-dark);
     padding: 11px 0;
     min-width: 0;
-  }
-
-  .ks-search-pill input[type="search"]::-webkit-search-cancel-button {
+    font-family: inherit;
     -webkit-appearance: none;
   }
-
-  .ks-pill-clear-btn {
-    flex-shrink: 0;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--karthika-bg-surface, #EFF4E3);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--karthika-text-muted);
-    font-size: 16px;
-    line-height: 1;
-    margin: 0 2px;
+  .ks-search-pill input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    display: none;
+  }
+  .ks-search-pill input[type="search"]:focus,
+  .ks-search-pill input[type="search"]:focus-visible {
+    outline: none;
+    box-shadow: none;
   }
 
-  .ks-search-submit-btn {
+  .ks-pill-submit-btn {
     flex-shrink: 0;
-    width: 42px;
-    height: 42px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background: var(--karthika-red, #3F7D2E);
     border: none;
@@ -145,118 +119,317 @@
     justify-content: center;
     cursor: pointer;
     color: #fff;
-    box-shadow: 0 3px 10px rgba(63, 125, 46, 0.25);
-    transition: background 0.18s;
+    padding: 0;
+    margin: 3px;
+    transition: background 0.15s;
+  }
+  .ks-pill-submit-btn:hover { background: var(--karthika-red-hover, #336524); }
+  .ks-pill-submit-btn svg {
+    width: 15px;
+    height: 15px;
+    display: block;
+  }
+  .ks-pill-submit-btn:focus-visible {
+    outline: 2px solid var(--karthika-red, #3F7D2E);
+    outline-offset: 2px;
   }
 
-  .ks-search-submit-btn:hover {
-    background: var(--karthika-red-hover, #336524);
-  }
+  .ks-live-search { flex: 1; display: flex; min-width: 0; }
+  .ks-search-form { display: flex; width: 100%; }
 
-  .ks-search-submit-btn:focus,
-  .ks-search-submit-btn:focus-visible,
-  .ks-pill-clear-btn:focus,
-  .ks-pill-clear-btn:focus-visible {
-    outline: none;
-    box-shadow: none;
-  }
-
-  .ks-search-submit-btn:focus-visible,
-  .ks-pill-clear-btn:focus-visible {
-    box-shadow: 0 0 0 3px rgba(63, 125, 46, 0.18);
-  }
-
-  .ks-live-search {
-    position: relative;
-    flex: 1;
+  /* --- Compact filter bar (cvat) --- */
+  .ks-cvat-bar {
     display: flex;
     align-items: center;
-    gap: 8px;
-    min-width: 0;
+    padding: 4px 0 10px;
+    border-bottom: 1px solid var(--karthika-border-light, #EAF0DE);
+    /* NO overflow here — overflow clips absolute dropdowns */
   }
 
-  .ks-search-form {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-  }
-
-  .ks-facets-wrap {
-    padding: 0 16px 12px;
-  }
-
-  .ks-facets-wrap .facets-container,
-  .ks-facets-wrap .page-width {
-    padding-left: 0;
-    padding-right: 0;
-    margin: 0;
-    max-width: none;
-  }
-
-  /* --- Filter/sort pill row --- */
-  .ks-filter-row {
+  /* scrollable inner track holds chips but doesn't clip dropdowns */
+  .ks-cvat-scroll {
     display: flex;
     align-items: center;
     gap: 7px;
-    padding: 4px 16px 12px;
+    padding: 0 16px;
     overflow-x: auto;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    border-bottom: 1px solid var(--karthika-border-light, #EAF0DE);
+    flex: 1;
+    /* overflow-x:auto creates a scroll context but NOT a stacking context,
+       so position:absolute children of .ks-cvat-item still escape it */
+  }
+  .ks-cvat-scroll::-webkit-scrollbar { display: none; }
+
+  /* wrapper around each chip + its dropdown */
+  .ks-cvat-item {
+    position: static; /* dropdown uses fixed positioning instead */
+    flex-shrink: 0;
   }
 
-  .ks-filter-row::-webkit-scrollbar { display: none; }
-
-  .ks-filter-pill {
+  /* each pill chip */
+  .ks-cvat-chip {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 7px 13px;
-    border-radius: var(--karthika-radius-pill, 9999px);
-    font-size: 12.5px;
-    font-weight: var(--karthika-weight-semibold, 600);
-    white-space: nowrap;
-    cursor: pointer;
+    padding: 7px 12px;
+    border-radius: 9999px;
     border: 1.5px solid var(--karthika-border, #E1E8D3);
     background: #fff;
-    color: var(--karthika-text-dark);
-    transition: background 0.15s, border-color 0.15s;
-    user-select: none;
-    flex-shrink: 0;
+    color: var(--karthika-text-dark, #171717);
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.14s, border-color 0.14s, color 0.14s;
+    font-family: inherit;
+    line-height: 1;
   }
-
-  .ks-filter-pill svg {
-    width: 14px;
-    height: 14px;
+  .ks-cvat-chip svg {
+    width: 13px;
+    height: 13px;
     flex-shrink: 0;
+    transition: transform 0.18s;
   }
-
-  .ks-filter-pill--active {
+  .ks-cvat-chip--active,
+  .ks-cvat-item.is-open .ks-cvat-chip {
     background: var(--karthika-red-subtle, #EAF4DE);
     border-color: var(--karthika-red, #3F7D2E);
     color: var(--karthika-red, #3F7D2E);
   }
+  .ks-cvat-item.is-open .ks-cvat-chip svg.ks-caret { transform: rotate(180deg); }
 
-  .ks-filter-pill--chevron::after {
-    content: '';
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235C6B52' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-size: contain;
-    margin-left: 2px;
-  }
-
-  .ks-result-count {
+  /* result count — right-aligned inside the bar */
+  .ks-cvat-count {
     margin-left: auto;
     flex-shrink: 0;
     font-size: 12px;
-    color: var(--karthika-text-muted);
+    color: var(--karthika-text-muted, #5C6B52);
     white-space: nowrap;
     padding-left: 8px;
   }
+
+  /* active filter tags row */
+  .ks-cvat-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 16px 4px;
+  }
+  .ks-cvat-tags:empty { display: none; }
+  .ks-cvat-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px 4px 12px;
+    border-radius: 9999px;
+    background: var(--karthika-red-subtle, #EAF4DE);
+    color: var(--karthika-red, #3F7D2E);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid rgba(63,125,46,0.25);
+  }
+  .ks-cvat-tag svg { width: 11px; height: 11px; }
+
+  /* invisible backdrop to catch outside clicks */
+  .ks-cvat-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+  }
+  .ks-cvat-backdrop.is-open { display: block; }
+
+  /* ── dropdown panel (fixed so it escapes overflow:auto containers) ── */
+  .ks-cvat-dropdown {
+    display: none;
+    position: fixed;     /* JS sets top + left via style attribute */
+    min-width: 220px;
+    max-width: 300px;
+    background: #fff;
+    border: 1.5px solid var(--karthika-border, #E1E8D3);
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+    z-index: 1000;
+    overflow: hidden;
+    animation: cvat-drop-in 0.16s ease;
+  }
+  .ks-cvat-item.is-open .ks-cvat-dropdown { display: block; }
+
+  @keyframes cvat-drop-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .ks-cvat-dropdown-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid var(--karthika-border-light, #EAF0DE);
+  }
+  .ks-cvat-dropdown-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--karthika-text-dark, #171717);
+    margin: 0;
+  }
+  .ks-cvat-dropdown-clear {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--karthika-red, #3F7D2E);
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+  }
+  .ks-cvat-dropdown-clear:hover { text-decoration: underline; }
+
+  .ks-cvat-dropdown-body {
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  /* option rows */
+  .ks-cvat-option-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ks-cvat-option-list li + li {
+    border-top: 1px solid var(--karthika-border-light, #EAF0DE);
+  }
+  .ks-cvat-option-list label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--karthika-text-dark);
+    font-weight: 500;
+  }
+  .ks-cvat-option-list input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    accent-color: var(--karthika-red, #3F7D2E);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .ks-cvat-option-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--karthika-text-muted);
+  }
+  .ks-cvat-option-disabled label { opacity: 0.38; pointer-events: none; }
+
+  /* price range */
+  .ks-cvat-price-range {
+    padding: 12px 14px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .ks-cvat-price-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .ks-cvat-price-range > .ks-cvat-price-field > label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--karthika-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .ks-cvat-price-range input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid var(--karthika-border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .ks-cvat-price-range input[type="text"]:focus {
+    border-color: var(--karthika-red, #3F7D2E);
+  }
+  .ks-cvat-price-sep {
+    font-size: 13px;
+    color: var(--karthika-text-muted);
+    padding-bottom: 10px;
+    flex-shrink: 0;
+  }
+
+  /* sort list (radio) */
+  .ks-cvat-sort-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ks-cvat-sort-list li + li {
+    border-top: 1px solid var(--karthika-border-light, #EAF0DE);
+  }
+  .ks-cvat-sort-list label {
+    display: flex;
+    align-items: center;
+    padding: 11px 14px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--karthika-text-dark);
+    font-weight: 500;
+    gap: 10px;
+  }
+  .ks-cvat-sort-list input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--karthika-red, #3F7D2E);
+    flex-shrink: 0;
+  }
+
+  /* apply / footer row inside dropdown */
+  .ks-cvat-dropdown-footer {
+    display: flex;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--karthika-border-light, #EAF0DE);
+  }
+  .ks-cvat-btn-clear {
+    flex: 1;
+    padding: 9px;
+    border-radius: 9999px;
+    border: 1.5px solid var(--karthika-border);
+    background: #fff;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--karthika-text-dark);
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ks-cvat-btn-apply {
+    flex: 1;
+    padding: 9px;
+    border-radius: 9999px;
+    border: none;
+    background: var(--karthika-red, #3F7D2E);
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .ks-cvat-btn-apply:hover { background: var(--karthika-red-hover, #336524); }
 
   /* --- Product Grid Container --- */
   .ks-product-grid-wrap {
@@ -558,7 +731,7 @@
     {%- endif -%}
   </div>
 
-  <!-- ── Pill-style search input ───────────────────────────── -->
+  <!-- ── Search input ───────────────────────────── -->
   <div class="ks-search-row">
     {%- if settings.predictive_search_enabled -%}
       <predictive-search class="karthika-live-search ks-live-search" data-loading-text="{{ 'accessibility.loading' | t }}">
@@ -566,7 +739,10 @@
     <main-search class="ks-live-search">
       <form action="{{ routes.search_url }}" method="get" role="search" class="ks-search-form" id="KarthikaSearchPageForm">
         <div class="ks-search-pill">
-          <label class="ks-search-pill-label" for="Search-In-Template">Search</label>
+          <svg class="ks-search-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><line x1="16.65" y1="16.65" x2="21" y2="21"/>
+          </svg>
+          <label class="visually-hidden" for="Search-In-Template">{{ 'general.search.search' | t }}</label>
           <input
             class="search__input"
             id="Search-In-Template"
@@ -589,8 +765,10 @@
           >
           <input name="options[prefix]" type="hidden" value="last">
           <input name="type" type="hidden" value="product">
-          <button type="reset" class="ks-pill-clear-btn{% if search.terms == blank %} hidden{% endif %}" aria-label="{{ 'general.search.reset' | t }}">
-            &times;
+          <button type="submit" class="ks-pill-submit-btn" aria-label="{{ 'general.search.search' | t }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/><line x1="16.65" y1="16.65" x2="21" y2="21"/>
+            </svg>
           </button>
         </div>
 
@@ -600,13 +778,6 @@
           </div>
           <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
         {%- endif -%}
-
-        <button type="submit" class="ks-search-submit-btn" aria-label="{{ 'general.search.search' | t }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-            <circle cx="11" cy="11" r="7"></circle>
-            <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
-          </svg>
-        </button>
       </form>
     </main-search>
     {%- if settings.predictive_search_enabled -%}
@@ -617,17 +788,215 @@
   <div id="KarthikaSearchPageError" class="karthika-search-error" hidden role="alert"></div>
 
   {%- if search.performed -%}
-    {%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
-      <div class="ks-facets-wrap" id="main-search-filters">
-        {% render 'facets',
-          results: search,
-          enable_filtering: section.settings.enable_filtering,
-          enable_sorting: section.settings.enable_sorting,
-          filter_type: section.settings.filter_type,
-          paginate: paginate
-        %}
+
+    {%- comment -%} ── Compact Filter Bar (cvat) ─────────────────────────── {%- endcomment -%}
+    {%- liquid
+      assign sort_by = search.sort_by | default: search.default_sort_by
+      assign search_base_url = '?q=' | append: terms | append: '&type=product&options%5Bprefix%5D=last'
+    -%}
+
+    <div class="ks-cvat-bar" role="toolbar" aria-label="Filter and sort">
+      <div class="ks-cvat-scroll">
+
+      {%- comment -%} Sort chip {%- endcomment -%}
+      {%- if section.settings.enable_sorting -%}
+        <div class="ks-cvat-item">
+          <button
+            type="button"
+            class="ks-cvat-chip{% if sort_by != search.default_sort_by %} ks-cvat-chip--active{% endif %}"
+            aria-expanded="false"
+            data-cvat-item
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M3 6h18M6 12h12M10 18h4"/>
+            </svg>
+            Sort
+            <svg class="ks-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div class="ks-cvat-dropdown">
+            <div class="ks-cvat-dropdown-head">
+              <p class="ks-cvat-dropdown-title">Sort by</p>
+            </div>
+            <div class="ks-cvat-dropdown-body">
+              <form id="ks-cvat-sort-form" action="{{ routes.search_url }}" method="get">
+                <input type="hidden" name="q" value="{{ search.terms | escape }}">
+                <input type="hidden" name="type" value="product">
+                <input type="hidden" name="options[prefix]" value="last">
+                {%- for filter in search.filters -%}
+                  {%- for value in filter.active_values -%}
+                    <input type="hidden" name="{{ value.param_name }}" value="{{ value.value | escape }}">
+                  {%- endfor -%}
+                  {%- if filter.type == 'price_range' -%}
+                    {%- if filter.min_value.value -%}
+                      <input type="hidden" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value | money_without_currency }}">
+                    {%- endif -%}
+                    {%- if filter.max_value.value -%}
+                      <input type="hidden" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value | money_without_currency }}">
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+                <ul class="ks-cvat-sort-list">
+                  {%- for option in search.sort_options -%}
+                    <li>
+                      <label>
+                        <input type="radio" name="sort_by" value="{{ option.value | escape }}"
+                          {% if option.value == sort_by %}checked{% endif %}
+                          onchange="this.form.submit()">
+                        {{ option.name | escape }}
+                      </label>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </form>
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} One chip+dropdown per filter {%- endcomment -%}
+      {%- if section.settings.enable_filtering -%}
+        {%- for filter in search.filters -%}
+          {%- assign chip_active = false -%}
+          {%- if filter.active_values.size > 0 -%}{%- assign chip_active = true -%}{%- endif -%}
+          {%- if filter.type == 'price_range' -%}
+            {%- if filter.min_value.value or filter.max_value.value -%}{%- assign chip_active = true -%}{%- endif -%}
+          {%- endif -%}
+          <div class="ks-cvat-item">
+            <button
+              type="button"
+              class="ks-cvat-chip{% if chip_active %} ks-cvat-chip--active{% endif %}"
+              aria-expanded="false"
+              data-cvat-item
+            >
+              {{ filter.label | escape }}
+              {%- if filter.active_values.size > 0 -%}
+                &nbsp;<span>({{ filter.active_values.size }})</span>
+              {%- endif -%}
+              <svg class="ks-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="ks-cvat-dropdown">
+              <div class="ks-cvat-dropdown-head">
+                <p class="ks-cvat-dropdown-title">{{ filter.label | escape }}</p>
+                <a href="{{ filter.url_to_remove }}" class="ks-cvat-dropdown-clear">Clear</a>
+              </div>
+              <div class="ks-cvat-dropdown-body">
+                <form action="{{ routes.search_url }}" method="get">
+                  <input type="hidden" name="q" value="{{ search.terms | escape }}">
+                  <input type="hidden" name="type" value="product">
+                  <input type="hidden" name="options[prefix]" value="last">
+                  <input type="hidden" name="sort_by" value="{{ sort_by | escape }}">
+                  {%- for other_filter in search.filters -%}
+                    {%- if other_filter.param_name != filter.param_name -%}
+                      {%- for value in other_filter.active_values -%}
+                        <input type="hidden" name="{{ value.param_name }}" value="{{ value.value | escape }}">
+                      {%- endfor -%}
+                      {%- if other_filter.type == 'price_range' -%}
+                        {%- if other_filter.min_value.value -%}
+                          <input type="hidden" name="{{ other_filter.min_value.param_name }}" value="{{ other_filter.min_value.value | money_without_currency }}">
+                        {%- endif -%}
+                        {%- if other_filter.max_value.value -%}
+                          <input type="hidden" name="{{ other_filter.max_value.param_name }}" value="{{ other_filter.max_value.value | money_without_currency }}">
+                        {%- endif -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  {%- case filter.type -%}
+                    {%- when 'boolean', 'list' -%}
+                      <ul class="ks-cvat-option-list">
+                        {%- for value in filter.values -%}
+                          {%- assign is_disabled = false -%}
+                          {%- if value.count == 0 and value.active == false -%}{%- assign is_disabled = true -%}{%- endif -%}
+                          <li class="{% if is_disabled %}ks-cvat-option-disabled{% endif %}">
+                            <label>
+                              <input type="checkbox"
+                                name="{{ value.param_name }}"
+                                value="{{ value.value | escape }}"
+                                {% if value.active %}checked{% endif %}
+                                {% if is_disabled %}disabled{% endif %}
+                              >
+                              {{ value.label | escape }}
+                              <span class="ks-cvat-option-count">({{ value.count }})</span>
+                            </label>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                      <div class="ks-cvat-dropdown-footer">
+                        <button type="submit" class="ks-cvat-btn-apply">Apply</button>
+                      </div>
+                    {%- when 'price_range' -%}
+                      <div class="ks-cvat-price-range">
+                        <div class="ks-cvat-price-field">
+                          <label for="cvat-price-min-{{ forloop.index }}">Min ({{ cart.currency.symbol }})</label>
+                          <input type="text" id="cvat-price-min-{{ forloop.index }}"
+                            name="{{ filter.min_value.param_name }}"
+                            inputmode="decimal"
+                            placeholder="0"
+                            value="{{ filter.min_value.value | money_without_currency }}"
+                          >
+                        </div>
+                        <span class="ks-cvat-price-sep">–</span>
+                        <div class="ks-cvat-price-field">
+                          <label for="cvat-price-max-{{ forloop.index }}">Max ({{ cart.currency.symbol }})</label>
+                          <input type="text" id="cvat-price-max-{{ forloop.index }}"
+                            name="{{ filter.max_value.param_name }}"
+                            inputmode="decimal"
+                            placeholder="{{ filter.range_max | money_without_currency }}"
+                            value="{{ filter.max_value.value | money_without_currency }}"
+                          >
+                        </div>
+                      </div>
+                      <div class="ks-cvat-dropdown-footer">
+                        <button type="submit" class="ks-cvat-btn-apply">Apply</button>
+                      </div>
+                  {%- endcase -%}
+                </form>
+              </div>
+            </div>
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- comment -%} Result count — pushed right {%- endcomment -%}
+      <span class="ks-cvat-count" role="status">
+        {%- if search.results_count -%}
+          {{ search.results_count }} result{% if search.results_count != 1 %}s{% endif %}
+        {%- endif -%}
+      </span>
+      </div>{%- comment -%} /.ks-cvat-scroll {%- endcomment -%}
+    </div>
+
+    {%- comment -%} ── Active filter tags ───────────────────────────────── {%- endcomment -%}
+    {%- if section.settings.enable_filtering -%}
+      <div class="ks-cvat-tags">
+        {%- for filter in search.filters -%}
+          {%- for value in filter.active_values -%}
+            <a href="{{ value.url_to_remove }}" class="ks-cvat-tag">
+              {{ value.label | escape }}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </a>
+          {%- endfor -%}
+          {%- if filter.type == 'price_range' -%}
+            {%- assign pmin = filter.min_value.value -%}
+            {%- assign pmax = filter.max_value.value -%}
+            {%- if pmin != null or pmax != null -%}
+              <a href="{{ filter.url_to_remove }}" class="ks-cvat-tag">
+                {{ pmin | default: 0 | money }} – {{ pmax | default: filter.range_max | money }}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </a>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
       </div>
     {%- endif -%}
+
+    {%- comment -%} ── Backdrop (catches outside-clicks) ────────────────── {%- endcomment -%}
+    <div class="ks-cvat-backdrop" id="ks-cvat-backdrop" aria-hidden="true"></div>
+
   {%- endif -%}
 
   <!-- ── Product Grid ───────────────────────────────────────── -->
@@ -764,6 +1133,78 @@
     </a>
 </div>
 {% endpaginate %}
+
+<script>
+(function() {
+  var backdrop = document.getElementById('ks-cvat-backdrop');
+
+  function positionDropdown(item) {
+    var chip = item.querySelector('.ks-cvat-chip');
+    var drop = item.querySelector('.ks-cvat-dropdown');
+    if (!chip || !drop) return;
+
+    var rect = chip.getBoundingClientRect();
+    var dropWidth = Math.max(drop.offsetWidth, 220);
+    var gap = 6;
+
+    var top = rect.bottom + gap;
+    var left = rect.left;
+
+    // keep inside right edge of viewport
+    if (left + dropWidth > window.innerWidth - 8) {
+      left = window.innerWidth - dropWidth - 8;
+    }
+    // keep inside left edge
+    if (left < 8) left = 8;
+
+    drop.style.top  = top + 'px';
+    drop.style.left = left + 'px';
+  }
+
+  function closeAll() {
+    document.querySelectorAll('.ks-cvat-item.is-open').forEach(function(item) {
+      item.classList.remove('is-open');
+      var btn = item.querySelector('[data-cvat-item]');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    });
+    if (backdrop) backdrop.classList.remove('is-open');
+  }
+
+  document.querySelectorAll('[data-cvat-item]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var item = btn.closest('.ks-cvat-item');
+      var isOpen = item.classList.contains('is-open');
+      closeAll();
+      if (!isOpen) {
+        item.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+        positionDropdown(item);   // position AFTER display:block kicks in
+        if (backdrop) backdrop.classList.add('is-open');
+      }
+    });
+  });
+
+  // reposition on scroll / resize so dropdown tracks the chip
+  window.addEventListener('scroll', function() {
+    var open = document.querySelector('.ks-cvat-item.is-open');
+    if (open) positionDropdown(open);
+  }, { passive: true });
+
+  window.addEventListener('resize', function() {
+    var open = document.querySelector('.ks-cvat-item.is-open');
+    if (open) positionDropdown(open);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.ks-cvat-item')) closeAll();
+  });
+  if (backdrop) backdrop.addEventListener('click', closeAll);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeAll();
+  });
+})();
+</script>
 
 {% if section.settings.image_shape == 'arch' %}
   {{ 'mask-arch.svg' | inline_asset_content }}
