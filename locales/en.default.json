@@ -623,7 +623,7 @@
   },
   "karthika": {
     "assistant": {
-      "badge": "Shopping assistant",
+      "badge": "AI Shopping Assistant",
       "heading_default": "What are you shopping for?",
       "description_default": "Choose a category, a meal, or a recipe. Products come from this store.",
       "shop_categories": "Shop by category",
@@ -651,7 +651,7 @@
       "add_none": "No items could be added.",
       "add_one_ok": "1 item added.",
       "none_available": "No available ingredients to add.",
-      "ai_badge": "Optional AI",
+      "ai_badge": "AI Shopping Assistant",
       "ai_submit": "Ask",
       "ai_placeholder": "e.g. Fish curry for 4",
       "ai_unavailable": "Sorry, the assistant is unavailable right now. Please try again, or shop by category below.",

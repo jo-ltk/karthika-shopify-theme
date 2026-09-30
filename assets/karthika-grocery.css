@@ -80,7 +80,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
-  padding-bottom: calc(var(--karthika-bottom-nav-height) + 28px + env(safe-area-inset-bottom, 16px));
 }
 
 .karthika-app-container {
@@ -4921,7 +4920,7 @@ body.karthika-wishlist-open {
 }
 
 .kcg-section {
-  padding: 16px 0 20px;
+  padding: 16px 0 6px;
   background: transparent;
 }
 
@@ -5066,7 +5065,7 @@ a.kcg-item:focus-visible .kcg-icon {
 @media screen and (min-width: 480px) {
   .kcg-scroll {
     gap: 10px;
-    padding: 4px 20px 12px;
+    padding: 4px 20px 4px;
   }
   .kcg-item {
     flex: 0 0 84px;
@@ -5080,14 +5079,14 @@ a.kcg-item:focus-visible .kcg-icon {
 
 @media screen and (min-width: 769px) {
   .kcg-section {
-    padding: 18px 0 24px;
+    padding: 18px 0 8px;
   }
   .kcg-header {
     padding: 0 24px;
   }
   .kcg-scroll {
     gap: 12px;
-    padding: 4px 24px 12px;
+    padding: 4px 24px 4px;
   }
   .kcg-title {
     font-size: 18px;
@@ -8442,3 +8441,224 @@ table {
 }
 
 
+
+
+/* ── Fix: remove white gap below footer ──────────────────────────────────────
+   base.css sets body { display:flex; flex-direction:column; min-height:100% }
+   and .content-for-layout { flex:1 } which makes <main> stretch to fill the
+   full viewport height. On the homepage this creates a white block below the
+   footer. Override it so <main> only takes the space its content needs.
+   ─────────────────────────────────────────────────────────────────────────── */
+body {
+  min-height: unset;
+}
+
+.content-for-layout {
+  flex: 0 0 auto;
+}
+
+.content-for-layout > .shopify-section:last-child {
+  flex-grow: 0;
+}
+
+
+/* ==========================================================================
+   PDP Info Column — Compact redesign (removes excessive whitespace)
+   ========================================================================== */
+
+/* 1. Tighten all block gaps in the info column */
+.product__info-container > * + * {
+  margin: 0.6rem 0;
+}
+
+/* 2. Reduce the wide margin that .product-form normally gets */
+.product__info-container .product-form {
+  margin: 0.6rem 0 0;
+}
+
+/* 3. Remove extra top margin from the very first block */
+.product__info-container > *:first-child {
+  margin-top: 0 !important;
+}
+
+/* 4. Vendor label — tighter & styled as a subtle pill */
+.product__info-container .product__text.caption-with-letter-spacing {
+  display: inline-block;
+  background: var(--karthika-red-light, #fff0f0);
+  color: var(--karthika-red, #c0392b);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 20px;
+  margin-bottom: 4px;
+  margin-top: 0;
+  line-height: 1.6;
+}
+
+/* 5. Title — tighter bottom margin */
+.product__title {
+  margin-bottom: 6px !important;
+}
+
+/* 6. Price block — pull up closer to title */
+[id^="price-"] {
+  margin-top: 4px !important;
+}
+
+/* 7. Price badges — less vertical padding */
+.product .price__container {
+  margin-bottom: 2px;
+}
+
+/* 8. Delivery note — compact & no excessive margin */
+.karthika-product-delivery-note {
+  margin-top: 8px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+}
+
+/* 9. Quantity input row — reduce bottom gap */
+.product-form__input.product-form__quantity {
+  margin-bottom: 8px;
+}
+
+.product-form__input {
+  margin-bottom: 8px;
+}
+
+/* 10. Add to cart button — no extra bottom margin */
+.product-form__submit {
+  margin-bottom: 6px;
+}
+
+/* 11. Pickup availability — collapse all space when not available (sold out) */
+.product__pickup-availabilities {
+  margin-top: 0 !important;
+}
+
+/* When not available (sold out), the element has no [available] attr — collapse it */
+pickup-availability:not([available]) {
+  display: none !important;
+}
+
+/* When available, keep it but reduce min-height */
+pickup-availability[available] {
+  min-height: 0 !important;
+}
+
+/* 12. Product description — less generous margin */
+.product__info-container .product__description {
+  margin: 0.8rem 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(var(--color-foreground), 0.75);
+}
+
+/* 13. Section-level outer padding override — much tighter */
+product-info {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+/* Also target the dynamic section-id padding class on mobile */
+@media screen and (max-width: 749px) {
+  .template-product .product.grid {
+    gap: 0;
+  }
+
+  .template-product .product__info-wrapper {
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 10px;
+    padding-bottom: 0;
+  }
+}
+
+/* 14. Desktop info column — reduce the left padding gap */
+@media screen and (min-width: 750px) {
+  .product__info-wrapper {
+    padding-left: 2.5rem;
+  }
+
+  .product__info-container {
+    max-width: 52rem;
+  }
+}
+
+/* 15. Sold out button — cleaner look with outline style instead of full disabled button */
+.product-form__submit[disabled] {
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   End PDP compact redesign
+   ========================================================================== */
+
+/* ── Sold out button redesign ────────────────────────────────────────────── */
+.karthika-btn-soldout.karthika-btn-soldout {
+  background: transparent !important;
+  color: #888 !important;
+  border: 1.5px solid #d0d0d0 !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.karthika-btn-soldout.karthika-btn-soldout span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #888 !important;
+}
+
+.karthika-btn-soldout.karthika-btn-soldout span::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ccc;
+  flex-shrink: 0;
+}
+/* ── End sold out button ─────────────────────────────────────────────────── */
+
+/* ── Add to cart button redesign ────────────────────────────────────────── */
+.karthika-btn-addtocart.karthika-btn-addtocart {
+  background: var(--karthika-red) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 14px !important;
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  box-shadow: 0 4px 14px rgba(63, 125, 46, 0.35) !important;
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease !important;
+  min-height: 50px !important;
+}
+
+.karthika-btn-addtocart.karthika-btn-addtocart:hover {
+  background: var(--karthika-red-hover) !important;
+  box-shadow: 0 6px 18px rgba(63, 125, 46, 0.45) !important;
+  transform: translateY(-1px) !important;
+}
+
+.karthika-btn-addtocart.karthika-btn-addtocart:active {
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 0 2px 8px rgba(63, 125, 46, 0.3) !important;
+}
+
+.karthika-btn-addtocart.karthika-btn-addtocart span {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  color: #fff !important;
+}
+/* ── End add to cart button ──────────────────────────────────────────────── */

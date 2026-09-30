@@ -39,6 +39,40 @@
     }
   {%- endstyle -%}
 
+  <style>
+    /* ── Karthika PDP compact layout ── */
+    #ProductInfo-{{ section.id }} > * + * {
+      margin-top: 6px !important;
+      margin-bottom: 0 !important;
+    }
+    #ProductInfo-{{ section.id }} > *:first-child {
+      margin-top: 0 !important;
+    }
+    #ProductInfo-{{ section.id }} .product-form {
+      margin-top: 6px !important;
+      margin-bottom: 0 !important;
+    }
+    #ProductInfo-{{ section.id }} .product__description {
+      margin-top: 8px !important;
+      margin-bottom: 0 !important;
+    }
+    #ProductInfo-{{ section.id }} .product__title {
+      margin-bottom: 4px !important;
+    }
+    #ProductInfo-{{ section.id }} .product-form__input {
+      margin-bottom: 6px !important;
+    }
+    #ProductInfo-{{ section.id }} .product-form__submit {
+      margin-bottom: 4px !important;
+    }
+    pickup-availability:not([available]) {
+      display: none !important;
+    }
+    pickup-availability[available] {
+      min-height: 0 !important;
+    }
+  </style>
+
   <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
   {%- if product.quantity_price_breaks_configured? -%}

@@ -7,9 +7,12 @@
 
 {%- comment -%}
   Static 16-entry category data.
-  Format: title||webp_filename||collection_handle
+  Format: title||webp_filename||cat_param
+  cat_param is the ?cat= handle used by the Collections page (/collections?cat=<param>).
+  These handles match the product-type handles defined in main-list-collections.liquid.
+  Home uses the all-products URL instead of a ?cat= param.
 {%- endcomment -%}
-{%- assign _cats_raw = "Home||karthika-cat-home.webp||all,Baby & Child||karthika-cat-baby-child.webp||baby-child,Baking||karthika-cat-baking.webp||baking,Beverages||karthika-cat-beverages.webp||beverages,Personal Care||karthika-cat-personal-care.webp||personal-care,Confectioneries||karthika-cat-confectioneries.webp||confectioneries,Dairy||karthika-cat-dairy.webp||dairy-eggs,Frozen||karthika-cat-frozen.webp||frozen-foods,Fruit & Veg||karthika-cat-fruit-vegetables.webp||fresh-fruits,Rice||karthika-cat-rice.webp||rice-grains,Groceries||karthika-cat-groceries.webp||groceries,Household||karthika-cat-household.webp||household,Kitchen||karthika-cat-kitchen.webp||kitchen,Pharmacy||karthika-cat-pharmacy.webp||pharmacy,Pooja Items||karthika-cat-pooja-items.webp||pooja-items,Manufacturer||karthika-cat-manufacturer.webp||manufacturer" | split: "," -%}
+{%- assign _cats_raw = "Home||karthika-cat-home.webp||__all__,Baby & Child||karthika-cat-baby-child.webp||baby-care,Baking||karthika-cat-baking.webp||flour,Beverages||karthika-cat-beverages.webp||soft-drinks,Personal Care||karthika-cat-personal-care.webp||bodycare,Confectioneries||karthika-cat-confectioneries.webp||chocolates-sweets,Dairy||karthika-cat-dairy.webp||ghee,Frozen||karthika-cat-frozen.webp||ice-cream,Fruit & Veg||karthika-cat-fruit-vegetables.webp||vegetables,Rice||karthika-cat-rice.webp||basmati,Groceries||karthika-cat-groceries.webp||grains-pulses,Household||karthika-cat-household.webp||detergents,Kitchen||karthika-cat-kitchen.webp||tawa-kadai-pan,Pharmacy||karthika-cat-pharmacy.webp||ayurveda-medicine,Pooja Items||karthika-cat-pooja-items.webp||agarbathi,Manufacturer||karthika-cat-manufacturer.webp||brass" | split: "," -%}
 
 <section
   class="kcg-section"
@@ -34,22 +37,24 @@
       {%- assign _file   = _parts[1] -%}
       {%- assign _handle = _parts[2] -%}
 
-      {%- comment -%} Resolve URL from live collection object, with /collections/<handle> fallback {%- endcomment -%}
-      {%- assign _col = collections[_handle] -%}
-      {%- if _col != blank and _col.url != blank -%}
-        {%- assign _url = _col.url -%}
-      {%- elsif _handle == 'all' -%}
+      {%- comment -%}
+        Build the URL using the same ?cat= mechanism as the Collections page.
+        __all__ is a sentinel for Home → all products URL.
+        All other handles become /collections?cat=<handle>.
+      {%- endcomment -%}
+      {%- if _handle == '__all__' -%}
         {%- assign _url = routes.all_products_collection_url -%}
       {%- else -%}
-        {%- assign _url = routes.collections_url | append: '/' | append: _handle -%}
+        {%- assign _url = routes.collections_url | append: '?cat=' | append: _handle -%}
       {%- endif -%}
 
-      {%- comment -%} Active state when browsing a matching collection {%- endcomment -%}
+      {%- comment -%} Active state: match against the current ?cat= param on the collections page {%- endcomment -%}
       {%- assign _active = false -%}
-      {%- if template.name == 'collection' and collection -%}
-        {%- if collection.handle == _handle -%}
+      {%- if template.name == 'list-collections' -%}
+        {%- assign _req_cat = request.path | split: '?' | last -%}
+        {%- if _handle != '__all__' and _req_cat contains _handle -%}
           {%- assign _active = true -%}
-        {%- elsif _handle == 'all' and collection.handle == 'all' -%}
+        {%- elsif _handle == '__all__' and request.path == routes.all_products_collection_url -%}
           {%- assign _active = true -%}
         {%- endif -%}
       {%- endif -%}
