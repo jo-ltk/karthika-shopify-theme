@@ -290,15 +290,25 @@ cart-items {
 }
 
 /* ── Karthika Sticky Checkout Bar ────────────────────────── */
+/*
+ * On mobile the bottom nav pill (.karthika-bottom-nav) is fixed at
+ *   bottom: calc(14px + env(safe-area-inset-bottom))  with z-index: 1000+
+ * and is 64px tall (--karthika-bottom-nav-height).
+ * The checkout bar must sit ABOVE it, so on mobile we offset it by
+ *   64px (nav height) + 14px (nav gap from edge) = 78px + safe-area.
+ * On desktop (≥990px) the bottom nav is hidden, so the bar sits at bottom: 0.
+ */
 .karthika-sticky-checkout {
   position: fixed;
-  bottom: 0;
+  /* Sit above the floating bottom nav on mobile */
+  bottom: calc(64px + 14px + env(safe-area-inset-bottom, 0px));
   left: 0;
   right: 0;
-  z-index: 200;
+  /* Above bottom nav (z-index ~1000) and floating cart (z-index 1001) */
+  z-index: 1050;
   background: #ffffff;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.10);
-  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
+  border-radius: 16px 16px 0 0;
   padding: 0 16px;
 }
 
@@ -355,13 +365,15 @@ cart-items {
   transform: scale(0.97);
 }
 
-/* Add bottom padding so sticky bar does not cover footer content */
+/* Bottom padding = checkout bar height + its bottom offset (above the nav) */
 #main-cart-footer {
-  padding-bottom: 80px !important;
+  padding-bottom: calc(64px + 64px + 14px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-@media screen and (min-width: 750px) {
+@media screen and (min-width: 990px) {
+  /* Desktop: bottom nav is hidden, sit flush at the screen bottom */
   .karthika-sticky-checkout {
+    bottom: 0;
     padding: 0 24px;
     border-radius: 0;
   }
@@ -381,5 +393,9 @@ cart-items {
   .karthika-sticky-checkout__btn {
     font-size: 1.5rem;
     padding: 16px 36px;
+  }
+
+  #main-cart-footer {
+    padding-bottom: 100px !important;
   }
 }
