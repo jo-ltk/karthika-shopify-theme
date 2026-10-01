@@ -945,7 +945,11 @@
     grid.className = 'kcb2-grid';
 
     products.forEach(function (product) {
-      var variant = product.variants && product.variants[0] ? product.variants[0] : {};
+      // Use the first available variant so the ADD button targets a variant
+      // that can actually be added to cart. Fall back to variants[0] only when
+      // no variant is available (product will render as sold-out anyway).
+      var variants = product.variants || [];
+      var variant = variants.find(function (v) { return v && v.available; }) || variants[0] || {};
       var numPrice = priceOf(product);
       var numCompare = Number(variant.compare_at_price || product.compare_at_price || 0);
       var savePercent = numCompare > numPrice ? Math.round((numCompare - numPrice) / numCompare * 100) : 0;

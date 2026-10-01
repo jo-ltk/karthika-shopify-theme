@@ -20,21 +20,11 @@
 
   assign phone_clean = helpline_phone | remove: ' ' | remove: '(' | remove: ')' | remove: '-'
 
-  assign has_social = false
+  assign social_facebook = settings.social_facebook_link | default: 'https://www.facebook.com/KarthikaEnterprises/'
+  assign social_instagram = settings.social_instagram_link | default: 'https://www.instagram.com/karthika_sg'
+  assign social_youtube = settings.social_youtube_link | default: 'https://www.youtube.com/@karthikaenterprises'
 
-  if settings.social_instagram_link != blank
-    assign has_social = true
-  elsif settings.social_facebook_link != blank
-    assign has_social = true
-  elsif settings.social_youtube_link != blank
-    assign has_social = true
-  elsif settings.social_tiktok_link != blank
-    assign has_social = true
-  elsif settings.social_twitter_link != blank
-    assign has_social = true
-  elsif settings.social_pinterest_link != blank
-    assign has_social = true
-  endif
+  assign has_social = true
 -%}
 
 <style>
@@ -1009,7 +999,66 @@
         {% if has_social %}
 
           <div class="kf-footer__social">
-            {% render 'social-icons' %}
+            <ul class="list-social" role="list">
+
+              <li class="list-social__item">
+                <a href="{{ social_facebook }}" class="list-social__link" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="16" height="16">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                  </svg>
+                  <span class="visually-hidden">Facebook</span>
+                </a>
+              </li>
+
+              <li class="list-social__item">
+                <a href="{{ social_instagram }}" class="list-social__link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                  </svg>
+                  <span class="visually-hidden">Instagram</span>
+                </a>
+              </li>
+
+              <li class="list-social__item">
+                <a href="{{ social_youtube }}" class="list-social__link" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="16" height="16">
+                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.96-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+                    <polygon fill="#183719" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+                  </svg>
+                  <span class="visually-hidden">YouTube</span>
+                </a>
+              </li>
+
+              {%- if settings.social_tiktok_link != blank -%}
+                <li class="list-social__item">
+                  <a href="{{ settings.social_tiktok_link }}" class="list-social__link" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                    <span class="svg-wrapper">{{- 'icon-tiktok.svg' | inline_asset_content -}}</span>
+                    <span class="visually-hidden">TikTok</span>
+                  </a>
+                </li>
+              {%- endif -%}
+
+              {%- if settings.social_twitter_link != blank -%}
+                <li class="list-social__item">
+                  <a href="{{ settings.social_twitter_link }}" class="list-social__link" target="_blank" rel="noopener noreferrer" aria-label="Twitter / X">
+                    <span class="svg-wrapper">{{- 'icon-twitter.svg' | inline_asset_content -}}</span>
+                    <span class="visually-hidden">Twitter</span>
+                  </a>
+                </li>
+              {%- endif -%}
+
+              {%- if settings.social_pinterest_link != blank -%}
+                <li class="list-social__item">
+                  <a href="{{ settings.social_pinterest_link }}" class="list-social__link" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">
+                    <span class="svg-wrapper">{{- 'icon-pinterest.svg' | inline_asset_content -}}</span>
+                    <span class="visually-hidden">Pinterest</span>
+                  </a>
+                </li>
+              {%- endif -%}
+
+            </ul>
           </div>
 
         {% endif %}

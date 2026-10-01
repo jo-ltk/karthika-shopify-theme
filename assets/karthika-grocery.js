@@ -10,6 +10,7 @@
 
   const CART_CUSTOMER_ERROR = "We couldn't update your cart. Please try again.";
   const CART_UNAVAILABLE_ERROR = 'This item is unavailable.';
+  const CART_RATE_LIMIT_ERROR = 'Too many requests — please wait a moment and try again.';
   const CART_NETWORK_ERROR = "We couldn't reach the cart. Check your connection and try again.";
   const CART_TRIGGER_SELECTOR = [
     '.karthika-cart-trigger',
@@ -696,7 +697,8 @@
           const available = stepper?.dataset?.productAvailable !== 'false';
           if (variantId && available) {
             this.setQuantityOptimistic(variantId, (this.state.variantMap[Number(variantId)] || 0) + 1);
-          } else if (!available) {
+          } else {
+            // Either explicitly marked unavailable or variant ID missing — show error
             this.showCartError(CART_UNAVAILABLE_ERROR);
           }
           return;
