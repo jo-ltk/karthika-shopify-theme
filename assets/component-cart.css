@@ -288,3 +288,98 @@ cart-items {
     gap: 1rem;
   }
 }
+
+/* ── Karthika Sticky Checkout Bar ────────────────────────── */
+.karthika-sticky-checkout {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: #ffffff;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.10);
+  border-radius: 20px 20px 0 0;
+  padding: 0 16px;
+}
+
+.karthika-sticky-checkout__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 12px;
+}
+
+.karthika-sticky-checkout__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.karthika-sticky-checkout__count {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #1f2937;
+  text-transform: uppercase;
+}
+
+.karthika-sticky-checkout__total {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #4B7F3B;
+}
+
+.karthika-sticky-checkout__btn {
+  background: #4B7F3B;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 14px 28px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.1s ease;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.karthika-sticky-checkout__btn:hover {
+  background: #3a6630;
+}
+
+.karthika-sticky-checkout__btn:active {
+  transform: scale(0.97);
+}
+
+/* Add bottom padding so sticky bar does not cover footer content */
+#main-cart-footer {
+  padding-bottom: 80px !important;
+}
+
+@media screen and (min-width: 750px) {
+  .karthika-sticky-checkout {
+    padding: 0 24px;
+    border-radius: 0;
+  }
+
+  .karthika-sticky-checkout__inner {
+    height: 72px;
+  }
+
+  .karthika-sticky-checkout__count {
+    font-size: 1.3rem;
+  }
+
+  .karthika-sticky-checkout__total {
+    font-size: 1.7rem;
+  }
+
+  .karthika-sticky-checkout__btn {
+    font-size: 1.5rem;
+    padding: 16px 36px;
+  }
+}

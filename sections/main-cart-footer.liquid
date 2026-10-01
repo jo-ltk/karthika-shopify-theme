@@ -136,29 +136,6 @@
                 </small>
               </div>
             {%- else -%}
-              <div class="cart__ctas" {{ block.shopify_attributes }}>
-                <button
-                  type="submit"
-                  id="checkout"
-                  class="cart__checkout-button button"
-                  name="checkout"
-                  data-karthika-checkout
-                  {% if cart == empty %}
-                    disabled
-                    data-checkout-empty
-                  {% endif %}
-                  form="cart"
-                >
-                  <span data-checkout-label>{{ 'sections.cart.checkout' | t }}</span>
-                  {%- render 'loading-spinner' -%}
-                </button>
-              </div>
-
-              {%- if additional_checkout_buttons -%}
-                <div class="cart__dynamic-checkout-buttons additional-checkout-buttons">
-                  {{ content_for_additional_checkout_buttons }}
-                </div>
-              {%- endif -%}
           {%- endcase -%}
         {% endfor %}
 
@@ -167,6 +144,23 @@
     </div>
   </div>
 </div>
+
+{%- unless cart == empty -%}
+<div class="karthika-sticky-checkout" id="karthika-sticky-checkout" aria-label="Checkout bar">
+  <div class="karthika-sticky-checkout__inner">
+    <div class="karthika-sticky-checkout__info">
+      <span class="karthika-sticky-checkout__count">CART &middot; {{cart.item_count}} {% if cart.item_count == 1 %}ITEM{% else %}ITEMS{% endif %}</span>
+      <span class="karthika-sticky-checkout__total">{{cart.total_price | money}}</span>
+    </div>
+    <button
+      type="submit"
+      form="cart"
+      name="checkout"
+      class="karthika-sticky-checkout__btn"
+    >Check out &rarr;</button>
+  </div>
+</div>
+{%- endunless -%}
 
 {% schema %}
 {
