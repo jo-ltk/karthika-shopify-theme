@@ -122,11 +122,13 @@ if (!customElements.get('karthika-atc-cta')) {
       _onCartUpdate(event) {
         if (event?.source === 'product-form') {
           const updatedId = String(event.productVariantId || '');
-          // If this update is for our variant, flip to in-cart immediately.
+          // If this update is for our variant, redirect to /cart immediately.
           // If it's for a different variant (e.g. quick-add), re-check ours.
           if (!updatedId || updatedId === this._variantId) {
             this._setState('in-cart');
             this._clearError();
+            // Redirect to the dedicated cart page after a successful add-to-cart.
+            window.location.href = window.routes?.cart_url || '/cart';
           } else {
             this._checkCartState();
           }
@@ -199,16 +201,26 @@ if (!customElements.get('karthika-atc-cta')) {
           productForm?.parentElement;
 
         const qtyInput = sectionWrapper?.querySelector('input.quantity__input, quantity-input input');
+        console.log('[karthika-atc-cta] _watchQuantityInput →',
+          'productForm:', productForm,
+          'sectionWrapper:', sectionWrapper,
+          'qtyInput found:', qtyInput,
+          'qtyInput id:', qtyInput?.id,
+          'qtyInput name:', qtyInput?.name
+        );
         if (!qtyInput) return;
 
         this._qtyInput = qtyInput;
 
         let debounceTimer = null;
         qtyInput.addEventListener('change', () => {
+          console.log('[karthika-atc-cta] qty change event fired → state:', this._state, 'value:', qtyInput.value);
           if (this._state !== 'in-cart') return;
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(() => {
-            this._updateCartLineQuantity(parseInt(qtyInput.value, 10) || 1);
+            const qty = parseInt(qtyInput.value, 10) || 1;
+            console.log('[karthika-atc-cta] debounce fired → calling _updateCartLineQuantity with qty:', qty);
+            this._updateCartLineQuantity(qty);
           }, 300);
         });
       }
@@ -219,36 +231,108 @@ if (!customElements.get('karthika-atc-cta')) {
 
       _updateCartLineQuantity(newQty) {
         const variantId = this._variantId;
-        if (!variantId) return;
+        console.log('[karthika-atc-cta] _updateCartLineQuantity → variantId:', variantId, 'newQty:', newQty);
+        if (!variantId) {
+          console.warn('[karthika-atc-cta] _updateCartLineQuantity aborted — no variantId');
+          return;
+        }
 
         this._qtyAbortController?.abort();
         this._qtyAbortController = new AbortController();
+        const signal = this._qtyAbortController.signal;
 
         this._setState('updating');
 
-        fetch(window.routes?.cart_change_url || '/cart/change.js', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: this._qtyAbortController.signal,
-          body: JSON.stringify({ id: variantId, quantity: newQty }),
-        })
+        // First fetch the current cart to find the 1-based line index for this
+        // variant. Shopify's /cart/change.js expects `line` (1-based index) or
+        // `id` set to the full line item key string — NOT the bare variant ID
+        // integer, which causes a 422 response.
+        console.log('[karthika-atc-cta] fetching /cart.js to find line index...');
+        fetch('/cart.js', { headers: { 'Content-Type': 'application/json' }, signal })
           .then((r) => r.json())
           .then((cart) => {
-            if (variantId !== this._variantId) return;
-            if (cart.status) throw new Error(cart.description || 'Cart update failed');
+            console.log('[karthika-atc-cta] /cart.js response →', cart);
+            if (signal.aborted) { console.log('[karthika-atc-cta] aborted after /cart.js'); return; }
+            if (variantId !== this._variantId) { console.log('[karthika-atc-cta] variant changed mid-fetch, bailing'); return; }
 
-            const stillInCart = cart.items?.some(
-              (item) => String(item.variant_id) === String(variantId)
-            ) ?? false;
+            console.log('[karthika-atc-cta] cart items:', cart.items?.map(i => ({ key: i.key, variant_id: i.variant_id, quantity: i.quantity })));
 
-            this._setState(stillInCart ? 'in-cart' : 'add');
+            const lineIndex =
+              cart.items?.findIndex(
+                (item) => String(item.variant_id) === String(variantId)
+              ) ?? -1;
 
-            if (typeof publish === 'function' && window.PUB_SUB_EVENTS?.cartUpdate) {
-              publish(PUB_SUB_EVENTS.cartUpdate, { source: 'karthika-atc-cta', cartData: cart });
+            console.log('[karthika-atc-cta] lineIndex (0-based):', lineIndex, '→ will send line:', lineIndex + 1);
+
+            if (lineIndex === -1) {
+              // Item is no longer in the cart — reset button state
+              console.warn('[karthika-atc-cta] variant not found in cart — resetting to add state');
+              this._setState('add');
+              return;
             }
+
+            const payload = { line: lineIndex + 1, quantity: newQty };
+            console.log('[karthika-atc-cta] POST /cart/change.js payload:', payload);
+
+            return fetch(window.routes?.cart_change_url || '/cart/change.js', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              signal,
+              body: JSON.stringify(payload),
+            })
+              .then((r) => {
+                console.log('[karthika-atc-cta] /cart/change.js HTTP status:', r.status, 'Content-Type:', r.headers.get('content-type'));
+                const ct = r.headers.get('content-type') || '';
+                if (!ct.includes('application/json')) {
+                  // Dev server or redirect returned HTML — fall back to reading
+                  // the real cart state from /cart.js to confirm the update.
+                  console.warn('[karthika-atc-cta] /cart/change.js returned non-JSON (content-type:', ct, ') — falling back to /cart.js to verify');
+                  return fetch('/cart.js', { headers: { 'Accept': 'application/json' }, signal })
+                    .then((r2) => r2.json())
+                    .then((fallbackCart) => ({ __fallback: true, cart: fallbackCart }));
+                }
+                return r.json().then((data) => ({ __fallback: false, cart: data }));
+              })
+              .then((result) => {
+                if (!result) return;
+                if (signal.aborted || variantId !== this._variantId) return;
+
+                const { __fallback, cart: updatedCart } = result;
+                console.log('[karthika-atc-cta] /cart/change.js final cart (fallback=' + __fallback + '):', updatedCart);
+
+                if (!__fallback && updatedCart.status) {
+                  console.error('[karthika-atc-cta] Shopify returned error status:', updatedCart.status, updatedCart);
+                  throw new Error(updatedCart.description || 'Cart update failed');
+                }
+
+                const stillInCart =
+                  updatedCart.items?.some(
+                    (item) => String(item.variant_id) === String(variantId)
+                  ) ?? false;
+
+                const updatedItem = updatedCart.items?.find(
+                  (item) => String(item.variant_id) === String(variantId)
+                );
+
+                console.log('[karthika-atc-cta] stillInCart:', stillInCart);
+                this._setState(stillInCart ? 'in-cart' : 'add');
+
+                // Sync the quantity display to what the cart now holds
+                if (stillInCart && updatedItem) {
+                  this._syncQuantityDisplay(updatedItem.quantity);
+                }
+
+                if (typeof publish === 'function' && window.PUB_SUB_EVENTS?.cartUpdate) {
+                  publish(PUB_SUB_EVENTS.cartUpdate, {
+                    source: 'karthika-atc-cta',
+                    cartData: updatedCart,
+                  });
+                }
+              });
           })
           .catch((err) => {
             if (err?.name === 'AbortError') return;
+            console.error('[karthika-atc-cta] cart quantity update failed:', err);
             this._setState('in-cart');
             this._showError('Could not update quantity. Please try again.');
           });
@@ -263,21 +347,76 @@ if (!customElements.get('karthika-atc-cta')) {
         const variantId = this._variantId;
         if (!variantId) return;
 
+        console.log('[karthika-atc-cta] _checkCartState → variantId:', variantId);
         fetch('/cart.js', { headers: { 'Content-Type': 'application/json' } })
           .then((r) => r.json())
           .then((cart) => {
             if (variantId !== this._variantId) return; // variant switched mid-fetch
 
-            const inCart = cart?.items?.some(
+            const cartItem = cart?.items?.find(
               (item) => String(item.variant_id) === String(variantId)
-            ) ?? false;
+            );
+            const inCart = !!cartItem;
+            const cartQty = cartItem?.quantity ?? 0;
 
+            console.log('[karthika-atc-cta] _checkCartState result → inCart:', inCart, 'cartQty:', cartQty, 'items:', cart?.items?.map(i => ({ variant_id: i.variant_id, quantity: i.quantity })));
             this._setState(inCart ? 'in-cart' : 'add');
+
+            // Always sync quantity display — covers bfcache restores (qty changed
+            // elsewhere) and returning after a cart deletion (cartQty = 0 resets
+            // the input back to the variant minimum).
+            this._syncQuantityDisplay(cartQty);
           })
           .catch(() => {
             // Network failure — reset to 'add' so the user isn't stuck
             if (this._state === 'adding') this._setState('add');
           });
+      }
+
+      /**
+       * Update the quantity input value and the "X in cart" label to reflect
+       * the actual quantity currently in the cart.
+       */
+      _syncQuantityDisplay(cartQty) {
+        // Update the quantity input value.
+        // When cartQty is 0 (item deleted), reset to the variant's minimum order qty.
+        const qtyInput = this._qtyInput;
+        if (qtyInput) {
+          const minQty = parseInt(qtyInput.dataset.min || qtyInput.min || '1', 10);
+          const targetValue = cartQty > 0 ? cartQty : minQty;
+          if (parseInt(qtyInput.value, 10) !== targetValue) {
+            console.log('[karthika-atc-cta] _syncQuantityDisplay → updating input from', qtyInput.value, 'to', targetValue, '(cartQty:', cartQty, ')');
+            qtyInput.value = targetValue;
+          }
+          // Keep data-cart-quantity in sync so volume pricing / other scripts see the right value
+          qtyInput.dataset.cartQuantity = cartQty;
+        }
+
+        // Update the "X in cart" label — quantity number lives in span.quantity-cart
+        const sectionId = this.dataset.sectionId;
+        const labelWrapper = document.querySelector(
+          `label[for="Quantity-${sectionId}"] .quantity__rules-cart`
+        );
+        if (labelWrapper) {
+          // Hide the label entirely when item is not in cart
+          labelWrapper.classList.toggle('hidden', cartQty === 0);
+
+          if (cartQty > 0) {
+            const qtySpan = labelWrapper.querySelector('.quantity-cart');
+            if (qtySpan) {
+              qtySpan.textContent = cartQty;
+              console.log('[karthika-atc-cta] _syncQuantityDisplay → updated .quantity-cart span to', cartQty);
+            }
+          }
+        }
+
+        // Update the visually-hidden aria label
+        const ariaLabel = document.getElementById(`quantity-label-${sectionId}`);
+        if (ariaLabel) {
+          ariaLabel.textContent = cartQty > 0
+            ? `Quantity (${cartQty} in cart)`
+            : 'Quantity';
+        }
       }
 
       // ─────────────────────────────────────────────────────────────────────

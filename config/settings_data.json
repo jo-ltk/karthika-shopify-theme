@@ -203,7 +203,7 @@
       "delivery_area_4_address": "",
       "delivery_area_4_note": "Informational. Shipping is calculated at checkout.",
       "currency_code_enabled": true,
-      "cart_type": "drawer",
+      "cart_type": "page",
       "show_vendor": false,
       "show_cart_note": true,
       "cart_drawer_collection": "",

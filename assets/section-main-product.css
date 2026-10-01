@@ -191,6 +191,18 @@ product-info {
 
 .product-form__submit {
   margin-bottom: 1rem;
+  border-radius: 8px !important;
+}
+
+/* Override the pseudo-element outset radius to match */
+.product-form__submit::before,
+.product-form__submit::after {
+  border-radius: 8px !important;
+}
+
+/* Remove the weird hover border glow */
+.product-form__submit:not([disabled]):hover::after {
+  box-shadow: none !important;
 }
 
 .product-form__submit[aria-disabled='true'] + .shopify-payment-button .shopify-payment-button__button[disabled],

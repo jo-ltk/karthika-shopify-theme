@@ -530,32 +530,6 @@
                     product_form_id: product_form_id
                   %}
                 {%- when 'buy_buttons' -%}
-                  {%- if settings.delivery_promise_text != blank or settings.store_location_name != blank or settings.store_location_region != blank -%}
-                    <div class="karthika-product-delivery-note">
-                      <div class="karthika-product-delivery-note__icon" aria-hidden="true">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-                      </div>
-                      <div>
-                        {%- if settings.delivery_promise_text != blank -%}
-                          <div class="karthika-product-delivery-note__title">{{ settings.delivery_promise_text | escape }}</div>
-                        {%- endif -%}
-                        {%- liquid
-                          assign delivery_source = settings.store_location_name | strip
-                          if settings.store_location_region != blank
-                            if delivery_source != blank
-                              assign delivery_source = delivery_source | append: ', ' | append: settings.store_location_region
-                            else
-                              assign delivery_source = settings.store_location_region
-                            endif
-                          endif
-                        -%}
-                        {%- if delivery_source != blank -%}
-                          <div class="karthika-product-delivery-note__meta">{{ 'general.location.from_store' | t: name: delivery_source }}</div>
-                        {%- endif -%}
-                      </div>
-                    </div>
-                  {%- endif -%}
-
                   {%- render 'buy-buttons',
                     block: block,
                     product: product,
