@@ -304,6 +304,22 @@
       /* ── Per-row action ──────────────────────────────────────────────── */
       '.kla-action { flex: 0 0 auto; }',
 
+      /* ── Per-row stepper ─────────────────────────────────────────────── */
+      /* Container */
+      '.kla-stepper { position: relative; width: 88px; height: 34px; flex-shrink: 0; }',
+      /* +ADD button — visible by default, hidden once added */
+      '.kla-stepper .karthika-stepper-add-btn { position: absolute; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; gap: 4px; background: #fff; border: 1.5px solid #2a7a2a; border-radius: 8px; color: #2a7a2a; font-size: 13px; font-weight: 800; cursor: pointer; box-sizing: border-box; padding: 0; transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }',
+      '.kla-stepper .karthika-stepper-add-btn:hover { background: #2a7a2a; color: #fff; }',
+      /* Stepper — hidden by default, shown once added */
+      '.kla-stepper .karthika-compact-stepper { position: absolute; inset: 0; width: 100%; height: 100%; display: none; align-items: center; justify-content: space-between; background: #2a7a2a; border-radius: 8px; box-sizing: border-box; color: #fff; user-select: none; }',
+      '.kla-stepper.is-added .karthika-stepper-add-btn { display: none; }',
+      '.kla-stepper.is-added .karthika-compact-stepper { display: flex; }',
+      /* Minus / Plus buttons */
+      '.kla-stepper .karthika-stepper-act-btn { background: transparent; border: none; color: #fff; width: 28px; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }',
+      '.kla-stepper .karthika-stepper-act-btn:active { background: rgba(0,0,0,0.15); }',
+      /* Quantity value */
+      '.kla-stepper .karthika-stepper-qty { flex: 1; text-align: center; font-size: 13px; font-weight: 800; color: #fff; line-height: 1; }',
+
       /* ── Add all button ──────────────────────────────────────────────── */
       '.kla-add-all-btn { display: block; width: 100%; margin-top: 14px; padding: 13px 16px; background: #2a7a2a; color: #fff; font-size: 14px; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; letter-spacing: 0.02em; transition: background 0.15s; }',
       '.kla-add-all-btn:disabled { background: #b0b0b0; cursor: default; }',
@@ -387,17 +403,17 @@
       : '';
 
     var actionHtml = isAvailable
-      ? '<div class="karthika-stepper" data-variant-id="' + esc(variantId) + '" data-product-available="true" style="min-width:80px">'
-        + '<button type="button" class="karthika-stepper-add-btn" aria-label="Add ' + esc(title) + ' to cart" style="width:72px;height:32px;border-radius:8px;font-size:13px;font-weight:700">'
-        + '<span class="karthika-add-btn-icon">+</span>'
+      ? '<div class="karthika-stepper kla-stepper" data-variant-id="' + esc(variantId) + '" data-product-available="true">'
+        + '<button type="button" class="karthika-stepper-add-btn" aria-label="Add ' + esc(title) + ' to cart">'
+        + '<span class="karthika-add-btn-icon" aria-hidden="true">+</span>'
         + '<span class="karthika-add-btn-text">ADD</span>'
         + '</button>'
-        + '<div class="karthika-compact-stepper" style="min-width:80px">'
-        + '<button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--minus" aria-label="Decrease quantity" style="width:26px;height:32px">'
+        + '<div class="karthika-compact-stepper">'
+        + '<button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--minus" aria-label="Decrease quantity">'
         + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="5" y1="12" x2="19" y2="12"></line></svg>'
         + '</button>'
-        + '<span class="karthika-compact-stepper-val karthika-stepper-qty" aria-live="polite" aria-atomic="true" style="font-size:13px">1</span>'
-        + '<button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--plus" aria-label="Increase quantity" style="width:26px;height:32px">'
+        + '<span class="karthika-stepper-qty karthika-compact-stepper-val" aria-live="polite" aria-atomic="true">1</span>'
+        + '<button type="button" class="karthika-stepper-act-btn karthika-stepper-btn--plus" aria-label="Increase quantity">'
         + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'
         + '</button>'
         + '</div>'
@@ -489,7 +505,7 @@
           if (!product) {
             if (titleEl) titleEl.textContent = '';
             if (countEl) countEl.textContent = '';
-            if (listEl) listEl.innerHTML = '';
+            if (listEl) listEl.innerHTML = '<p style="margin:16px 4px 4px;color:#888;font-size:13px;">Sorry, no results found.</p>';
             if (buildBtn) { buildBtn.hidden = true; }
             return;
           }
@@ -506,7 +522,6 @@
           if (buildBtn) {
             buildBtn.hidden = false;
             buildBtn.disabled = self._matchedProducts.length === 0;
-            buildBtn.className = 'kla-add-all-btn';
             buildBtn.textContent = 'Add to cart';
           }
           if (root) self.syncSteppersFromCart(root);
@@ -571,7 +586,9 @@
           if (cards.length > 0) {
             listEl.innerHTML = '<ul class="kla-list" role="list">' + cards.join('') + '</ul>';
           } else {
-            listEl.innerHTML = '';
+            if (titleEl) titleEl.textContent = '';
+            if (countEl) countEl.textContent = '';
+            listEl.innerHTML = '<p style="margin:16px 4px 4px;color:#888;font-size:13px;">Sorry, no results found.</p>';
           }
         }
 
@@ -579,11 +596,9 @@
           buildBtn.hidden = false;
           if (matchedForCart.length > 0) {
             buildBtn.disabled = false;
-            buildBtn.className = 'kla-add-all-btn';
             buildBtn.textContent = 'Add all ' + matchedForCart.length + ' item' + (matchedForCart.length === 1 ? '' : 's') + ' to cart';
           } else if (cards.length > 0) {
             buildBtn.disabled = true;
-            buildBtn.className = 'kla-add-all-btn';
             buildBtn.textContent = 'Add all to cart';
           } else {
             buildBtn.hidden = true;
