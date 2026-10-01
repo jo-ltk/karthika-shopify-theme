@@ -18,10 +18,9 @@
         assign gift_card_recipient_feature_active = true
       endif
 
+      # Karthika grocery flow: no "Buy it now" button.
+      # Add to cart → Go to cart is the full purchase journey.
       assign show_dynamic_checkout = false
-      if block.settings.show_dynamic_checkout and gift_card_recipient_feature_active == false
-        assign show_dynamic_checkout = true
-      endif
     -%}
 
     <product-form
@@ -70,38 +69,49 @@
               assign quantity_rule_soldout = true
             endif
           -%}
-          <button
-            id="ProductSubmitButton-{{ section_id }}"
-            type="submit"
-            name="add"
-            class="product-form__submit button button--full-width {% if show_dynamic_checkout %}button--secondary{% else %}button--primary{% endif %}{% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout or product.selected_or_first_available_variant == null %} karthika-btn-soldout{% else %} karthika-btn-addtocart{% endif %}"
-            {% if product.selected_or_first_available_variant.available == false
-              or quantity_rule_soldout
-              or product.selected_or_first_available_variant == null
-            %}
-              disabled
-            {% endif %}
+
+          {%- comment -%}
+            karthika-atc-cta wraps the submit button and manages Add→Go-to-cart state.
+            It reads the real Shopify cart state via /cart.js and never prevents the
+            native ProductForm submit from doing its job.
+          {%- endcomment -%}
+          <karthika-atc-cta
+            data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+            data-product-id="{{ product.id }}"
+            data-section-id="{{ section_id }}"
+            data-add-to-cart-text="{{ 'products.product.add_to_cart' | t | escape }}"
+            data-go-to-cart-text="{{ 'products.product.go_to_cart' | t | escape }}"
+            data-adding-text="{{ 'products.product.adding' | t | escape }}"
           >
-            <span>
-              {%- if product.selected_or_first_available_variant == null -%}
-                {{ 'products.product.unavailable' | t }}
-              {%- elsif product.selected_or_first_available_variant.available == false or quantity_rule_soldout -%}
-                {{ 'products.product.sold_out' | t }}
-              {%- else -%}
-                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                {{ 'products.product.add_to_cart' | t }}
-              {%- endif -%}
-            </span>
-            {%- render 'loading-spinner' -%}
-          </button>
-          {%- if show_dynamic_checkout
-            and product != blank
-            and product.selected_or_first_available_variant != null
-            and product.selected_or_first_available_variant.available
-            and quantity_rule_soldout != true
-          -%}
-            {{ form | payment_button }}
-          {%- endif -%}
+            <button
+              id="ProductSubmitButton-{{ section_id }}"
+              type="submit"
+              name="add"
+              class="product-form__submit button button--full-width button--primary{% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout or product.selected_or_first_available_variant == null %} karthika-btn-soldout{% else %} karthika-btn-addtocart{% endif %}"
+              {% if product.selected_or_first_available_variant.available == false
+                or quantity_rule_soldout
+                or product.selected_or_first_available_variant == null
+              %}
+                disabled
+              {% endif %}
+            >
+              <span class="karthika-atc-btn-label">
+                {%- if product.selected_or_first_available_variant == null -%}
+                  {{ 'products.product.unavailable' | t }}
+                {%- elsif product.selected_or_first_available_variant.available == false or quantity_rule_soldout -%}
+                  {{ 'products.product.sold_out' | t }}
+                {%- else -%}
+                  <span class="karthika-atc-icon" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                  </span>
+                  <span class="karthika-atc-text">{{ 'products.product.add_to_cart' | t }}</span>
+                {%- endif -%}
+              </span>
+              {%- render 'loading-spinner' -%}
+            </button>
+            <p class="karthika-atc-error" role="alert" aria-live="polite" hidden></p>
+          </karthika-atc-cta>
+
         </div>
       {%- endform -%}
     </product-form>

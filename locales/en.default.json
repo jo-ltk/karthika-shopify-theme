@@ -142,6 +142,8 @@
   "products": {
     "product": {
       "add_to_cart": "Add to cart",
+      "go_to_cart": "Go to cart",
+      "adding": "Adding...",
       "choose_options": "Choose options",
       "choose_product_options": "Choose options for {{ product_name }}",
       "description": "Description",

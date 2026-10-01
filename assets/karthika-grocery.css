@@ -2075,22 +2075,28 @@ textarea {
   margin-bottom: 12px;
 }
 
-.karthika-ai-input-wrap {
+.karthika-ai-prompt-form {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: var(--karthika-bg-surface);
   border: 1px solid var(--karthika-border);
   border-radius: var(--karthika-radius-pill);
-  padding: 4px 6px 4px 14px;
-  overflow: hidden;
+  padding: 4px 4px 4px 14px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.karthika-ai-input-wrap:focus-within {
+.karthika-ai-prompt-form:focus-within {
   border-color: var(--karthika-red);
   box-shadow: 0 0 0 2px var(--karthika-red-subtle);
   background: #FFFFFF;
+}
+
+.karthika-ai-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
 }
 
 .karthika-ai-input {
@@ -2106,6 +2112,7 @@ textarea {
   color: var(--karthika-text-dark);
   outline: none;
   font-family: inherit;
+  padding: 6px 0;
 }
 
 .karthika-ai-input:focus,
@@ -2129,18 +2136,26 @@ textarea {
 }
 
 .karthika-ai-submit-btn {
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
   background: var(--karthika-red);
   color: #FFFFFF;
   border: none;
   border-radius: var(--karthika-radius-pill);
-  padding: 6px 12px;
+  padding: 5px 14px;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.15s, opacity 0.15s;
+  transition: background 0.15s, transform 0.15s, opacity 0.15s;
+  white-space: nowrap;
+  line-height: 1;
+  height: 30px;
+}
+
+.karthika-ai-submit-btn:hover:not(:disabled) {
+  background: var(--karthika-red-dark, #b91c1c);
 }
 
 .karthika-ai-submit-btn:disabled {
@@ -2591,17 +2606,6 @@ textarea {
     padding: 14px;
     margin-left: 0;
     margin-right: 0;
-  }
-
-  .karthika-ai-input-wrap {
-    flex-wrap: wrap;
-    border-radius: 16px;
-    padding: 8px;
-  }
-
-  .karthika-ai-submit-btn {
-    width: 100%;
-    justify-content: center;
   }
 
   .karthika-ai-chips-wrap {
@@ -8705,3 +8709,82 @@ product-info {
   color: #fff !important;
 }
 /* ── End add to cart button ──────────────────────────────────────────────── */
+
+/* ── Karthika ATC CTA: smart Add-to-Cart / Go-to-Cart button states ─────── */
+
+/* Wrapper element — no layout change */
+karthika-atc-cta {
+  display: contents;
+}
+
+/* Button label row — icon + text inline */
+.karthika-atc-btn-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  color: #fff !important;
+}
+
+.karthika-atc-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* "Adding…" disabled state — slightly dimmed, cursor blocked */
+.product-form__submit[aria-disabled="true"].karthika-btn-addtocart {
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+/* "Updating…" disabled state on the Go-to-cart button — same dim treatment */
+.product-form__submit[aria-disabled="true"].karthika-btn-gotocart {
+  opacity: 0.75 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+/* "Go to cart" state — keep Karthika green, swap hover to a deeper green */
+.product-form__submit.karthika-btn-gotocart {
+  background: #4B7F3B !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 14px !important;
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  box-shadow: 0 4px 14px rgba(63, 125, 46, 0.35) !important;
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease !important;
+  min-height: 50px !important;
+}
+.product-form__submit.karthika-btn-gotocart:hover {
+  background: #3a6430 !important;
+  box-shadow: 0 6px 18px rgba(63, 125, 46, 0.5) !important;
+  transform: translateY(-1px) !important;
+}
+.product-form__submit.karthika-btn-gotocart:active {
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 0 2px 8px rgba(63, 125, 46, 0.3) !important;
+}
+
+/* Inline error message below the CTA */
+.karthika-atc-error {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fff3f3;
+  border: 1px solid #f5c6c6;
+  border-radius: 8px;
+  color: #c0392b;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+.karthika-atc-error[hidden] {
+  display: none !important;
+}
+
+/* ── End Karthika ATC CTA ──────────────────────────────────────────────────── */
